@@ -2005,7 +2005,7 @@
       setFormLevel(5);
       const radios = document.getElementsByName('form-timeslot');
       radios.forEach(r => { r.checked = (r.value === '18-21'); });
-      document.getElementById('form-player-paid').checked = true;
+      document.getElementById('form-player-paid').checked = false;
       document.getElementById('player-modal').classList.remove('hidden');
       document.getElementById('player-modal').classList.add('flex');
     }
