@@ -469,15 +469,6 @@
     </div>
   </div>
 
-  <!-- ================= MODAL 2: PLAYER PARTNER & OPPONENT HISTORY ================= -->
-  <div id="history-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[88vh] flex flex-col">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-        <div class="flex items-center gap-2.5">
-          <div id="hist-player-badge" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm"></div>
-          <div>
-            <h3 id="hist-player-name" class="text-lg font-extrabold text-white">球員對戰紀錄</h3>
-            <p id="hist-player-meta" class="text-xs text-slate-400"></p>
   <!-- ================= MODAL 2: PLAYER PLAYED-WITH HISTORY (CLEAN & UNIFIED) ================= -->
   <div id="history-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[88vh] flex flex-col">
@@ -774,6 +765,63 @@
      * 1. STATE ARCHITECTURE & DEFAULT SAMPLE DATA
      ********************************************************************/
     const STORAGE_KEY = 'MEOW_BADMINTON_PRO_STATE_V3';
+
+    const DEFAULT_CAT_SVG = `
+      <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FFFBEB" stroke="#78350F" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M17 14L20 22L25 18Z" fill="#F43F5E"/>
+        <path d="M47 14L44 22L39 18Z" fill="#F43F5E"/>
+        <circle cx="24" cy="33" r="3.5" fill="#451A03"/>
+        <circle cx="40" cy="33" r="3.5" fill="#451A03"/>
+        <ellipse cx="19" cy="38" rx="3.5" ry="2" fill="#FDA4AF"/>
+        <ellipse cx="45" cy="38" rx="3.5" ry="2" fill="#FDA4AF"/>
+        <path d="M29 37H35L32 40.5L29 37Z" fill="#F43F5E"/>
+        <path d="M32 40.5C32 43 29 45 26 44M32 40.5C32 43 35 45 38 44" stroke="#78350F" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    const CAT_PRESET_SVGS = {
+      ORANGE: DEFAULT_CAT_SVG,
+      BLACK: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#1E293B" stroke="#F8FAFC" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="24" cy="33" r="4" fill="#FACC15"/>
+          <circle cx="40" cy="33" r="4" fill="#FACC15"/>
+          <circle cx="24" cy="33" r="1.6" fill="#0F172A"/>
+          <circle cx="40" cy="33" r="1.6" fill="#0F172A"/>
+          <path d="M29 38H35L32 41L29 38Z" fill="#FB7185"/>
+        </svg>
+      `,
+      CALICO: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FFFBEB" stroke="#78350F" stroke-width="2.5"/>
+          <path d="M14 24C18 18 25 20 26 27C22 30 15 29 14 24Z" fill="#EA580C"/>
+          <path d="M50 24C46 18 39 20 38 27C42 30 49 29 50 24Z" fill="#334155"/>
+          <circle cx="24" cy="34" r="3.3" fill="#1E293B"/>
+          <circle cx="40" cy="34" r="3.3" fill="#1E293B"/>
+          <path d="M29 38H35L32 41L29 38Z" fill="#F43F5E"/>
+        </svg>
+      `,
+      WHITE: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FFFFFF" stroke="#475569" stroke-width="2.5"/>
+          <circle cx="24" cy="33" r="3.6" fill="#0284C7"/>
+          <circle cx="40" cy="33" r="3.6" fill="#0284C7"/>
+          <ellipse cx="19" cy="38" rx="3.2" ry="1.8" fill="#FDA4AF"/>
+          <ellipse cx="45" cy="38" rx="3.2" ry="1.8" fill="#FDA4AF"/>
+          <path d="M29 37H35L32 40.5L29 37Z" fill="#FB7185"/>
+        </svg>
+      `,
+      SIAMESE: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FDE68A" stroke="#451A03" stroke-width="2.5"/>
+          <ellipse cx="32" cy="37" rx="13" ry="10" fill="#78350F"/>
+          <circle cx="25" cy="34" r="3.3" fill="#38BDF8"/>
+          <circle cx="39" cy="34" r="3.3" fill="#38BDF8"/>
+          <path d="M30 39H34L32 41.5L30 39Z" fill="#FDA4AF"/>
+        </svg>
+      `
+    };
 
     // Exact 37x37 QR Matrix decoded from the uploaded LINE QR Code image (6793.jpg)
     const LINE_GROUP_QR_MATRIX = [
@@ -2219,45 +2267,6 @@
       saveState();
       renderAll();
       showToast('已開啟新的一天！所有場次、同場紀錄與用球數已歸零', 'success');
-    }
-      document.getElementById('match-log-modal').classList.remove('hidden');
-      document.getElementById('match-log-modal').classList.add('flex');
-    }
-
-    function closeMatchLogModal() {
-      document.getElementById('match-log-modal').classList.add('hidden');
-      document.getElementById('match-log-modal').classList.remove('flex');
-    }
-
-    function openSettingsModal() {
-      document.getElementById('settings-modal').classList.remove('hidden');
-      document.getElementById('settings-modal').classList.add('flex');
-    }
-
-    function closeSettingsModal() {
-      document.getElementById('settings-modal').classList.add('hidden');
-      document.getElementById('settings-modal').classList.remove('flex');
-    }
-
-    function resetMatchCountsOnly() {
-      state.players.forEach(p => {
-        p.games = 0;
-        p.partners = {};
-        p.opponents = {};
-        p.lastPlayedAt = 0;
-        p.paid = false;
-      });
-      state.courts.forEach(c => {
-        c.slots = [null, null, null, null];
-        c.startTime = null;
-      });
-      state.prepSlots = [null, null, null, null];
-      state.shuttlesUsed = 0;
-      state.matchLogs = [];
-      closeSettingsModal();
-      saveState();
-      renderAll();
-      showToast('已開啟新的一天！所有場次、搭檔紀錄與用球數已歸零', 'success');
     }
 
     function loadDemoPlayers() {
