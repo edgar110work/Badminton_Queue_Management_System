@@ -390,35 +390,45 @@
       </section>
     </div>
 
-    <!-- RIGHT AREA (5 COLUMNS ON IPAD LANDSCAPE): PLAYER ROSTER, FILTERS & ADD PLAYER -->
+    <!-- RIGHT AREA (5 COLUMNS ON IPAD LANDSCAPE): ON-SITE ARRIVED PLAYER DISPATCH & ROSTER -->
     <div
       class="lg:col-span-5 xl:col-span-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col max-h-[calc(100vh-100px)]">
 
-      <!-- Roster Header & Add Player Trigger -->
+      <!-- Roster Header & Quick Jump to Registration Area -->
       <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-800">
         <div>
           <h2 class="text-base font-extrabold text-white flex items-center gap-2 flex-wrap">
-            <i class="fa-solid fa-users text-emerald-400"></i>
-            球員名單與等待區
+            <i class="fa-solid fa-user-check text-emerald-400"></i>
+            現場到場排點區
             <span id="roster-count-badge"
-              class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">0人</span>
+              class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">繼續排點
+              0人</span>
             <span id="roster-ended-count-badge"
-              class="text-xs px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700/80">已結束 0人</span>
+              class="text-xs px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700/80">已結束
+              0人</span>
           </h2>
-          <p class="text-[11px] text-slate-400">區分「繼續排點」與「時間到/提早結束 (保留今日紀錄)」</p>
+          <p class="text-[11px] text-slate-400">僅「已到場」球員可進入排點・未到場請於下方報名資料區點名</p>
         </div>
-        <button onclick="openAddPlayerModal()"
-          class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 transition shrink-0">
-          <i class="fa-solid fa-user-plus"></i>
-          新增球員
-        </button>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="scrollToRegistrationSection()"
+            class="px-2.5 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 font-extrabold text-xs flex items-center gap-1 transition active:scale-95"
+            title="跳轉至所有球員報名資料區點名">
+            <i class="fa-solid fa-clipboard-user"></i>
+            <span id="unarrived-pill-badge">報名/點名</span>
+          </button>
+          <button onclick="openAddPlayerModal()"
+            class="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-extrabold text-xs flex items-center gap-1 shadow-lg shadow-emerald-950/50 transition">
+            <i class="fa-solid fa-user-plus"></i>
+            新增
+          </button>
+        </div>
       </div>
 
-      <!-- Filter Tabs: Time Slots & Status -->
+      <!-- Filter Tabs for On-Site Arrived Players -->
       <div class="py-2.5 border-b border-slate-800 flex flex-col gap-2">
         <div class="flex items-center justify-between gap-1 overflow-x-auto pb-0.5">
           <button onclick="setRosterFilter('ALL')" id="roster-tab-ALL"
-            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">全部(分區)</button>
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">已到場(全)</button>
           <button onclick="setRosterFilter('ACTIVE')" id="roster-tab-ACTIVE"
             class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">🟢 繼續排點</button>
           <button onclick="setRosterFilter('FINISHED')" id="roster-tab-FINISHED"
@@ -437,11 +447,10 @@
         <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
           <div class="relative flex-1 min-w-[130px]">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-            <input type="text" id="player-search-input" oninput="renderRoster()" placeholder="搜尋球員姓名..."
+            <input type="text" id="player-search-input" oninput="renderRoster()" placeholder="搜尋已到場球員..."
               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
           </div>
-          <button onclick="markTimeSlotPlayersFinished('18-20')"
-            title="將所有 18-20 時段球員標記為「時間到結束」，不再排點但保留紀錄"
+          <button onclick="markTimeSlotPlayersFinished('18-20')" title="將所有 18-20 時段球員標記為「時間到結束」，不再排點但保留紀錄"
             class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap transition active:scale-95">
             <i class="fa-regular fa-clock mr-1"></i>18-20時間到結束
           </button>
@@ -455,11 +464,88 @@
         </div>
       </div>
 
-      <!-- Scrollable Player List -->
+      <!-- Scrollable On-Site Arrived Player List -->
       <div id="roster-list" class="flex-1 overflow-y-auto space-y-2 py-2.5 pr-1">
         <!-- Dynamically rendered by JS -->
       </div>
     </div>
+
+    <!-- BOTTOM FULL-WIDTH AREA (12 COLUMNS): ALL REGISTERED PLAYERS & ARRIVAL CHECK-IN MANAGEMENT -->
+    <section id="registration-section"
+      class="lg:col-span-12 bg-slate-900/90 border-2 border-sky-500/30 rounded-2xl p-4 sm:p-5 shadow-xl">
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-300 flex items-center justify-center text-base font-bold">
+            <i class="fa-solid fa-clipboard-list"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-base sm:text-lg font-black text-white">所有球員資料（報名名單與到場報到管理區）</h2>
+              <span id="reg-summary-badges" class="flex items-center gap-1.5 flex-wrap">
+                <!-- Rendered by JS -->
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">管理所有報名球友資料・點選「👋 點名到場」後，球員才會進入上方「現場到場排點區」參與排點</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="batchSetCheckIn('18-20', true)"
+            class="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-bold transition active:scale-95">
+            <i class="fa-solid fa-user-check mr-1"></i>18-20全體到場
+          </button>
+          <button onclick="batchSetCheckIn('19-21', true)"
+            class="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 text-xs font-bold transition active:scale-95">
+            <i class="fa-solid fa-user-check mr-1"></i>19-21全體到場
+          </button>
+          <button onclick="batchSetCheckIn('ALL', true)"
+            class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition active:scale-95">
+            <i class="fa-solid fa-check-double mr-1"></i>全體已到場
+          </button>
+          <button onclick="batchSetCheckIn('ALL', false)"
+            class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold transition active:scale-95">
+            <i class="fa-solid fa-rotate-left mr-1"></i>全體設未到
+          </button>
+          <button onclick="openAddPlayerModal(false)"
+            class="px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 active:scale-95 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow-lg transition">
+            <i class="fa-solid fa-user-plus"></i>
+            新增報名球員
+          </button>
+        </div>
+      </div>
+
+      <!-- Registration Filter Bar & Search -->
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+          <button onclick="setRegFilter('ALL')" id="reg-tab-ALL"
+            class="reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition">全部報名名單</button>
+          <button onclick="setRegFilter('UNARRIVED')" id="reg-tab-UNARRIVED"
+            class="reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition">⏳ 尚未到場</button>
+          <button onclick="setRegFilter('ARRIVED')" id="reg-tab-ARRIVED"
+            class="reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition">✅ 已到場</button>
+          <button onclick="setRegFilter('UNPAID')" id="reg-tab-UNPAID"
+            class="reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition">💰 未繳費</button>
+          <button onclick="setRegFilter('18-21')" id="reg-tab-18-21"
+            class="reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition">18-21時段</button>
+          <button onclick="setRegFilter('18-20')" id="reg-tab-18-20"
+            class="reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition">18-20時段</button>
+          <button onclick="setRegFilter('19-21')" id="reg-tab-19-21"
+            class="reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition">19-21時段</button>
+        </div>
+
+        <div class="relative w-full sm:w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="reg-search-input" oninput="renderRegistrationList()" placeholder="搜尋報名球員姓名..."
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500" />
+        </div>
+      </div>
+
+      <!-- Registration Players Grid -->
+      <div id="registration-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+        <!-- Dynamically rendered by JS -->
+      </div>
+    </section>
 
   </main>
 
@@ -552,6 +638,20 @@
               </div>
             </label>
           </div>
+        </div>
+
+        <!-- Checked-in (Arrived) Status -->
+        <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl p-3">
+          <div>
+            <div class="text-xs font-bold text-emerald-300">球員是否已到場報到（到場才可進入排點）</div>
+            <div class="text-[11px] text-slate-400">若僅先建立報名名單可關閉，到場後再點名開啟</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="form-player-checkedin" checked class="sr-only peer" />
+            <div
+              class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+            </div>
+          </label>
         </div>
 
         <!-- Paid Status -->
@@ -812,12 +912,22 @@
           </label>
         </div>
 
-        <!-- Method 3: Built-in 5 Cute Cat Presets -->
+        <!-- Method 3: Default 6796.jpg + Built-in 5 Cute Cat Presets -->
         <div>
           <div class="text-xs font-bold text-emerald-300 mb-1.5">
-            方式二：一鍵切換內建可愛貓咪頭像 (5款)
+            方式二：切換預設貓貓 (6796.jpg) 或內建可愛貓咪頭像
           </div>
-          <div class="grid grid-cols-5 gap-2">
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <button type="button" onclick="selectPresetCat('DEFAULT_6796')"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-amber-500/50 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center overflow-hidden"
+                id="preset-cat-DEFAULT_6796">
+                <img src="./6796.jpg" alt="預設貓貓" class="w-full h-full object-cover"
+                  onerror="this.onerror=null; this.parentElement.innerHTML='🐱';" />
+              </div>
+              <span class="text-[11px] font-bold text-amber-300">預設(6796)</span>
+            </button>
             <button type="button" onclick="selectPresetCat('ORANGE')"
               class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
               <div
@@ -1032,22 +1142,22 @@
     ];
     function getInitialDemoPlayers() {
       const sample = [
-        { id: 'p1', name: '阿凱', level: 8, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p2', name: '小傑', level: 7, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p3', name: '瑋哥', level: 9, timeSlot: '18-20', paid: true, games: 0, resting: false },
-        { id: 'p4', name: '阿哲', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p5', name: '小美', level: 5, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p6', name: '庭庭', level: 4, timeSlot: '18-20', paid: false, games: 0, resting: false },
-        { id: 'p7', name: '志豪', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p8', name: '冠宇', level: 5, timeSlot: '18-20', paid: true, games: 0, resting: false },
-        { id: 'p9', name: '大衛', level: 10, timeSlot: '19-21', paid: true, games: 0, resting: false },
-        { id: 'p10', name: '柏翰', level: 9, timeSlot: '18-21', paid: false, games: 0, resting: false },
-        { id: 'p11', name: '子軒', level: 8, timeSlot: '19-21', paid: true, games: 0, resting: false },
-        { id: 'p12', name: '家豪', level: 7, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p13', name: '雅筑', level: 3, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p14', name: '心怡', level: 4, timeSlot: '19-21', paid: false, games: 0, resting: false },
-        { id: 'p15', name: '建宏', level: 11, timeSlot: '19-21', paid: true, games: 0, resting: false },
-        { id: 'p16', name: '品源', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p1', name: '阿凱', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p2', name: '小傑', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p3', name: '瑋哥', level: 9, timeSlot: '18-20', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p4', name: '阿哲', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p5', name: '小美', level: 5, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p6', name: '庭庭', level: 4, timeSlot: '18-20', paid: false, checkedIn: true, games: 0, resting: false },
+        { id: 'p7', name: '志豪', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p8', name: '冠宇', level: 5, timeSlot: '18-20', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p9', name: '大衛', level: 10, timeSlot: '19-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p10', name: '柏翰', level: 9, timeSlot: '18-21', paid: false, checkedIn: true, games: 0, resting: false },
+        { id: 'p11', name: '子軒', level: 8, timeSlot: '19-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p12', name: '家豪', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p13', name: '雅筑', level: 3, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p14', name: '心怡', level: 4, timeSlot: '19-21', paid: false, checkedIn: false, games: 0, resting: false },
+        { id: 'p15', name: '建宏', level: 11, timeSlot: '19-21', paid: true, checkedIn: false, games: 0, resting: false },
+        { id: 'p16', name: '品源', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
       ];
       return sample.map(p => ({
         ...p,
@@ -1058,7 +1168,8 @@
 
     let state = {
       customIconDataUrl: null,
-      customIconPreset: 'ORANGE',
+      customIconPreset: 'DEFAULT_6796',
+      iconUserChanged: false,
       customQrDataUrl: null,
       players: [],
       courts: [
@@ -1070,6 +1181,7 @@
       shuttlesUsed: 6,
       currentHourFilter: 'ALL',
       rosterFilter: 'ALL',
+      regFilter: 'ALL',
       matchLogs: []
     };
 
@@ -1114,9 +1226,15 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           state = { ...state, ...parsed };
-          // Ensure every player has unified playedWith object
+          if (!state.iconUserChanged) {
+            state.customIconPreset = 'DEFAULT_6796';
+            state.customIconDataUrl = null;
+          }
+          if (!state.regFilter) state.regFilter = 'ALL';
+          // Ensure every player has unified playedWith object and checkedIn boolean
           state.players.forEach(p => {
             if (!p.playedWith) p.playedWith = {};
+            if (typeof p.checkedIn !== 'boolean') p.checkedIn = true;
           });
         } else {
           state.players = getInitialDemoPlayers();
@@ -1178,6 +1296,7 @@
           ctx.drawImage(img, 0, 0, w, h);
           const compressedDataUrl = canvas.toDataURL('image/png', 0.9);
           state.customIconDataUrl = compressedDataUrl;
+          state.iconUserChanged = true;
           saveState();
           renderBrandIcon();
           showToast('已成功換上您的自訂貓貓圖片 Icon！', 'success');
@@ -1198,9 +1317,10 @@
     function selectPresetCat(presetKey) {
       state.customIconDataUrl = null;
       state.customIconPreset = presetKey;
+      state.iconUserChanged = true;
       saveState();
       renderBrandIcon();
-      showToast('已切換內建貓咪圖示！', 'success');
+      showToast(presetKey === 'DEFAULT_6796' ? '已切換為預設 6796.jpg 貓咪圖示！' : '已切換內建貓咪圖示！', 'success');
     }
 
     function applyIconUrl() {
@@ -1211,6 +1331,7 @@
         return;
       }
       state.customIconDataUrl = url;
+      state.iconUserChanged = true;
       saveState();
       renderBrandIcon();
       urlInput.value = '';
@@ -1220,10 +1341,14 @@
     function renderBrandIcon() {
       const box = document.getElementById('brand-icon-box');
       const modalPreview = document.getElementById('modal-icon-preview');
-      const presetSvg = CAT_PRESET_SVGS[state.customIconPreset || 'ORANGE'] || DEFAULT_CAT_SVG;
-      const htmlContent = state.customIconDataUrl
-        ? `<img src="${state.customIconDataUrl}" alt="貓貓Icon" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='🐾';" />`
-        : presetSvg;
+      let htmlContent = '';
+      if (state.customIconDataUrl) {
+        htmlContent = `<img src="${state.customIconDataUrl}" alt="貓貓Icon" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='🐾';" />`;
+      } else if (!state.customIconPreset || state.customIconPreset === 'DEFAULT_6796') {
+        htmlContent = `<img src="./6796.jpg" alt="貓貓Icon (6796.jpg)" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML=DEFAULT_CAT_SVG;" />`;
+      } else {
+        htmlContent = CAT_PRESET_SVGS[state.customIconPreset] || DEFAULT_CAT_SVG;
+      }
 
       if (box) box.innerHTML = htmlContent;
       if (modalPreview) modalPreview.innerHTML = htmlContent;
@@ -1375,6 +1500,7 @@
      ********************************************************************/
     function autoFillPrepArea() {
       const available = state.players.filter(p => {
+        if (!p.checkedIn) return false;
         if (p.resting) return false;
         if (!isPlayerEligibleInCurrentHour(p)) return false;
         const loc = getPlayerLocation(p.id);
@@ -1382,7 +1508,7 @@
       });
 
       if (available.length < 4) {
-        showToast('目前符合時段且在等待區的球員不足 4 人！', 'warn');
+        showToast('目前「已到場」且符合時段、在等待區的球員不足 4 人！請先確認球員已報到', 'warn');
         return;
       }
 
@@ -1616,6 +1742,11 @@
       const player = getPlayerById(playerId);
       if (!player) return;
 
+      if (!player.checkedIn) {
+        showToast(`「${player.name}」尚未到場報到！請先在報名資料區點選「點名到場」才能進入排點`, 'warn');
+        return;
+      }
+
       if (player.resting) {
         showToast(`「${player.name}」目前已標記為結束排點，若要再次上場請先點「繼續排點」`, 'warn');
         return;
@@ -1665,11 +1796,21 @@
     }
 
     function PlacePlayerIntoPrepSlot(playerId, targetSlotIndex) {
+      const p = getPlayerById(playerId);
+      if (p && !p.checkedIn) {
+        showToast(`「${p.name}」尚未到場報到，無法排入準備區！`, 'warn');
+        return;
+      }
       removePlayerFromEverywhere(playerId);
       state.prepSlots[targetSlotIndex] = playerId;
     }
 
     function PlacePlayerIntoCourtSlot(playerId, courtIndex, slotIndex) {
+      const p = getPlayerById(playerId);
+      if (p && !p.checkedIn) {
+        showToast(`「${p.name}」尚未到場報到，無法排入球場！`, 'warn');
+        return;
+      }
       removePlayerFromEverywhere(playerId);
       state.courts[courtIndex].slots[slotIndex] = playerId;
       if (state.courts[courtIndex].slots.every(Boolean) && !state.courts[courtIndex].startTime) {
@@ -1756,8 +1897,21 @@
       renderRoster();
     }
 
+    function setRegFilter(filter) {
+      state.regFilter = filter;
+      saveState();
+      renderRegistrationList();
+    }
+
+    function scrollToRegistrationSection() {
+      const el = document.getElementById('registration-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
     /********************************************************************
-     * 8. RENDER ENGINE (COURTS, PREP AREA, ROSTER, STATS)
+     * 8. RENDER ENGINE (COURTS, PREP AREA, ROSTER, REGISTRATION, STATS)
      ********************************************************************/
     function renderAll() {
       renderBrandIcon();
@@ -1765,6 +1919,7 @@
       renderCourts();
       renderPrepArea();
       renderRoster();
+      renderRegistrationList();
     }
 
     function renderHeaderStats() {
@@ -2103,7 +2258,16 @@
       const search = (document.getElementById('player-search-input')?.value || '').trim().toLowerCase();
       const sortMode = document.getElementById('roster-sort-select')?.value || 'GAMES_ASC';
 
-      let filtered = state.players.filter(p => {
+      // 現場到場排點區：僅處理已到場 (checkedIn === true) 的球員
+      const arrivedPlayers = state.players.filter(p => !!p.checkedIn);
+      const unarrivedCount = state.players.filter(p => !p.checkedIn).length;
+
+      const unarrivedPill = document.getElementById('unarrived-pill-badge');
+      if (unarrivedPill) {
+        unarrivedPill.textContent = unarrivedCount > 0 ? `點名(未到${unarrivedCount}人)` : `報名總表(${state.players.length}人)`;
+      }
+
+      let filtered = arrivedPlayers.filter(p => {
         if (search && !p.name.toLowerCase().includes(search)) return false;
         const loc = getPlayerLocation(p.id);
         if (state.rosterFilter === 'ACTIVE' && p.resting) return false;
@@ -2130,8 +2294,8 @@
         return 0;
       };
 
-      const totalActiveCount = state.players.filter(p => !p.resting).length;
-      const totalEndedCount = state.players.filter(p => p.resting).length;
+      const totalActiveCount = arrivedPlayers.filter(p => !p.resting).length;
+      const totalEndedCount = arrivedPlayers.filter(p => p.resting).length;
       document.getElementById('roster-count-badge').textContent = `繼續排點 ${totalActiveCount}人`;
       const endedBadge = document.getElementById('roster-ended-count-badge');
       if (endedBadge) {
@@ -2141,8 +2305,9 @@
       const listEl = document.getElementById('roster-list');
       if (filtered.length === 0) {
         listEl.innerHTML = `
-          <div class="text-center py-8 text-slate-500 text-xs">
-            沒有符合篩選條件的球員
+          <div class="text-center py-8 text-slate-400 text-xs space-y-2">
+            <div>目前沒有符合條件的「已到場」球員</div>
+            ${unarrivedCount > 0 ? `<button onclick="scrollToRegistrationSection()" class="px-3 py-1.5 rounded-xl bg-sky-500/20 border border-sky-500/40 text-sky-300 font-bold text-xs">👇 前往下方報名區點名 (${unarrivedCount}人尚未報到)</button>` : ''}
           </div>
         `;
         return;
@@ -2158,13 +2323,13 @@
           <div class="flex items-center justify-between px-1 pt-0.5 pb-1">
             <span class="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              繼續排點球員 (${activePlayers.length}人)
+              已到場・繼續排點 (${activePlayers.length}人)
             </span>
             <span class="text-[10px] text-slate-400">點「結束」可移至下方休息/離場區</span>
           </div>
         `;
         if (activePlayers.length === 0) {
-          html += `<div class="text-center py-4 bg-slate-950/40 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">目前沒有繼續排點中的球員</div>`;
+          html += `<div class="text-center py-4 bg-slate-950/40 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">目前沒有繼續排點中的到場球員</div>`;
         } else {
           html += `<div class="space-y-2">${activePlayers.map(p => renderRosterPlayerCard(p)).join('')}</div>`;
         }
@@ -2190,9 +2355,197 @@
       listEl.innerHTML = html;
     }
 
+    function renderRegistrationList() {
+      const regTabs = ['ALL', 'UNARRIVED', 'ARRIVED', 'UNPAID', '18-21', '18-20', '19-21'];
+      regTabs.forEach(tab => {
+        const el = document.getElementById(`reg-tab-${tab}`);
+        if (el) {
+          const active = (state.regFilter || 'ALL') === tab;
+          el.className = `reg-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${active ? 'bg-sky-500 text-slate-950 shadow' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+            }`;
+        }
+      });
+
+      const totalCount = state.players.length;
+      const arrivedCount = state.players.filter(p => p.checkedIn).length;
+      const unarrivedCount = totalCount - arrivedCount;
+      const paidCount = state.players.filter(p => p.paid).length;
+
+      const summaryEl = document.getElementById('reg-summary-badges');
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 font-bold">總報名 ${totalCount}人</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">✅ 已到場 ${arrivedCount}人</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full ${unarrivedCount > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'} border font-bold">⏳ 尚未到場 ${unarrivedCount}人</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold">💰 已繳費 ${paidCount}/${totalCount}人</span>
+        `;
+      }
+
+      const search = (document.getElementById('reg-search-input')?.value || '').trim().toLowerCase();
+      const filter = state.regFilter || 'ALL';
+
+      let list = state.players.filter(p => {
+        if (search && !p.name.toLowerCase().includes(search)) return false;
+        if (filter === 'UNARRIVED' && p.checkedIn) return false;
+        if (filter === 'ARRIVED' && !p.checkedIn) return false;
+        if (filter === 'UNPAID' && p.paid) return false;
+        if (filter === '18-21' && p.timeSlot !== '18-21') return false;
+        if (filter === '18-20' && p.timeSlot !== '18-20') return false;
+        if (filter === '19-21' && p.timeSlot !== '19-21') return false;
+        return true;
+      });
+
+      // 未到場優先排前面方便點名，再依時段與姓名排序
+      list.sort((a, b) => {
+        if (!!a.checkedIn !== !!b.checkedIn) return a.checkedIn ? 1 : -1;
+        return a.timeSlot.localeCompare(b.timeSlot);
+      });
+
+      const container = document.getElementById('registration-list');
+      if (!container) return;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-8 bg-slate-950/50 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">
+            沒有符合篩選條件的報名球員資料
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(p => {
+        const lvInfo = getLevelBadgeInfo(p.level);
+        const tsInfo = getTimeSlotBadge(p.timeSlot);
+        const loc = getPlayerLocation(p.id);
+
+        let stateLabel = '';
+        if (!p.checkedIn) {
+          stateLabel = `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-extrabold">⏳ 尚未到場</span>`;
+        } else if (p.resting) {
+          stateLabel = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-bold">🏁 已到場・已結束</span>`;
+        } else if (loc.status === 'COURT') {
+          stateLabel = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">✅ 已到場・${loc.label}</span>`;
+        } else {
+          stateLabel = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">✅ 已到場・排點中</span>`;
+        }
+
+        return `
+          <div onclick="openHistoryModal('${p.id}')"
+               class="bg-slate-950/90 hover:bg-slate-900 border ${p.checkedIn ? 'border-slate-800 hover:border-emerald-500/40' : 'border-amber-500/40 bg-amber-950/10 hover:border-amber-400'} rounded-xl p-3 flex flex-col justify-between gap-2.5 transition cursor-pointer">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-extrabold text-sm text-white truncate">${escapeHTML(p.name)}</span>
+                  <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}">${lvInfo.label}</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${tsInfo.classes}">${tsInfo.text}</span>
+                </div>
+                <div class="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                  ${stateLabel}
+                  <span class="text-[11px] text-slate-400">今日已打 <strong class="text-amber-300">${p.games}</strong> 場</span>
+                </div>
+              </div>
+
+              <button onclick="event.stopPropagation(); openEditPlayerModal('${p.id}')" title="編輯報名資料"
+                      class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs shrink-0">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+
+            <!-- Action Bar: Check-In Toggle + Paid Toggle -->
+            <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-slate-900" onclick="event.stopPropagation()">
+              <div class="flex items-center gap-1.5 flex-1">
+                ${!p.checkedIn
+            ? `
+                      <button onclick="togglePlayerCheckIn('${p.id}')"
+                              class="flex-1 py-1.5 px-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shadow transition active:scale-95 flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-user-check"></i> 點名到場
+                      </button>
+                      ${!p.paid ? `
+                        <button onclick="checkInAndPayPlayer('${p.id}')" title="同時標記「已到場」與「已繳費」"
+                                class="py-1.5 px-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 font-bold text-[11px] transition active:scale-95 whitespace-nowrap">
+                          到場+繳費
+                        </button>
+                      ` : ''}
+                    `
+            : `
+                      <button onclick="togglePlayerCheckIn('${p.id}')" title="點擊可改回「尚未到場」"
+                              class="flex-1 py-1.5 px-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/50 border border-slate-700 hover:border-rose-500/40 text-emerald-300 hover:text-rose-300 font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> 已到場 (點此改未到)
+                      </button>
+                    `
+          }
+              </div>
+
+              <button onclick="togglePlayerPaid('${p.id}')"
+                      class="px-2.5 py-1.5 rounded-xl border text-xs font-bold transition active:scale-95 shrink-0 ${p.paid
+            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
+            : 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30'
+          }">
+                ${p.paid ? '✓已繳費' : '$未繳費'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     /********************************************************************
      * 9. PLAYER CRUD & INDIVIDUAL PARTNER/OPPONENT HISTORY MODAL
      ********************************************************************/
+    function togglePlayerCheckIn(playerId) {
+      const p = getPlayerById(playerId);
+      if (!p) return;
+      if (p.checkedIn) {
+        const loc = getPlayerLocation(playerId);
+        if (loc.status === 'COURT') {
+          showToast(`「${p.name}」目前正在${loc.label}，請先將其從球場移出再改為未到場`, 'warn');
+          return;
+        }
+        p.checkedIn = false;
+        state.prepSlots = state.prepSlots.map(id => (id === playerId ? null : id));
+        showToast(`已將「${p.name}」設為尚未到場（移出現場排點區）`, 'info');
+      } else {
+        p.checkedIn = true;
+        p.resting = false;
+        p.endReason = null;
+        showToast(`✅「${p.name}」已報到到場！現在可進入現場排點區排點`, 'success');
+      }
+      saveState();
+      renderAll();
+    }
+
+    function checkInAndPayPlayer(playerId) {
+      const p = getPlayerById(playerId);
+      if (!p) return;
+      p.checkedIn = true;
+      p.paid = true;
+      p.resting = false;
+      p.endReason = null;
+      saveState();
+      renderAll();
+      showToast(`✅「${p.name}」已完成報到與繳費，並進入現場排點區！`, 'success');
+    }
+
+    function batchSetCheckIn(targetScope, checkedInValue) {
+      const targets = state.players.filter(p => {
+        if (targetScope !== 'ALL' && p.timeSlot !== targetScope) return false;
+        return !!p.checkedIn !== checkedInValue;
+      });
+      if (targets.length === 0) {
+        showToast('符合條件的球員皆已是該到場狀態', 'info');
+        return;
+      }
+      targets.forEach(p => {
+        p.checkedIn = checkedInValue;
+        if (!checkedInValue) {
+          state.prepSlots = state.prepSlots.map(id => (id === p.id ? null : id));
+        }
+      });
+      saveState();
+      renderAll();
+      const label = targetScope === 'ALL' ? '全體報名球員' : `${targetScope} 時段球員`;
+      showToast(`已將 ${targets.length} 位${label}設為「${checkedInValue ? '已到場' : '尚未到場'}」`, 'success');
+    }
     function togglePlayerPaid(playerId) {
       const p = getPlayerById(playerId);
       if (!p) return;
@@ -2257,13 +2610,15 @@
       }
     }
 
-    function openAddPlayerModal() {
-      document.getElementById('player-modal-title').textContent = '新增球員';
+    function openAddPlayerModal(defaultCheckedIn = true) {
+      document.getElementById('player-modal-title').textContent = defaultCheckedIn ? '新增現場到場球員' : '新增報名球員';
       document.getElementById('form-player-id').value = '';
       document.getElementById('form-player-name').value = '';
       setFormLevel(5);
       const radios = document.getElementsByName('form-timeslot');
       radios.forEach(r => { r.checked = (r.value === '18-21'); });
+      const checkInEl = document.getElementById('form-player-checkedin');
+      if (checkInEl) checkInEl.checked = !!defaultCheckedIn;
       document.getElementById('form-player-paid').checked = false;
       document.getElementById('player-modal').classList.remove('hidden');
       document.getElementById('player-modal').classList.add('flex');
@@ -2278,6 +2633,8 @@
       setFormLevel(p.level);
       const radios = document.getElementsByName('form-timeslot');
       radios.forEach(r => { r.checked = (r.value === p.timeSlot); });
+      const checkInEl = document.getElementById('form-player-checkedin');
+      if (checkInEl) checkInEl.checked = !!p.checkedIn;
       document.getElementById('form-player-paid').checked = !!p.paid;
       document.getElementById('player-modal').classList.remove('hidden');
       document.getElementById('player-modal').classList.add('flex');
@@ -2296,6 +2653,9 @@
       const radios = document.getElementsByName('form-timeslot');
       let timeSlot = '18-21';
       radios.forEach(r => { if (r.checked) timeSlot = r.value; });
+      const checkedIn = document.getElementById('form-player-checkedin')
+        ? document.getElementById('form-player-checkedin').checked
+        : true;
       const paid = document.getElementById('form-player-paid').checked;
 
       if (!name) return;
@@ -2306,7 +2666,11 @@
           existing.name = name;
           existing.level = level;
           existing.timeSlot = timeSlot;
+          existing.checkedIn = checkedIn;
           existing.paid = paid;
+          if (!checkedIn) {
+            state.prepSlots = state.prepSlots.map(slotId => (slotId === id ? null : slotId));
+          }
           showToast(`已更新「${name}」的資料`, 'success');
         }
       } else {
@@ -2315,6 +2679,7 @@
           name,
           level,
           timeSlot,
+          checkedIn,
           paid,
           games: 0,
           resting: false,
@@ -2322,7 +2687,7 @@
           lastPlayedAt: 0
         };
         state.players.push(newPlayer);
-        showToast(`已新增球員「${name} (${level}級)」`, 'success');
+        showToast(`已新增球員「${name} (${level}級・${checkedIn ? '已到場' : '報名未到場'})」`, 'success');
       }
 
       closePlayerModal();
@@ -2340,23 +2705,34 @@
       badge.textContent = lvInfo.label;
 
       document.getElementById('hist-player-name').textContent = `${p.name} 的同場紀錄`;
-      const statusText = p.resting ? '🏁 已結束/離場 (不再排點)' : '🟢 繼續排點中';
+      const arrivalText = p.checkedIn ? (p.resting ? '🏁 已到場・已結束排點' : '🟢 已到場・繼續排點中') : '⏳ 尚未到場報到';
       document.getElementById('hist-player-meta').textContent =
-        `狀態：${statusText} ｜ 時段：${p.timeSlot} ｜ 今日已上：${p.games} 場 ｜ ${p.paid ? '已繳費' : '未繳費'}`;
+        `狀態：${arrivalText} ｜ 時段：${p.timeSlot} ｜ 今日已上：${p.games} 場 ｜ ${p.paid ? '已繳費' : '未繳費'}`;
 
       const toggleRestBtn = document.getElementById('hist-toggle-rest-btn');
       if (toggleRestBtn) {
-        if (p.resting) {
+        if (!p.checkedIn) {
+          toggleRestBtn.className = 'px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold';
+          toggleRestBtn.innerHTML = '<i class="fa-solid fa-user-check mr-1"></i>點名報到 (設為已到場)';
+          toggleRestBtn.onclick = () => {
+            togglePlayerCheckIn(playerId);
+            openHistoryModal(playerId);
+          };
+        } else if (p.resting) {
           toggleRestBtn.className = 'px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold';
           toggleRestBtn.innerHTML = '<i class="fa-solid fa-rotate-left mr-1"></i>恢復繼續排點';
+          toggleRestBtn.onclick = () => {
+            togglePlayerRest(playerId, 'EARLY');
+            openHistoryModal(playerId);
+          };
         } else {
           toggleRestBtn.className = 'px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold';
           toggleRestBtn.innerHTML = '<i class="fa-solid fa-flag-checkered mr-1"></i>設為結束排點';
+          toggleRestBtn.onclick = () => {
+            togglePlayerRest(playerId, 'EARLY');
+            openHistoryModal(playerId);
+          };
         }
-        toggleRestBtn.onclick = () => {
-          togglePlayerRest(playerId, 'EARLY');
-          openHistoryModal(playerId);
-        };
       }
 
       const playedEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
@@ -2530,6 +2906,7 @@
         p.playedWith = {};
         p.lastPlayedAt = 0;
         p.paid = false;
+        p.checkedIn = false;
         p.resting = false;
         p.endReason = null;
       });
@@ -2543,7 +2920,7 @@
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已開啟新的一天！所有場次、同場紀錄與用球數已歸零', 'success');
+      showToast('已開啟新的一天！場次已歸零，球員皆重置為「尚未到場」等待點名報到', 'success');
     }
 
     function loadDemoPlayers() {
