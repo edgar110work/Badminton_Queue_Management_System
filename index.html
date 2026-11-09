@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW" class="dark">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -9,7 +10,9 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <!-- Google Fonts: Inter & Noto Sans TC -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+    rel="stylesheet" />
 
   <script>
     tailwind.config = {
@@ -37,25 +40,30 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
+
     body {
       font-family: 'Inter', 'Noto Sans TC', sans-serif;
       background-color: #0b1120;
       color: #f8fafc;
       overflow-x: hidden;
     }
+
     /* Custom subtle scrollbars for iPad & Desktop */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
+
     ::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.6);
       border-radius: 8px;
     }
+
     ::-webkit-scrollbar-thumb {
       background: rgba(100, 116, 139, 0.5);
       border-radius: 8px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(148, 163, 184, 0.8);
     }
@@ -67,6 +75,7 @@
       border: 2px solid rgba(167, 243, 208, 0.65);
       box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35), 0 8px 20px -4px rgba(0, 0, 0, 0.5);
     }
+
     /* Court Net Line */
     .court-net {
       position: relative;
@@ -74,27 +83,35 @@
       align-items: center;
       justify-content: center;
     }
+
     .court-net::before {
       content: '';
       position: absolute;
       left: 0;
       right: 0;
       height: 2px;
-      background: repeating-linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.85),
-        rgba(255, 255, 255, 0.85) 6px,
-        transparent 6px,
-        transparent 10px
-      );
+      background: repeating-linear-gradient(90deg,
+          rgba(255, 255, 255, 0.85),
+          rgba(255, 255, 255, 0.85) 6px,
+          transparent 6px,
+          transparent 10px);
     }
 
     /* Selection Pulse Animation for Swap/Assign */
     @keyframes pulse-ring {
-      0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
-      70% { box-shadow: 0 0 0 8px rgba(250, 204, 21, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+      0% {
+        box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(250, 204, 21, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
+      }
     }
+
     .selected-slot {
       border-color: #facc15 !important;
       background-color: rgba(250, 204, 21, 0.18) !important;
@@ -102,19 +119,23 @@
     }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
 
   <!-- ================= TOP NAVIGATION & DASHBOARD HEADER ================= -->
-  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-5 py-2.5 shadow-lg">
+  <header
+    class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-5 py-2.5 shadow-lg">
     <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
-      
+
       <!-- Brand, Custom Cat Icon & Current Period Filter -->
       <div class="flex items-center gap-3">
         <div class="relative group cursor-pointer" onclick="openIconModal()" title="點擊更換自訂貓咪圖片 Icon">
-          <div id="brand-icon-box" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center shadow-lg shadow-orange-950/60 overflow-hidden border-2 border-amber-300/60 transition transform group-hover:scale-105 active:scale-95">
+          <div id="brand-icon-box"
+            class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center shadow-lg shadow-orange-950/60 overflow-hidden border-2 border-amber-300/60 transition transform group-hover:scale-105 active:scale-95">
             <!-- Rendered by JS -->
           </div>
-          <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-800 border border-slate-600 text-amber-300 flex items-center justify-center text-[10px] shadow">
+          <span
+            class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-800 border border-slate-600 text-amber-300 flex items-center justify-center text-[10px] shadow">
             <i class="fa-solid fa-camera"></i>
           </span>
         </div>
@@ -123,9 +144,12 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="font-black text-base sm:text-lg tracking-tight text-white flex items-center gap-1.5">
               貓貓羽球排點系統
-              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">推廣1-15級</span>
+              <span
+                class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">推廣1-15級</span>
             </h1>
-            <button onclick="openIconModal()" class="text-[11px] px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold transition flex items-center gap-1" title="開啟更換貓貓圖示視窗">
+            <button onclick="openIconModal()"
+              class="text-[11px] px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold transition flex items-center gap-1"
+              title="開啟更換貓貓圖示視窗">
               <i class="fa-solid fa-paw text-[10px]"></i> 更換圖示
             </button>
           </div>
@@ -134,21 +158,27 @@
 
         <!-- Time Period Selector (Controls who is eligible in Auto-Match) -->
         <div class="hidden md:flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 ml-2">
-          <span class="text-xs text-slate-400 px-2 font-medium"><i class="fa-regular fa-clock mr-1 text-emerald-400"></i>現在時段：</span>
-          <button onclick="setCurrentHourFilter('ALL')" id="period-btn-ALL" class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">全部</button>
-          <button onclick="setCurrentHourFilter('18-19')" id="period-btn-18-19" class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">18-19點</button>
-          <button onclick="setCurrentHourFilter('19-20')" id="period-btn-19-20" class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">19-20點</button>
-          <button onclick="setCurrentHourFilter('20-21')" id="period-btn-20-21" class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">20-21點</button>
+          <span class="text-xs text-slate-400 px-2 font-medium"><i
+              class="fa-regular fa-clock mr-1 text-emerald-400"></i>現在時段：</span>
+          <button onclick="setCurrentHourFilter('ALL')" id="period-btn-ALL"
+            class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">全部</button>
+          <button onclick="setCurrentHourFilter('18-19')" id="period-btn-18-19"
+            class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">18-19點</button>
+          <button onclick="setCurrentHourFilter('19-20')" id="period-btn-19-20"
+            class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">19-20點</button>
+          <button onclick="setCurrentHourFilter('20-21')" id="period-btn-20-21"
+            class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">20-21點</button>
         </div>
       </div>
 
       <!-- Right Side Widgets: Shuttlecock Counter + Fee Summary + History/Settings -->
       <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-        
+
         <!-- Independent Shuttlecock Counter Widget -->
         <div class="flex items-center bg-slate-800/90 border border-slate-700/80 rounded-xl px-2.5 py-1.5 gap-2">
           <div class="flex items-center gap-1.5">
-            <span class="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-sm font-bold">
+            <span
+              class="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-sm font-bold">
               🪶
             </span>
             <div>
@@ -160,20 +190,24 @@
             </div>
           </div>
           <div class="flex items-center gap-1 border-l border-slate-700 pl-2">
-            <button onclick="adjustShuttles(-1)" title="減少1顆" class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 flex items-center justify-center text-xs font-bold transition">
+            <button onclick="adjustShuttles(-1)" title="減少1顆"
+              class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 flex items-center justify-center text-xs font-bold transition">
               -1
             </button>
-            <button onclick="adjustShuttles(1)" title="消耗1顆新球" class="px-2.5 h-7 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 flex items-center justify-center text-xs font-extrabold shadow transition">
+            <button onclick="adjustShuttles(1)" title="消耗1顆新球"
+              class="px-2.5 h-7 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 flex items-center justify-center text-xs font-extrabold shadow transition">
               +1顆
             </button>
-            <button onclick="adjustShuttles(12)" title="開新球筒 (+12顆)" class="px-2 h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 active:scale-95 text-amber-300 flex items-center justify-center text-xs font-bold transition">
+            <button onclick="adjustShuttles(12)" title="開新球筒 (+12顆)"
+              class="px-2 h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 active:scale-95 text-amber-300 flex items-center justify-center text-xs font-bold transition">
               +1筒
             </button>
           </div>
         </div>
 
         <!-- Fee & Revenue Quick Pill -->
-        <button onclick="openFinanceModal()" class="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl px-3 py-1.5 transition active:scale-95">
+        <button onclick="openFinanceModal()"
+          class="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl px-3 py-1.5 transition active:scale-95">
           <i class="fa-solid fa-coins text-emerald-400 text-sm"></i>
           <div class="text-left">
             <div class="text-[10px] text-slate-400 leading-none">繳費進度</div>
@@ -182,41 +216,56 @@
         </button>
 
         <!-- Match History Log Button -->
-        <button onclick="openMatchLogModal()" class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 transition active:scale-95">
+        <button onclick="openMatchLogModal()"
+          class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 transition active:scale-95">
           <i class="fa-solid fa-list-check text-sky-400"></i>
           <span class="hidden sm:inline">總場次</span>
-          <span id="completed-matches-badge" class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded-md font-bold">0</span>
+          <span id="completed-matches-badge"
+            class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded-md font-bold">0</span>
         </button>
 
         <!-- LINE Group QR Code Invite Button -->
-        <button onclick="openQrModal()" class="flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl px-3 py-2 text-xs font-extrabold shadow-lg shadow-emerald-950/50 transition active:scale-95" title="顯示 LINE 群組邀請 QR Code">
+        <button onclick="openQrModal()"
+          class="flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl px-3 py-2 text-xs font-extrabold shadow-lg shadow-emerald-950/50 transition active:scale-95"
+          title="顯示 LINE 群組邀請 QR Code">
           <i class="fa-brands fa-line text-base"></i>
           <span>邀請入群</span>
         </button>
 
         <!-- Reset / Demo Data Menu -->
-        <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 flex items-center justify-center text-slate-300 transition active:scale-95" title="系統設定與重置">
+        <button onclick="openSettingsModal()"
+          class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 flex items-center justify-center text-slate-300 transition active:scale-95"
+          title="系統設定與重置">
           <i class="fa-solid fa-gear"></i>
         </button>
       </div>
     </div>
 
     <!-- Mobile Time Period Bar -->
-    <div class="flex md:hidden items-center justify-between bg-slate-800/80 p-1 rounded-xl border border-slate-700/80 mt-2">
-      <span class="text-xs text-slate-400 px-2 font-medium"><i class="fa-regular fa-clock mr-1 text-emerald-400"></i>現在時段：</span>
+    <div
+      class="flex md:hidden items-center justify-between bg-slate-800/80 p-1 rounded-xl border border-slate-700/80 mt-2">
+      <span class="text-xs text-slate-400 px-2 font-medium"><i
+          class="fa-regular fa-clock mr-1 text-emerald-400"></i>現在時段：</span>
       <div class="flex gap-1">
-        <button onclick="setCurrentHourFilter('ALL')" id="m-period-btn-ALL" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">全部</button>
-        <button onclick="setCurrentHourFilter('18-19')" id="m-period-btn-18-19" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">18-19</button>
-        <button onclick="setCurrentHourFilter('19-20')" id="m-period-btn-19-20" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">19-20</button>
-        <button onclick="setCurrentHourFilter('20-21')" id="m-period-btn-20-21" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">20-21</button>
+        <button onclick="setCurrentHourFilter('ALL')" id="m-period-btn-ALL"
+          class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">全部</button>
+        <button onclick="setCurrentHourFilter('18-19')" id="m-period-btn-18-19"
+          class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">18-19</button>
+        <button onclick="setCurrentHourFilter('19-20')" id="m-period-btn-19-20"
+          class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">19-20</button>
+        <button onclick="setCurrentHourFilter('20-21')" id="m-period-btn-20-21"
+          class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">20-21</button>
       </div>
     </div>
   </header>
 
   <!-- ================= ACTIVE SELECTION HINT BANNER ================= -->
-  <div id="selection-banner" class="hidden bg-amber-500/20 border-b border-amber-400/40 px-4 py-2 text-center text-xs sm:text-sm text-amber-200 font-medium flex items-center justify-center gap-3">
-    <span><i class="fa-solid fa-hand-pointer mr-1.5 animate-bounce"></i><span id="selection-banner-text">已選取位置，請點擊下方名單球員或另一個位置進行替換/互換</span></span>
-    <button onclick="clearSelection()" class="px-2.5 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition">取消選取</button>
+  <div id="selection-banner"
+    class="hidden bg-amber-500/20 border-b border-amber-400/40 px-4 py-2 text-center text-xs sm:text-sm text-amber-200 font-medium flex items-center justify-center gap-3">
+    <span><i class="fa-solid fa-hand-pointer mr-1.5 animate-bounce"></i><span
+        id="selection-banner-text">已選取位置，請點擊下方名單球員或另一個位置進行替換/互換</span></span>
+    <button onclick="clearSelection()"
+      class="px-2.5 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition">取消選取</button>
   </div>
 
   <!-- ================= MAIN WORKSPACE (IPAD PRO LANDSCAPE 12-COL GRID) ================= -->
@@ -247,13 +296,15 @@
       <section class="bg-slate-900/90 border-2 border-indigo-500/40 rounded-2xl p-4 shadow-xl relative overflow-hidden">
         <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
           <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 flex items-center justify-center font-bold">
+            <div
+              class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 flex items-center justify-center font-bold">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <h2 class="text-base font-extrabold text-white">下一場排點準備區（4人同場即可）</h2>
-                <span id="prep-chemistry-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">
+                <span id="prep-chemistry-badge"
+                  class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">
                   等待排點中
                 </span>
               </div>
@@ -263,11 +314,13 @@
 
           <!-- Action Buttons for Prep Area -->
           <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="autoFillPrepArea()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/60 flex items-center gap-1.5 transition">
+            <button onclick="autoFillPrepArea()"
+              class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/60 flex items-center gap-1.5 transition">
               <i class="fa-solid fa-bolt"></i>
               智慧自動配點
             </button>
-            <button onclick="clearPrepArea()" title="清空準備區" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 active:scale-95 text-slate-300 hover:text-rose-300 text-xs transition">
+            <button onclick="clearPrepArea()" title="清空準備區"
+              class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 active:scale-95 text-slate-300 hover:text-rose-300 text-xs transition">
               <i class="fa-solid fa-eraser"></i>
               清空
             </button>
@@ -294,13 +347,16 @@
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs text-slate-400 font-medium">派發上場：</span>
-            <button onclick="assignPrepToCourt(0)" id="assign-court-btn-0" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
+            <button onclick="assignPrepToCourt(0)" id="assign-court-btn-0"
+              class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
               <i class="fa-solid fa-play mr-1"></i>送入 1號場
             </button>
-            <button onclick="assignPrepToCourt(1)" id="assign-court-btn-1" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
+            <button onclick="assignPrepToCourt(1)" id="assign-court-btn-1"
+              class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
               <i class="fa-solid fa-play mr-1"></i>送入 2號場
             </button>
-            <button onclick="assignPrepToCourt(2)" id="assign-court-btn-2" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
+            <button onclick="assignPrepToCourt(2)" id="assign-court-btn-2"
+              class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
               <i class="fa-solid fa-play mr-1"></i>送入 3號場
             </button>
           </div>
@@ -308,14 +364,25 @@
       </section>
 
       <!-- LEVEL LEGEND & TIME SLOT EXPLANATION -->
-      <section class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <section
+        class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-bold text-slate-300"><i class="fa-solid fa-layer-group text-emerald-400 mr-1"></i>台灣推廣分級色標：</span>
-          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">1-3級 新手階</span>
-          <span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">4-6級 初階</span>
-          <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">7-9級 中階</span>
-          <span class="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">10-12級 高階</span>
-          <span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold">13-15級 職業/甲組</span>
+          <span class="font-bold text-slate-300"><i
+              class="fa-solid fa-layer-group text-emerald-400 mr-1"></i>台灣推廣分級色標：</span>
+          <span
+            class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">1-3級
+            新手階</span>
+          <span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">4-6級
+            初階</span>
+          <span
+            class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">7-9級
+            中階</span>
+          <span
+            class="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">10-12級
+            高階</span>
+          <span
+            class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold">13-15級
+            職業/甲組</span>
         </div>
         <div class="text-slate-400">
           點擊球員卡片即可檢視「<strong class="text-slate-200">今日總共跟誰打過幾次</strong>」
@@ -324,19 +391,24 @@
     </div>
 
     <!-- RIGHT AREA (5 COLUMNS ON IPAD LANDSCAPE): PLAYER ROSTER, FILTERS & ADD PLAYER -->
-    <div class="lg:col-span-5 xl:col-span-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col max-h-[calc(100vh-100px)]">
-      
+    <div
+      class="lg:col-span-5 xl:col-span-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col max-h-[calc(100vh-100px)]">
+
       <!-- Roster Header & Add Player Trigger -->
       <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-800">
         <div>
-          <h2 class="text-base font-extrabold text-white flex items-center gap-2">
+          <h2 class="text-base font-extrabold text-white flex items-center gap-2 flex-wrap">
             <i class="fa-solid fa-users text-emerald-400"></i>
             球員名單與等待區
-            <span id="roster-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">0人</span>
+            <span id="roster-count-badge"
+              class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">0人</span>
+            <span id="roster-ended-count-badge"
+              class="text-xs px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-400 border border-slate-700/80">已結束 0人</span>
           </h2>
-          <p class="text-[11px] text-slate-400">自動依「上場次數少 ➔ 等待最久」優先排序</p>
+          <p class="text-[11px] text-slate-400">區分「繼續排點」與「時間到/提早結束 (保留今日紀錄)」</p>
         </div>
-        <button onclick="openAddPlayerModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 transition">
+        <button onclick="openAddPlayerModal()"
+          class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 transition shrink-0">
           <i class="fa-solid fa-user-plus"></i>
           新增球員
         </button>
@@ -345,21 +417,36 @@
       <!-- Filter Tabs: Time Slots & Status -->
       <div class="py-2.5 border-b border-slate-800 flex flex-col gap-2">
         <div class="flex items-center justify-between gap-1 overflow-x-auto pb-0.5">
-          <button onclick="setRosterFilter('ALL')" id="roster-tab-ALL" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">全部</button>
-          <button onclick="setRosterFilter('WAIT')" id="roster-tab-WAIT" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">等待上場</button>
-          <button onclick="setRosterFilter('18-21')" id="roster-tab-18-21" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">18-21時段</button>
-          <button onclick="setRosterFilter('18-20')" id="roster-tab-18-20" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">18-20時段</button>
-          <button onclick="setRosterFilter('19-21')" id="roster-tab-19-21" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">19-21時段</button>
-          <button onclick="setRosterFilter('UNPAID')" id="roster-tab-UNPAID" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">未繳費</button>
+          <button onclick="setRosterFilter('ALL')" id="roster-tab-ALL"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">全部(分區)</button>
+          <button onclick="setRosterFilter('ACTIVE')" id="roster-tab-ACTIVE"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">🟢 繼續排點</button>
+          <button onclick="setRosterFilter('FINISHED')" id="roster-tab-FINISHED"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">🏁 已結束/離場</button>
+          <button onclick="setRosterFilter('WAIT')" id="roster-tab-WAIT"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">等待上場</button>
+          <button onclick="setRosterFilter('18-20')" id="roster-tab-18-20"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">18-20時段</button>
+          <button onclick="setRosterFilter('19-21')" id="roster-tab-19-21"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">19-21時段</button>
+          <button onclick="setRosterFilter('UNPAID')" id="roster-tab-UNPAID"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">未繳費</button>
         </div>
 
-        <!-- Quick Search & Sort Info -->
-        <div class="flex items-center gap-2">
-          <div class="relative flex-1">
+        <!-- Quick Search, Batch Time-Up Action & Sort Info -->
+        <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+          <div class="relative flex-1 min-w-[130px]">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-            <input type="text" id="player-search-input" oninput="renderRoster()" placeholder="搜尋球員姓名..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+            <input type="text" id="player-search-input" oninput="renderRoster()" placeholder="搜尋球員姓名..."
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
           </div>
-          <select id="roster-sort-select" onchange="renderRoster()" class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+          <button onclick="markTimeSlotPlayersFinished('18-20')"
+            title="將所有 18-20 時段球員標記為「時間到結束」，不再排點但保留紀錄"
+            class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap transition active:scale-95">
+            <i class="fa-regular fa-clock mr-1"></i>18-20時間到結束
+          </button>
+          <select id="roster-sort-select" onchange="renderRoster()"
+            class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
             <option value="GAMES_ASC">依場次 (少→多)</option>
             <option value="LEVEL_DESC">依程度 (高→低)</option>
             <option value="LEVEL_ASC">依程度 (低→高)</option>
@@ -377,11 +464,13 @@
   </main>
 
   <!-- ================= MODAL 1: ADD / EDIT PLAYER ================= -->
-  <div id="player-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div id="player-modal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
         <h3 id="player-modal-title" class="text-lg font-extrabold text-white">新增球員</h3>
-        <button onclick="closePlayerModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button onclick="closePlayerModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -392,18 +481,21 @@
         <!-- Player Name -->
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">球員姓名 / 暱稱 *</label>
-          <input type="text" id="form-player-name" required placeholder="例如：阿凱、小美" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" />
+          <input type="text" id="form-player-name" required placeholder="例如：阿凱、小美"
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" />
         </div>
 
         <!-- Taiwan Badminton Skill Level (1-15) -->
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label class="text-xs font-bold text-slate-300">台灣推廣羽球分級 (1 - 15 級)</label>
-            <span id="form-level-preview" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span id="form-level-preview"
+              class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
               7級 (中階)
             </span>
           </div>
-          <input type="range" id="form-player-level" min="1" max="15" value="7" oninput="updateLevelPreview(this.value)" class="w-full accent-emerald-500 cursor-pointer h-2 rounded-lg bg-slate-800" />
+          <input type="range" id="form-player-level" min="1" max="15" value="7" oninput="updateLevelPreview(this.value)"
+            class="w-full accent-emerald-500 cursor-pointer h-2 rounded-lg bg-slate-800" />
           <div class="flex justify-between text-[10px] text-slate-400 mt-1 px-0.5">
             <span>1-3 新手</span>
             <span>4-6 初階</span>
@@ -413,11 +505,21 @@
           </div>
           <!-- Quick Level Buttons -->
           <div class="grid grid-cols-5 gap-1.5 mt-2">
-            <button type="button" onclick="setFormLevel(2)" class="py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold">2級 新手</button>
-            <button type="button" onclick="setFormLevel(5)" class="py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-bold">5級 初階</button>
-            <button type="button" onclick="setFormLevel(7)" class="py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold">7級 中下</button>
-            <button type="button" onclick="setFormLevel(9)" class="py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold">9級 中上</button>
-            <button type="button" onclick="setFormLevel(11)" class="py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold">11級 高階</button>
+            <button type="button" onclick="setFormLevel(2)"
+              class="py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold">2級
+              新手</button>
+            <button type="button" onclick="setFormLevel(5)"
+              class="py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-bold">5級
+              初階</button>
+            <button type="button" onclick="setFormLevel(7)"
+              class="py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold">7級
+              中下</button>
+            <button type="button" onclick="setFormLevel(9)"
+              class="py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold">9級
+              中上</button>
+            <button type="button" onclick="setFormLevel(11)"
+              class="py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold">11級
+              高階</button>
           </div>
         </div>
 
@@ -427,21 +529,24 @@
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="form-timeslot" value="18-21" checked class="peer sr-only" />
-              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-400 peer-checked:text-emerald-300 text-slate-300 transition">
+              <div
+                class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-400 peer-checked:text-emerald-300 text-slate-300 transition">
                 <div class="text-xs font-extrabold">18:00 - 21:00</div>
                 <div class="text-[10px] opacity-75">全場 (3小時)</div>
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="form-timeslot" value="18-20" class="peer sr-only" />
-              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-sky-500/20 peer-checked:border-sky-400 peer-checked:text-sky-300 text-slate-300 transition">
+              <div
+                class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-sky-500/20 peer-checked:border-sky-400 peer-checked:text-sky-300 text-slate-300 transition">
                 <div class="text-xs font-extrabold">18:00 - 20:00</div>
                 <div class="text-[10px] opacity-75">上半場 (2小時)</div>
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="form-timeslot" value="19-21" class="peer sr-only" />
-              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-purple-500/20 peer-checked:border-purple-400 peer-checked:text-purple-300 text-slate-300 transition">
+              <div
+                class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-purple-500/20 peer-checked:border-purple-400 peer-checked:text-purple-300 text-slate-300 transition">
                 <div class="text-xs font-extrabold">19:00 - 21:00</div>
                 <div class="text-[10px] opacity-75">下半場 (2小時)</div>
               </div>
@@ -457,30 +562,38 @@
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="form-player-paid" class="sr-only peer" />
-            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            <div
+              class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+            </div>
           </label>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
-          <button type="button" onclick="closePlayerModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">取消</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold shadow-lg">儲存球員</button>
+          <button type="button" onclick="closePlayerModal()"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">取消</button>
+          <button type="submit"
+            class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold shadow-lg">儲存球員</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- ================= MODAL 2: PLAYER PLAYED-WITH HISTORY (CLEAN & UNIFIED) ================= -->
-  <div id="history-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[88vh] flex flex-col">
+  <div id="history-modal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div
+      class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[88vh] flex flex-col">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2.5">
-          <div id="hist-player-badge" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm"></div>
+          <div id="hist-player-badge" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm">
+          </div>
           <div>
             <h3 id="hist-player-name" class="text-lg font-extrabold text-white">球員同場紀錄</h3>
             <p id="hist-player-meta" class="text-xs text-slate-400"></p>
           </div>
         </div>
-        <button onclick="closeHistoryModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button onclick="closeHistoryModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -505,29 +618,38 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-        <button id="hist-delete-btn" class="px-3 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-300 text-xs font-bold">
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800">
+        <button id="hist-delete-btn"
+          class="px-3 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-300 text-xs font-bold">
           <i class="fa-solid fa-trash-can mr-1"></i>刪除球員
         </button>
-        <div class="flex gap-2">
-          <button id="hist-edit-btn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
+        <div class="flex flex-wrap gap-2">
+          <button id="hist-toggle-rest-btn"
+            class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold">
+            <i class="fa-solid fa-flag-checkered mr-1"></i>設為結束排點
+          </button>
+          <button id="hist-edit-btn"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
             <i class="fa-solid fa-pen mr-1"></i>編輯資料
           </button>
-          <button onclick="closeHistoryModal()" class="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-extrabold">關閉</button>
+          <button onclick="closeHistoryModal()"
+            class="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-extrabold">關閉</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ================= MODAL 3: FINANCE & SHUTTLECOCK COST CALCULATOR ================= -->
-  <div id="finance-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div id="finance-modal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
         <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-calculator text-emerald-400"></i>
           繳費統計與獨立用球成本試算
         </h3>
-        <button onclick="closeFinanceModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button onclick="closeFinanceModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -537,11 +659,13 @@
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
             <label class="block text-[11px] text-slate-400 mb-1">每人零打收費 (元)</label>
-            <input type="number" id="fin-fee-per-person" value="200" oninput="updateFinanceCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-emerald-300" />
+            <input type="number" id="fin-fee-per-person" value="200" oninput="updateFinanceCalc()"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-emerald-300" />
           </div>
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
             <label class="block text-[11px] text-slate-400 mb-1">單顆羽球成本 (元/顆)</label>
-            <input type="number" id="fin-cost-per-shuttle" value="45" oninput="updateFinanceCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-300" />
+            <input type="number" id="fin-cost-per-shuttle" value="45" oninput="updateFinanceCalc()"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-300" />
           </div>
         </div>
 
@@ -572,41 +696,49 @@
       </div>
 
       <div class="flex justify-end mt-4 pt-3 border-t border-slate-800">
-        <button onclick="closeFinanceModal()" class="px-5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">完成</button>
+        <button onclick="closeFinanceModal()"
+          class="px-5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">完成</button>
       </div>
     </div>
   </div>
 
   <!-- ================= MODAL 4: COMPLETED MATCHES LOG ================= -->
-  <div id="match-log-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[85vh] flex flex-col">
+  <div id="match-log-modal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div
+      class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[85vh] flex flex-col">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-clock-rotate-left text-sky-400"></i>
           今日完賽場次紀錄
         </h3>
-        <button onclick="closeMatchLogModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button onclick="closeMatchLogModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
       <div id="match-log-list" class="flex-1 overflow-y-auto space-y-2 my-3 pr-1"></div>
       <div class="flex justify-end pt-3 border-t border-slate-800">
-        <button onclick="closeMatchLogModal()" class="px-5 py-2 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs">關閉</button>
+        <button onclick="closeMatchLogModal()"
+          class="px-5 py-2 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs">關閉</button>
       </div>
     </div>
   </div>
 
   <!-- ================= MODAL 5: SYSTEM SETTINGS & RESET ================= -->
-  <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+  <div id="settings-modal"
+    class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
         <h3 class="text-lg font-extrabold text-white">系統管理與資料重置</h3>
-        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button onclick="closeSettingsModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
       <div class="space-y-3">
-        <button onclick="resetMatchCountsOnly()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left flex items-center justify-between transition">
+        <button onclick="resetMatchCountsOnly()"
+          class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left flex items-center justify-between transition">
           <div>
             <div class="font-bold text-sm text-amber-300">開啟新的一天（保留球員名單，歸零場次與用球）</div>
             <div class="text-xs text-slate-400">適合固定球團每週開團前歸零使用</div>
@@ -614,7 +746,8 @@
           <i class="fa-solid fa-rotate-right text-amber-400"></i>
         </button>
 
-        <button onclick="loadDemoPlayers()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left flex items-center justify-between transition">
+        <button onclick="loadDemoPlayers()"
+          class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left flex items-center justify-between transition">
           <div>
             <div class="font-bold text-sm text-sky-300">載入預設 16 人測試名單（含三時段與各級數）</div>
             <div class="text-xs text-slate-400">重置為範例球團資料方便體驗排點</div>
@@ -622,7 +755,8 @@
           <i class="fa-solid fa-users-gear text-sky-400"></i>
         </button>
 
-        <button onclick="clearAllPlayers()" class="w-full py-3 px-4 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/30 text-left flex items-center justify-between transition">
+        <button onclick="clearAllPlayers()"
+          class="w-full py-3 px-4 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/30 text-left flex items-center justify-between transition">
           <div>
             <div class="font-bold text-sm text-rose-300">清空所有球員與紀錄</div>
             <div class="text-xs text-rose-400/80">從空白名單開始建立您的專屬球團</div>
@@ -634,13 +768,16 @@
   </div>
 
   <!-- ================= MODAL 6: CUSTOM CAT ICON PICKER ================= -->
-  <div id="icon-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+  <div id="icon-modal"
+    class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div
+      class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
         <h3 class="text-lg font-black text-white flex items-center gap-2">
           <i class="fa-solid fa-cat text-amber-400"></i> 更換系統貓貓圖示 (支援電腦與 iPad)
         </h3>
-        <button onclick="closeIconModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <button onclick="closeIconModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -648,7 +785,8 @@
       <div class="space-y-4">
         <!-- Current Preview -->
         <div class="flex items-center gap-4 bg-slate-800/70 border border-slate-700 rounded-xl p-3">
-          <div id="modal-icon-preview" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center overflow-hidden border-2 border-amber-300 shadow-lg shrink-0">
+          <div id="modal-icon-preview"
+            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center overflow-hidden border-2 border-amber-300 shadow-lg shrink-0">
           </div>
           <div class="text-xs text-slate-300 space-y-1">
             <div class="font-bold text-white text-sm">目前系統圖示預覽</div>
@@ -659,12 +797,14 @@
         <!-- Method 1 & 2: Native <label> File Upload + Drag & Drop + Ctrl+V Paste -->
         <div>
           <div class="text-xs font-bold text-amber-300 mb-1.5">
-            方式一：從電腦 / iPad 選擇圖片、直接拖曳圖片、或按 <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-white">Ctrl+V</kbd> 貼上截圖
+            方式一：從電腦 / iPad 選擇圖片、直接拖曳圖片、或按 <kbd
+              class="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-white">Ctrl+V</kbd> 貼上截圖
           </div>
           <label for="icon-file-input" id="icon-dropzone"
-                 class="block w-full border-2 border-dashed border-amber-500/50 hover:border-amber-400 bg-slate-800/50 hover:bg-slate-800/90 rounded-xl p-5 text-center cursor-pointer transition">
+            class="block w-full border-2 border-dashed border-amber-500/50 hover:border-amber-400 bg-slate-800/50 hover:bg-slate-800/90 rounded-xl p-5 text-center cursor-pointer transition">
             <input type="file" id="icon-file-input" accept="image/*" class="sr-only" onchange="handleIconUpload(event)">
-            <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-2 text-lg">
+            <div
+              class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-2 text-lg">
               <i class="fa-solid fa-cloud-arrow-up"></i>
             </div>
             <div class="text-sm font-black text-white">點擊此處從電腦/iPad選擇照片</div>
@@ -678,24 +818,39 @@
             方式二：一鍵切換內建可愛貓咪頭像 (5款)
           </div>
           <div class="grid grid-cols-5 gap-2">
-            <button type="button" onclick="selectPresetCat('ORANGE')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center overflow-hidden" id="preset-cat-ORANGE"></div>
+            <button type="button" onclick="selectPresetCat('ORANGE')"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center overflow-hidden"
+                id="preset-cat-ORANGE"></div>
               <span class="text-[11px] font-bold text-slate-200">橘貓大吉</span>
             </button>
-            <button type="button" onclick="selectPresetCat('BLACK')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-950 flex items-center justify-center overflow-hidden" id="preset-cat-BLACK"></div>
+            <button type="button" onclick="selectPresetCat('BLACK')"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-950 flex items-center justify-center overflow-hidden"
+                id="preset-cat-BLACK"></div>
               <span class="text-[11px] font-bold text-slate-200">黑貓酷哥</span>
             </button>
-            <button type="button" onclick="selectPresetCat('CALICO')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-amber-500 flex items-center justify-center overflow-hidden" id="preset-cat-CALICO"></div>
+            <button type="button" onclick="selectPresetCat('CALICO')"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-amber-500 flex items-center justify-center overflow-hidden"
+                id="preset-cat-CALICO"></div>
               <span class="text-[11px] font-bold text-slate-200">三花小咪</span>
             </button>
-            <button type="button" onclick="selectPresetCat('WHITE')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center overflow-hidden" id="preset-cat-WHITE"></div>
+            <button type="button" onclick="selectPresetCat('WHITE')"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center overflow-hidden"
+                id="preset-cat-WHITE"></div>
               <span class="text-[11px] font-bold text-slate-200">白貓雪球</span>
             </button>
-            <button type="button" onclick="selectPresetCat('SIAMESE')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center overflow-hidden" id="preset-cat-SIAMESE"></div>
+            <button type="button" onclick="selectPresetCat('SIAMESE')"
+              class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center overflow-hidden"
+                id="preset-cat-SIAMESE"></div>
               <span class="text-[11px] font-bold text-slate-200">暹羅豆漿</span>
             </button>
           </div>
@@ -707,49 +862,61 @@
             方式三：貼上網路圖片網址 (URL)
           </div>
           <div class="flex items-center gap-2">
-            <input type="url" id="custom-icon-url-input" placeholder="https://example.com/my-cat.png" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
-            <button type="button" onclick="applyIconUrl()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shrink-0 transition">
+            <input type="url" id="custom-icon-url-input" placeholder="https://example.com/my-cat.png"
+              class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+            <button type="button" onclick="applyIconUrl()"
+              class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shrink-0 transition">
               套用網址
             </button>
           </div>
         </div>
 
         <div class="flex justify-end pt-2 border-t border-slate-800">
-          <button type="button" onclick="closeIconModal()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">完成關閉</button>
+          <button type="button" onclick="closeIconModal()"
+            class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">完成關閉</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ================= MODAL 7: LINE GROUP QR CODE INVITE ================= -->
-  <div id="qr-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="closeQrModal()">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center relative" onclick="event.stopPropagation()">
-      <button onclick="closeQrModal()" class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+  <div id="qr-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+    onclick="closeQrModal()">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center relative"
+      onclick="event.stopPropagation()">
+      <button onclick="closeQrModal()"
+        class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#06C755]/20 border border-[#06C755]/40 text-[#06C755] text-xs font-extrabold mb-2">
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#06C755]/20 border border-[#06C755]/40 text-[#06C755] text-xs font-extrabold mb-2">
         <i class="fa-brands fa-line text-base"></i> LINE 球團群組邀請
       </div>
       <h3 class="text-xl font-black text-white">掃描加入貓貓羽球群組</h3>
       <p class="text-xs text-slate-400 mt-1 mb-4">請打開手機 LINE 掃描下方行動條碼加入群組</p>
 
-      <!-- Exact SVG Vector Recreation of User's LINE QR Code (6793.jpg) + Optional Custom Upload -->
-      <div class="bg-white p-4 rounded-2xl shadow-inner mx-auto w-64 h-64 flex items-center justify-center relative overflow-hidden">
+      <!-- Default loads ./6793.jpg in the same GitHub Pages directory + Optional Custom Upload -->
+      <div
+        class="bg-white p-3 rounded-2xl shadow-inner mx-auto w-64 h-64 flex items-center justify-center relative overflow-hidden">
         <div id="qr-code-container" class="w-full h-full flex items-center justify-center">
-          <!-- Rendered by JS (Exact 37x37 QR matrix from 6793.jpg with LINE logo) -->
+          <img src="./6793.jpg" alt="LINE群組QR (6793.jpg)" class="w-full h-full object-contain"
+            onerror="this.onerror=null; this.parentElement.innerHTML=generateLineQrSvg();" />
         </div>
       </div>
 
       <div class="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-800">
-        <label for="qr-upload-input" class="text-[11px] text-slate-400 hover:text-amber-300 cursor-pointer underline decoration-dotted">
-          <input type="file" id="qr-upload-input" accept="image/*" class="sr-only" onchange="handleCustomQrUpload(event)" />
+        <label for="qr-upload-input"
+          class="text-[11px] text-slate-400 hover:text-amber-300 cursor-pointer underline decoration-dotted">
+          <input type="file" id="qr-upload-input" accept="image/*" class="sr-only"
+            onchange="handleCustomQrUpload(event)" />
           更換其他 QR 圖片
         </label>
         <button onclick="resetDefaultQr()" id="reset-qr-btn" class="hidden text-[11px] text-sky-400 hover:underline">
           還原預設群組 QR
         </button>
-        <button onclick="closeQrModal()" class="px-5 py-2 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-extrabold text-xs shadow">
+        <button onclick="closeQrModal()"
+          class="px-5 py-2 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-extrabold text-xs shadow">
           完成關閉
         </button>
       </div>
@@ -865,22 +1032,22 @@
     ];
     function getInitialDemoPlayers() {
       const sample = [
-        { id: 'p1',  name: '阿凱', level: 8,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
-        { id: 'p2',  name: '小傑', level: 7,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
-        { id: 'p3',  name: '瑋哥', level: 9,  timeSlot: '18-20', paid: true,  games: 0, resting: false },
-        { id: 'p4',  name: '阿哲', level: 6,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
-        { id: 'p5',  name: '小美', level: 5,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
-        { id: 'p6',  name: '庭庭', level: 4,  timeSlot: '18-20', paid: false, games: 0, resting: false },
-        { id: 'p7',  name: '志豪', level: 6,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
-        { id: 'p8',  name: '冠宇', level: 5,  timeSlot: '18-20', paid: true,  games: 0, resting: false },
-        { id: 'p9',  name: '大衛', level: 10, timeSlot: '19-21', paid: true,  games: 0, resting: false },
-        { id: 'p10', name: '柏翰', level: 9,  timeSlot: '18-21', paid: false, games: 0, resting: false },
-        { id: 'p11', name: '子軒', level: 8,  timeSlot: '19-21', paid: true,  games: 0, resting: false },
-        { id: 'p12', name: '家豪', level: 7,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
-        { id: 'p13', name: '雅筑', level: 3,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
-        { id: 'p14', name: '心怡', level: 4,  timeSlot: '19-21', paid: false, games: 0, resting: false },
-        { id: 'p15', name: '建宏', level: 11, timeSlot: '19-21', paid: true,  games: 0, resting: false },
-        { id: 'p16', name: '品源', level: 6,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p1', name: '阿凱', level: 8, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p2', name: '小傑', level: 7, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p3', name: '瑋哥', level: 9, timeSlot: '18-20', paid: true, games: 0, resting: false },
+        { id: 'p4', name: '阿哲', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p5', name: '小美', level: 5, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p6', name: '庭庭', level: 4, timeSlot: '18-20', paid: false, games: 0, resting: false },
+        { id: 'p7', name: '志豪', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p8', name: '冠宇', level: 5, timeSlot: '18-20', paid: true, games: 0, resting: false },
+        { id: 'p9', name: '大衛', level: 10, timeSlot: '19-21', paid: true, games: 0, resting: false },
+        { id: 'p10', name: '柏翰', level: 9, timeSlot: '18-21', paid: false, games: 0, resting: false },
+        { id: 'p11', name: '子軒', level: 8, timeSlot: '19-21', paid: true, games: 0, resting: false },
+        { id: 'p12', name: '家豪', level: 7, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p13', name: '雅筑', level: 3, timeSlot: '18-21', paid: true, games: 0, resting: false },
+        { id: 'p14', name: '心怡', level: 4, timeSlot: '19-21', paid: false, games: 0, resting: false },
+        { id: 'p15', name: '建宏', level: 11, timeSlot: '19-21', paid: true, games: 0, resting: false },
+        { id: 'p16', name: '品源', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
       ];
       return sample.map(p => ({
         ...p,
@@ -993,9 +1160,9 @@
         return;
       }
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
           const canvas = document.createElement('canvas');
           const maxDim = 160;
           let w = img.width;
@@ -1110,7 +1277,7 @@
         container.innerHTML = `<img src="${state.customQrDataUrl}" alt="LINE群組QR" class="w-full h-full object-contain" />`;
         if (resetBtn) resetBtn.classList.remove('hidden');
       } else {
-        container.innerHTML = generateLineQrSvg();
+        container.innerHTML = `<img src="./6793.jpg" alt="LINE群組QR (6793.jpg)" class="w-full h-full object-contain" onerror="this.onerror=null; this.parentElement.innerHTML=generateLineQrSvg();" />`;
         if (resetBtn) resetBtn.classList.add('hidden');
       }
     }
@@ -1119,7 +1286,7 @@
       const file = event.target.files?.[0];
       if (!file || !file.type.startsWith('image/')) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         state.customQrDataUrl = e.target.result;
         saveState();
         renderQrModalContent();
@@ -1449,6 +1616,11 @@
       const player = getPlayerById(playerId);
       if (!player) return;
 
+      if (player.resting) {
+        showToast(`「${player.name}」目前已標記為結束排點，若要再次上場請先點「繼續排點」`, 'warn');
+        return;
+      }
+
       if (selectedSource) {
         if (selectedSource.type === 'PREP') {
           PlacePlayerIntoPrepSlot(playerId, selectedSource.slotIndex);
@@ -1610,14 +1782,12 @@
         const mBtn = document.getElementById(`m-period-btn-${p}`);
         const active = state.currentHourFilter === p;
         if (btn) {
-          btn.className = `period-btn px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-            active ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-300 hover:text-white'
-          }`;
+          btn.className = `period-btn px-2.5 py-1 rounded-lg text-xs font-bold transition ${active ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-300 hover:text-white'
+            }`;
         }
         if (mBtn) {
-          mBtn.className = `m-period-btn px-2 py-1 rounded-lg text-xs font-bold transition ${
-            active ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-300'
-          }`;
+          mBtn.className = `m-period-btn px-2 py-1 rounded-lg text-xs font-bold transition ${active ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-300'
+            }`;
         }
       });
     }
@@ -1637,14 +1807,13 @@
                 <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-black text-xs">
                   ${court.name}
                 </span>
-                ${
-                  isFull
-                    ? `<span class="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                ${isFull
+            ? `<span class="text-[11px] font-bold text-amber-300 flex items-center gap-1">
                         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
                         <span class="court-timer" data-start="${court.startTime || Date.now()}">${formatDuration(court.startTime)}</span>
                        </span>`
-                    : `<span class="text-[11px] text-slate-400">空場待命 (${activeCount}/4)</span>`
-                }
+            : `<span class="text-[11px] text-slate-400">空場待命 (${activeCount}/4)</span>`
+          }
               </div>
               <button onclick="adjustShuttles(1)" title="此場地換新球 (+1顆)" class="px-2 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-[11px] font-bold transition active:scale-95">
                 🪶+1球
@@ -1673,9 +1842,8 @@
 
             <!-- Court Bottom Controls -->
             <div class="mt-2.5 flex items-center gap-1.5">
-              ${
-                activeCount > 0
-                  ? `
+              ${activeCount > 0
+            ? `
                     <button onclick="finishCourtMatch(${cIdx})" ${!isFull ? 'disabled' : ''} class="flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 active:scale-95 text-slate-950 font-extrabold text-xs shadow transition flex items-center justify-center gap-1">
                       <i class="fa-solid fa-flag-checkered"></i> 結束結算 (+1場)
                     </button>
@@ -1683,12 +1851,12 @@
                       退回
                     </button>
                   `
-                  : `
+            : `
                     <button onclick="assignPrepToCourt(${cIdx})" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-emerald-600/80 border border-slate-700 hover:border-emerald-400 text-slate-200 hover:text-white font-bold text-xs transition active:scale-95">
                       <i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> 由準備區派發上場
                     </button>
                   `
-              }
+          }
             </div>
           </div>
         `;
@@ -1819,14 +1987,116 @@
       `;
     }
 
+    function renderRosterPlayerCard(p) {
+      const lvInfo = getLevelBadgeInfo(p.level);
+      const tsInfo = getTimeSlotBadge(p.timeSlot);
+      const loc = getPlayerLocation(p.id);
+      const eligibleNow = isPlayerEligibleInCurrentHour(p);
+      const isSelectedRoster = selectedSource && selectedSource.type === 'ROSTER' && selectedSource.playerId === p.id;
+      const isFinished = !!p.resting;
+
+      const playedWithEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
+      const recentPlayedText = playedWithEntries.length > 0
+        ? playedWithEntries.slice(0, 4).map(([id, cnt]) => {
+          const mate = getPlayerById(id);
+          return mate ? `${escapeHTML(mate.name)}(${cnt})` : '';
+        }).filter(Boolean).join('、') + (playedWithEntries.length > 4 ? ` 等${playedWithEntries.length}人` : '')
+        : '尚無同場紀錄';
+
+      let statusBadge = '';
+      if (isFinished) {
+        const reasonLabel = p.endReason === 'TIME_UP' ? '⏰ 時間到結束' : '🏁 已結束/離場';
+        statusBadge = `<span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold">${reasonLabel}${loc.status === 'COURT' ? ' (場上最後一場)' : ''}</span>`;
+      } else if (loc.status === 'COURT') {
+        statusBadge = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">${loc.label}</span>`;
+      } else if (loc.status === 'PREP') {
+        statusBadge = `<span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold">準備區</span>`;
+      } else if (!eligibleNow) {
+        statusBadge = `<span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">非本時段</span>`;
+      } else {
+        statusBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-semibold">等待中</span>`;
+      }
+
+      return `
+        <div onclick="openHistoryModal('${p.id}')"
+             title="點擊查看「${escapeHTML(p.name)}」今日總共跟誰打過"
+             class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : isFinished ? 'border-slate-800/60 hover:border-amber-500/40 bg-slate-950/50' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${(!eligibleNow && !isFinished) ? 'opacity-65' : ''}">
+          
+          <div class="flex items-center justify-between gap-2">
+            <!-- Left: Player Name + Skill Level + Time Slot -->
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-extrabold text-sm ${isFinished ? 'text-slate-300' : 'text-white'} truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
+                <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}" title="台灣推廣 ${lvInfo.label} (${lvInfo.tier})">
+                  ${lvInfo.label}・${lvInfo.tier}
+                </span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${tsInfo.classes}">
+                  <i class="fa-regular fa-clock mr-0.5"></i>${tsInfo.text}
+                </span>
+                ${statusBadge}
+              </div>
+            </div>
+
+            <!-- Right: Paid Toggle + Finish/Restore Toggle + Assign to Prep Button -->
+            <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+              <button onclick="togglePlayerPaid('${p.id}')" title="點擊切換繳費狀態"
+                      class="px-2 py-1 rounded-lg border text-[11px] font-bold transition active:scale-95 ${p.paid
+          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
+          : 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30'
+        }">
+                ${p.paid ? '✓已繳' : '$未繳'}
+              </button>
+
+              ${isFinished
+          ? `
+                  <button onclick="togglePlayerRest('${p.id}')" title="恢復為繼續排點狀態"
+                          class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs transition active:scale-95">
+                    <i class="fa-solid fa-rotate-left mr-0.5"></i>繼續排點
+                  </button>
+                `
+          : `
+                  <button onclick="togglePlayerRest('${p.id}', 'EARLY')" title="時間到或臨時有事提早結束（不再排點，保留今日紀錄）"
+                          class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 font-bold text-[11px] transition active:scale-95">
+                    結束
+                  </button>
+                  <button onclick="handleRosterPlayerAssign('${p.id}')"
+                          class="px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition active:scale-95 ${loc.status === 'PREP'
+            ? 'bg-indigo-600/30 border border-indigo-400 text-indigo-200'
+            : loc.status === 'COURT'
+              ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow'
+          }">
+                    ${loc.status === 'PREP' ? '移出準備' : loc.status === 'COURT' ? '場上' : '+排點'}
+                  </button>
+                `
+        }
+            </div>
+          </div>
+
+          <!-- Bottom Row: Clean Unified Played-With Summary Bar -->
+          <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-900">
+            <div class="flex items-center gap-2 truncate">
+              <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次</span>
+              <span class="text-slate-600">|</span>
+              <span class="truncate text-slate-300">
+                <i class="fa-solid fa-user-group text-emerald-400 mr-1"></i>打過：${recentPlayedText}
+              </span>
+            </div>
+            <span class="text-[11px] text-amber-300 font-bold shrink-0 flex items-center gap-1 ml-2">
+              共${playedWithEntries.length}人 <i class="fa-solid fa-chevron-right text-[9px]"></i>
+            </span>
+          </div>
+        </div>
+      `;
+    }
+
     function renderRoster() {
-      ['ALL', 'WAIT', '18-21', '18-20', '19-21', 'UNPAID'].forEach(tab => {
+      ['ALL', 'ACTIVE', 'FINISHED', 'WAIT', '18-20', '19-21', 'UNPAID'].forEach(tab => {
         const el = document.getElementById(`roster-tab-${tab}`);
         if (el) {
           const active = state.rosterFilter === tab;
-          el.className = `roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition ${
-            active ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-          }`;
+          el.className = `roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition ${active ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+            }`;
         }
       });
 
@@ -1836,7 +2106,9 @@
       let filtered = state.players.filter(p => {
         if (search && !p.name.toLowerCase().includes(search)) return false;
         const loc = getPlayerLocation(p.id);
-        if (state.rosterFilter === 'WAIT' && loc.status !== 'WAIT') return false;
+        if (state.rosterFilter === 'ACTIVE' && p.resting) return false;
+        if (state.rosterFilter === 'FINISHED' && !p.resting) return false;
+        if (state.rosterFilter === 'WAIT' && (loc.status !== 'WAIT' || p.resting)) return false;
         if (state.rosterFilter === '18-21' && p.timeSlot !== '18-21') return false;
         if (state.rosterFilter === '18-20' && p.timeSlot !== '18-20') return false;
         if (state.rosterFilter === '19-21' && p.timeSlot !== '19-21') return false;
@@ -1844,7 +2116,7 @@
         return true;
       });
 
-      filtered.sort((a, b) => {
+      const sortFn = (a, b) => {
         const locA = getPlayerLocation(a.id).status === 'WAIT' ? 0 : 1;
         const locB = getPlayerLocation(b.id).status === 'WAIT' ? 0 : 1;
         if (sortMode === 'GAMES_ASC') {
@@ -1856,9 +2128,15 @@
         if (sortMode === 'LEVEL_ASC') return a.level - b.level;
         if (sortMode === 'TIMESLOT') return a.timeSlot.localeCompare(b.timeSlot);
         return 0;
-      });
+      };
 
-      document.getElementById('roster-count-badge').textContent = `${state.players.length}人`;
+      const totalActiveCount = state.players.filter(p => !p.resting).length;
+      const totalEndedCount = state.players.filter(p => p.resting).length;
+      document.getElementById('roster-count-badge').textContent = `繼續排點 ${totalActiveCount}人`;
+      const endedBadge = document.getElementById('roster-ended-count-badge');
+      if (endedBadge) {
+        endedBadge.textContent = `已結束 ${totalEndedCount}人`;
+      }
 
       const listEl = document.getElementById('roster-list');
       if (filtered.length === 0) {
@@ -1870,94 +2148,46 @@
         return;
       }
 
-      listEl.innerHTML = filtered.map(p => {
-        const lvInfo = getLevelBadgeInfo(p.level);
-        const tsInfo = getTimeSlotBadge(p.timeSlot);
-        const loc = getPlayerLocation(p.id);
-        const eligibleNow = isPlayerEligibleInCurrentHour(p);
-        const isSelectedRoster = selectedSource && selectedSource.type === 'ROSTER' && selectedSource.playerId === p.id;
+      const activePlayers = filtered.filter(p => !p.resting).sort(sortFn);
+      const finishedPlayers = filtered.filter(p => p.resting).sort(sortFn);
 
-        const playedWithEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
-        const recentPlayedText = playedWithEntries.length > 0
-          ? playedWithEntries.slice(0, 4).map(([id, cnt]) => {
-              const mate = getPlayerById(id);
-              return mate ? `${escapeHTML(mate.name)}(${cnt})` : '';
-            }).filter(Boolean).join('、') + (playedWithEntries.length > 4 ? ` 等${playedWithEntries.length}人` : '')
-          : '尚無同場紀錄';
+      let html = '';
 
-        let statusBadge = '';
-        if (loc.status === 'COURT') {
-          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">${loc.label}</span>`;
-        } else if (loc.status === 'PREP') {
-          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold">準備區</span>`;
-        } else if (p.resting) {
-          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 text-[10px] font-bold">休息中</span>`;
-        } else if (!eligibleNow) {
-          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">非本時段</span>`;
-        } else {
-          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-semibold">等待中</span>`;
-        }
-
-        return `
-          <div onclick="openHistoryModal('${p.id}')"
-               title="點擊查看「${escapeHTML(p.name)}」今日總共跟誰打過"
-               class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${!eligibleNow ? 'opacity-60' : ''}">
-            
-            <div class="flex items-center justify-between gap-2">
-              <!-- Left: Player Name + Skill Level + Time Slot -->
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="font-extrabold text-sm text-white truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
-                  <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}" title="台灣推廣 ${lvInfo.label} (${lvInfo.tier})">
-                    ${lvInfo.label}・${lvInfo.tier}
-                  </span>
-                  <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${tsInfo.classes}">
-                    <i class="fa-regular fa-clock mr-0.5"></i>${tsInfo.text}
-                  </span>
-                  ${statusBadge}
-                </div>
-              </div>
-
-              <!-- Right: Paid Toggle + Assign to Prep Button -->
-              <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
-                <button onclick="togglePlayerPaid('${p.id}')" title="點擊切換繳費狀態"
-                        class="px-2 py-1 rounded-lg border text-[11px] font-bold transition active:scale-95 ${
-                          p.paid
-                            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
-                            : 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30'
-                        }">
-                  ${p.paid ? '✓已繳' : '$未繳'}
-                </button>
-
-                <button onclick="handleRosterPlayerAssign('${p.id}')"
-                        class="px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition active:scale-95 ${
-                          loc.status === 'PREP'
-                            ? 'bg-indigo-600/30 border border-indigo-400 text-indigo-200'
-                            : loc.status === 'COURT'
-                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow'
-                        }">
-                  ${loc.status === 'PREP' ? '移出準備' : loc.status === 'COURT' ? '場上' : '+排點'}
-                </button>
-              </div>
-            </div>
-
-            <!-- Bottom Row: Clean Unified Played-With Summary Bar -->
-            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-900">
-              <div class="flex items-center gap-2 truncate">
-                <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次</span>
-                <span class="text-slate-600">|</span>
-                <span class="truncate text-slate-300">
-                  <i class="fa-solid fa-user-group text-emerald-400 mr-1"></i>打過：${recentPlayedText}
-                </span>
-              </div>
-              <span class="text-[11px] text-amber-300 font-bold shrink-0 flex items-center gap-1 ml-2">
-                共${playedWithEntries.length}人 <i class="fa-solid fa-chevron-right text-[9px]"></i>
-              </span>
-            </div>
+      if (state.rosterFilter !== 'FINISHED') {
+        html += `
+          <div class="flex items-center justify-between px-1 pt-0.5 pb-1">
+            <span class="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              繼續排點球員 (${activePlayers.length}人)
+            </span>
+            <span class="text-[10px] text-slate-400">點「結束」可移至下方休息/離場區</span>
           </div>
         `;
-      }).join('');
+        if (activePlayers.length === 0) {
+          html += `<div class="text-center py-4 bg-slate-950/40 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">目前沒有繼續排點中的球員</div>`;
+        } else {
+          html += `<div class="space-y-2">${activePlayers.map(p => renderRosterPlayerCard(p)).join('')}</div>`;
+        }
+      }
+
+      if (state.rosterFilter !== 'ACTIVE' && state.rosterFilter !== 'WAIT') {
+        html += `
+          <div class="flex items-center justify-between px-1 pt-3 pb-1 border-t border-slate-800/90 mt-2">
+            <span class="text-xs font-extrabold text-amber-300/90 flex items-center gap-1.5">
+              <i class="fa-solid fa-flag-checkered text-amber-400 text-[11px]"></i>
+              已結束 / 提早離場 (${finishedPlayers.length}人・不再排點)
+            </span>
+            <span class="text-[10px] text-slate-400">點擊卡片仍可查看今日完整紀錄</span>
+          </div>
+        `;
+        if (finishedPlayers.length === 0) {
+          html += `<div class="text-center py-3 bg-slate-950/30 border border-dashed border-slate-800/60 rounded-xl text-slate-500 text-[11px]">尚無已結束或提早離場的球員</div>`;
+        } else {
+          html += `<div class="space-y-2">${finishedPlayers.map(p => renderRosterPlayerCard(p)).join('')}</div>`;
+        }
+      }
+
+      listEl.innerHTML = html;
     }
 
     /********************************************************************
@@ -1972,13 +2202,42 @@
       showToast(`${p.name} 已標記為「${p.paid ? '已繳費' : '未繳費'}」`, p.paid ? 'success' : 'warn');
     }
 
-    function togglePlayerRest(playerId) {
+    function togglePlayerRest(playerId, reason = 'EARLY') {
       const p = getPlayerById(playerId);
       if (!p) return;
       p.resting = !p.resting;
+      if (p.resting) {
+        p.endReason = reason;
+        // 若該球員原本在準備區，自動從準備區移出避免誤派上場
+        state.prepSlots = state.prepSlots.map(id => (id === playerId ? null : id));
+        const loc = getPlayerLocation(playerId);
+        if (loc.status === 'COURT') {
+          showToast(`「${p.name}」已設為結束排點（此場打完不再排點，保留今日紀錄）`, 'info');
+        } else {
+          showToast(`「${p.name}」已移至結束名單，不再排點並保留今日紀錄`, 'info');
+        }
+      } else {
+        p.endReason = null;
+        showToast(`「${p.name}」已恢復為繼續排點狀態！`, 'success');
+      }
       saveState();
       renderAll();
-      showToast(`${p.name} 已設為「${p.resting ? '休息暫停排點' : '可正常排點'}」`, 'info');
+    }
+
+    function markTimeSlotPlayersFinished(targetTimeSlot) {
+      const targets = state.players.filter(p => p.timeSlot === targetTimeSlot && !p.resting);
+      if (targets.length === 0) {
+        showToast(`目前沒有進行中的 ${targetTimeSlot} 時段球員需要設為結束`, 'info');
+        return;
+      }
+      targets.forEach(p => {
+        p.resting = true;
+        p.endReason = 'TIME_UP';
+        state.prepSlots = state.prepSlots.map(id => (id === p.id ? null : id));
+      });
+      saveState();
+      renderAll();
+      showToast(`已將 ${targets.length} 位 ${targetTimeSlot} 時段球員移至「時間到結束」區（保留今日紀錄）`, 'success');
     }
 
     function updateLevelPreview(val) {
@@ -2081,8 +2340,24 @@
       badge.textContent = lvInfo.label;
 
       document.getElementById('hist-player-name').textContent = `${p.name} 的同場紀錄`;
+      const statusText = p.resting ? '🏁 已結束/離場 (不再排點)' : '🟢 繼續排點中';
       document.getElementById('hist-player-meta').textContent =
-        `參與時段：${p.timeSlot} ｜ 今日已上場：${p.games} 次 ｜ 繳費狀態：${p.paid ? '已繳費' : '未繳費'}`;
+        `狀態：${statusText} ｜ 時段：${p.timeSlot} ｜ 今日已上：${p.games} 場 ｜ ${p.paid ? '已繳費' : '未繳費'}`;
+
+      const toggleRestBtn = document.getElementById('hist-toggle-rest-btn');
+      if (toggleRestBtn) {
+        if (p.resting) {
+          toggleRestBtn.className = 'px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold';
+          toggleRestBtn.innerHTML = '<i class="fa-solid fa-rotate-left mr-1"></i>恢復繼續排點';
+        } else {
+          toggleRestBtn.className = 'px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold';
+          toggleRestBtn.innerHTML = '<i class="fa-solid fa-flag-checkered mr-1"></i>設為結束排點';
+        }
+        toggleRestBtn.onclick = () => {
+          togglePlayerRest(playerId, 'EARLY');
+          openHistoryModal(playerId);
+        };
+      }
 
       const playedEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
       const playedListEl = document.getElementById('hist-playedwith-list');
@@ -2255,6 +2530,8 @@
         p.playedWith = {};
         p.lastPlayedAt = 0;
         p.paid = false;
+        p.resting = false;
+        p.endReason = null;
       });
       state.courts.forEach(c => {
         c.slots = [null, null, null, null];
@@ -2398,4 +2675,5 @@
     };
   </script>
 </body>
+
 </html>
