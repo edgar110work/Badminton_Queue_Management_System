@@ -188,6 +188,12 @@
           <span id="completed-matches-badge" class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded-md font-bold">0</span>
         </button>
 
+        <!-- LINE Group QR Code Invite Button -->
+        <button onclick="openQrModal()" class="flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl px-3 py-2 text-xs font-extrabold shadow-lg shadow-emerald-950/50 transition active:scale-95" title="顯示 LINE 群組邀請 QR Code">
+          <i class="fa-brands fa-line text-base"></i>
+          <span>邀請入群</span>
+        </button>
+
         <!-- Reset / Demo Data Menu -->
         <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 flex items-center justify-center text-slate-300 transition active:scale-95" title="系統設定與重置">
           <i class="fa-solid fa-gear"></i>
@@ -246,12 +252,12 @@
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <h2 class="text-base font-extrabold text-white">下一場排點準備區（Staging Area）</h2>
+                <h2 class="text-base font-extrabold text-white">下一場排點準備區（4人同場即可）</h2>
                 <span id="prep-chemistry-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">
                   等待排點中
                 </span>
               </div>
-              <p class="text-xs text-slate-400">可按「智慧自動配點」避開重複搭檔，或直接點選下方格子與右側名單手動微調</p>
+              <p class="text-xs text-slate-400">不強制分隊友或對手，按「智慧自動配點」自動挑選最少同場打過的 4 人</p>
             </div>
           </div>
 
@@ -261,10 +267,6 @@
               <i class="fa-solid fa-bolt"></i>
               智慧自動配點
             </button>
-            <button onclick="shufflePrepTeams()" title="這4人重新交換隊友組合" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 active:scale-95 text-slate-200 font-semibold text-xs flex items-center gap-1 transition">
-              <i class="fa-solid fa-shuffle text-indigo-400"></i>
-              換邊/換隊友
-            </button>
             <button onclick="clearPrepArea()" title="清空準備區" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 active:scale-95 text-slate-300 hover:text-rose-300 text-xs transition">
               <i class="fa-solid fa-eraser"></i>
               清空
@@ -272,40 +274,16 @@
           </div>
         </div>
 
-        <!-- 4 Slots in Prep Area (Team A vs Team B) -->
-        <div class="grid grid-cols-1 md:grid-cols-11 gap-3 items-center">
-          <!-- Team A (Slots 0 & 1) -->
-          <div class="md:col-span-5 bg-slate-950/70 border border-slate-800 rounded-xl p-3">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-sky-400"></span> A 隊組合
-              </span>
-              <span id="prep-teamA-stats" class="text-[11px] text-slate-400 font-medium">總級數: -</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2.5" id="prep-team-a">
-              <!-- Prep Slot 0 & 1 rendered by JS -->
-            </div>
+        <!-- Clean 4 Slots in Prep Area (No Team A / Team B split) -->
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-users-viewfinder"></i> 準備上場 4 位名單（上場後自行分邊）
+            </span>
+            <span id="prep-avg-stats" class="text-[11px] text-slate-400 font-medium">平均級數: -</span>
           </div>
-
-          <!-- VS Divider & Match Quality Indicator -->
-          <div class="md:col-span-1 flex md:flex-col items-center justify-center gap-1 py-1">
-            <div class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-black text-amber-400 shadow">
-              VS
-            </div>
-            <div id="prep-diff-indicator" class="text-[11px] text-slate-400 font-semibold text-center leading-tight"></div>
-          </div>
-
-          <!-- Team B (Slots 2 & 3) -->
-          <div class="md:col-span-5 bg-slate-950/70 border border-slate-800 rounded-xl p-3">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-rose-400"></span> B 隊組合
-              </span>
-              <span id="prep-teamB-stats" class="text-[11px] text-slate-400 font-medium">總級數: -</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2.5" id="prep-team-b">
-              <!-- Prep Slot 2 & 3 rendered by JS -->
-            </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="prep-slots-grid">
+            <!-- Prep Slots 0, 1, 2, 3 rendered by JS -->
           </div>
         </div>
 
@@ -340,7 +318,7 @@
           <span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold">13-15級 職業/甲組</span>
         </div>
         <div class="text-slate-400">
-          點擊球員卡片即可檢視「<strong class="text-slate-200">跟誰搭檔過 / 跟誰對戰過幾次</strong>」
+          點擊球員卡片即可檢視「<strong class="text-slate-200">今日總共跟誰打過幾次</strong>」
         </div>
       </section>
     </div>
@@ -500,6 +478,15 @@
           <div>
             <h3 id="hist-player-name" class="text-lg font-extrabold text-white">球員對戰紀錄</h3>
             <p id="hist-player-meta" class="text-xs text-slate-400"></p>
+  <!-- ================= MODAL 2: PLAYER PLAYED-WITH HISTORY (CLEAN & UNIFIED) ================= -->
+  <div id="history-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div id="hist-player-badge" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm"></div>
+          <div>
+            <h3 id="hist-player-name" class="text-lg font-extrabold text-white">球員同場紀錄</h3>
+            <p id="hist-player-meta" class="text-xs text-slate-400"></p>
           </div>
         </div>
         <button onclick="closeHistoryModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
@@ -508,29 +495,20 @@
       </div>
 
       <div class="flex-1 overflow-y-auto space-y-4 my-4 pr-1">
-        <!-- Teammates List -->
+        <!-- Unified Played-With List -->
         <div class="bg-slate-950/90 border border-emerald-500/30 rounded-xl p-3.5">
           <h4 class="text-xs font-bold text-emerald-400 mb-2.5 flex items-center justify-between">
-            <span><i class="fa-solid fa-handshake mr-1.5"></i>今日跟誰搭檔過（同隊隊友）</span>
-            <span id="hist-partners-total" class="text-[11px] text-slate-400 font-normal"></span>
+            <span><i class="fa-solid fa-user-group mr-1.5"></i>今日總共跟誰同場打過</span>
+            <span id="hist-playedwith-total" class="text-[11px] text-slate-400 font-normal"></span>
           </h4>
-          <div id="hist-partners-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-        </div>
-
-        <!-- Opponents List -->
-        <div class="bg-slate-950/90 border border-rose-500/30 rounded-xl p-3.5">
-          <h4 class="text-xs font-bold text-rose-400 mb-2.5 flex items-center justify-between">
-            <span><i class="fa-solid fa-swords mr-1.5"></i>今日跟誰對戰過（隔網對手）</span>
-            <span id="hist-opponents-total" class="text-[11px] text-slate-400 font-normal"></span>
-          </h4>
-          <div id="hist-opponents-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+          <div id="hist-playedwith-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
         </div>
 
         <!-- Individual Match-by-Match Timeline -->
         <div class="bg-slate-950/90 border border-sky-500/30 rounded-xl p-3.5">
           <h4 class="text-xs font-bold text-sky-400 mb-2.5 flex items-center justify-between">
             <span><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>個人今日參與場次明細</span>
-            <span class="text-[11px] text-slate-400 font-normal">點選可查看與誰同場</span>
+            <span class="text-[11px] text-slate-400 font-normal">同場球友列表</span>
           </h4>
           <div id="hist-matches-timeline" class="space-y-2"></div>
         </div>
@@ -752,6 +730,41 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 7: LINE GROUP QR CODE INVITE ================= -->
+  <div id="qr-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="closeQrModal()">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center relative" onclick="event.stopPropagation()">
+      <button onclick="closeQrModal()" class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#06C755]/20 border border-[#06C755]/40 text-[#06C755] text-xs font-extrabold mb-2">
+        <i class="fa-brands fa-line text-base"></i> LINE 球團群組邀請
+      </div>
+      <h3 class="text-xl font-black text-white">掃描加入貓貓羽球群組</h3>
+      <p class="text-xs text-slate-400 mt-1 mb-4">請打開手機 LINE 掃描下方行動條碼加入群組</p>
+
+      <!-- Exact SVG Vector Recreation of User's LINE QR Code (6793.jpg) + Optional Custom Upload -->
+      <div class="bg-white p-4 rounded-2xl shadow-inner mx-auto w-64 h-64 flex items-center justify-center relative overflow-hidden">
+        <div id="qr-code-container" class="w-full h-full flex items-center justify-center">
+          <!-- Rendered by JS (Exact 37x37 QR matrix from 6793.jpg with LINE logo) -->
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-800">
+        <label for="qr-upload-input" class="text-[11px] text-slate-400 hover:text-amber-300 cursor-pointer underline decoration-dotted">
+          <input type="file" id="qr-upload-input" accept="image/*" class="sr-only" onchange="handleCustomQrUpload(event)" />
+          更換其他 QR 圖片
+        </label>
+        <button onclick="resetDefaultQr()" id="reset-qr-btn" class="hidden text-[11px] text-sky-400 hover:underline">
+          還原預設群組 QR
+        </button>
+        <button onclick="closeQrModal()" class="px-5 py-2 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-extrabold text-xs shadow">
+          完成關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= TOAST NOTIFICATION ================= -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -760,77 +773,48 @@
     /********************************************************************
      * 1. STATE ARCHITECTURE & DEFAULT SAMPLE DATA
      ********************************************************************/
-    const STORAGE_KEY = 'MEOW_BADMINTON_PRO_STATE_V2';
+    const STORAGE_KEY = 'MEOW_BADMINTON_PRO_STATE_V3';
 
-    const CAT_PRESET_SVGS = {
-      WHITE: `
-        <svg viewBox="0 0 64 64" class="w-9 h-9 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 12 L24 20 C29 18 35 18 40 20 L50 12 L48 28 C51 33 51 41 47 46 C43 51 36 53 32 53 C28 53 21 51 17 46 C13 41 13 33 16 28 Z" fill="#ffffff"/>
-          <path d="M17 16 L23 21 L18 26 Z" fill="#fda4af"/>
-          <path d="M47 16 L41 21 L46 26 Z" fill="#fda4af"/>
-          <circle cx="25" cy="34" r="3.2" fill="#0284c7"/>
-          <circle cx="39" cy="34" r="3.2" fill="#0284c7"/>
-          <circle cx="24" cy="33" r="1.2" fill="#fff"/>
-          <circle cx="38" cy="33" r="1.2" fill="#fff"/>
-          <polygon points="30,38 34,38 32,41" fill="#f43f5e"/>
-          <path d="M29 42 Q32 45 35 42" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
-      `,
-      ORANGE: `
-        <svg viewBox="0 0 64 64" class="w-9 h-9 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 12 L24 20 C29 18 35 18 40 20 L50 12 L48 28 C51 33 51 41 47 46 C43 51 36 53 32 53 C28 53 21 51 17 46 C13 41 13 33 16 28 Z" fill="#fed7aa"/>
-          <path d="M28 19 L32 25 L36 19" stroke="#ea580c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <path d="M17 16 L23 21 L18 26 Z" fill="#fb7185"/>
-          <path d="M47 16 L41 21 L46 26 Z" fill="#fb7185"/>
-          <circle cx="25" cy="34" r="3.2" fill="#431407"/>
-          <circle cx="39" cy="34" r="3.2" fill="#431407"/>
-          <circle cx="24" cy="33" r="1.2" fill="#fff"/>
-          <circle cx="38" cy="33" r="1.2" fill="#fff"/>
-          <polygon points="30,38 34,38 32,41" fill="#e11d48"/>
-          <path d="M28 42 Q32 46 36 42" stroke="#431407" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
-      `,
-      BLACK: `
-        <svg viewBox="0 0 64 64" class="w-9 h-9 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 12 L24 20 C29 18 35 18 40 20 L50 12 L48 28 C51 33 51 41 47 46 C43 51 36 53 32 53 C28 53 21 51 17 46 C13 41 13 33 16 28 Z" fill="#1e293b"/>
-          <path d="M17 16 L23 21 L18 26 Z" fill="#f43f5e"/>
-          <path d="M47 16 L41 21 L46 26 Z" fill="#f43f5e"/>
-          <circle cx="25" cy="34" r="3.8" fill="#facc15"/>
-          <circle cx="39" cy="34" r="3.8" fill="#facc15"/>
-          <circle cx="25" cy="34" r="1.6" fill="#0f172a"/>
-          <circle cx="39" cy="34" r="1.6" fill="#0f172a"/>
-          <polygon points="30,39 34,39 32,41.5" fill="#fb7185"/>
-        </svg>
-      `,
-      CALICO: `
-        <svg viewBox="0 0 64 64" class="w-9 h-9 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 12 L24 20 C29 18 35 18 40 20 L50 12 L48 28 C51 33 51 41 47 46 C43 51 36 53 32 53 C28 53 21 51 17 46 C13 41 13 33 16 28 Z" fill="#ffffff"/>
-          <path d="M14 12 L26 20 C22 28 18 32 15 29 Z" fill="#f97316"/>
-          <path d="M50 12 L38 20 C42 28 46 32 49 29 Z" fill="#334155"/>
-          <circle cx="25" cy="34" r="3.2" fill="#0f172a"/>
-          <circle cx="39" cy="34" r="3.2" fill="#0f172a"/>
-          <circle cx="24" cy="33" r="1.1" fill="#fff"/>
-          <circle cx="38" cy="33" r="1.1" fill="#fff"/>
-          <polygon points="30,38 34,38 32,41" fill="#f43f5e"/>
-          <path d="M29 42 Q32 45 35 42" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
-      `,
-      SIAMESE: `
-        <svg viewBox="0 0 64 64" class="w-9 h-9 drop-shadow" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 12 L24 20 C29 18 35 18 40 20 L50 12 L48 28 C51 33 51 41 47 46 C43 51 36 53 32 53 C28 53 21 51 17 46 C13 41 13 33 16 28 Z" fill="#fef3c7"/>
-          <path d="M14 12 L24 20 L16 28 Z" fill="#451a03"/>
-          <path d="M50 12 L40 20 L48 28 Z" fill="#451a03"/>
-          <ellipse cx="32" cy="37" rx="11" ry="8" fill="#78350f"/>
-          <circle cx="26" cy="35" r="3.3" fill="#38bdf8"/>
-          <circle cx="38" cy="35" r="3.3" fill="#38bdf8"/>
-          <circle cx="25" cy="34" r="1.1" fill="#fff"/>
-          <circle cx="37" cy="34" r="1.1" fill="#fff"/>
-          <polygon points="30,39 34,39 32,41.5" fill="#fda4af"/>
-        </svg>
-      `
-    };
-    const DEFAULT_CAT_SVG = CAT_PRESET_SVGS.ORANGE;
-
+    // Exact 37x37 QR Matrix decoded from the uploaded LINE QR Code image (6793.jpg)
+    const LINE_GROUP_QR_MATRIX = [
+      "1111111010001011001010011010101111111",
+      "1000001001001111110000011001101000001",
+      "1011101010011011000000110100001011101",
+      "1011101010110011100111110001001011101",
+      "1011101011001001110000001111001011101",
+      "1000001011011110110011100010001000001",
+      "1111111010101010101010101010101111111",
+      "0000000011101010110000010001100000000",
+      "1101111110011101100010010111111000000",
+      "0101010011011100001011110001010101001",
+      "1011111001111010101111010011001111011",
+      "1010000110101001110010001001100100010",
+      "1011111011100000100010101110111101101",
+      "0010110110111001011110000100111011001",
+      "1001001000110100000000010110101010000",
+      "0110010111000100000000011011001111101",
+      "1110111000100100000000000110110001001",
+      "0110010010001100000000001011100111010",
+      "1100101011011000000000001111000011111",
+      "0101010101110100000000001110000100110",
+      "1001101111011100000000011001111010100",
+      "0000010101101100000000010011101101100",
+      "1001111010110001000001000110001010110",
+      "0110110001111111110011010000101110001",
+      "1011101110001001001111010010111010101",
+      "0111010000110001011010101011010111000",
+      "1010001000101011110001110110001010110",
+      "0111110011100001011000010100001110001",
+      "1111111000110110110011011100111110100",
+      "0000000010001101000110101000100010111",
+      "1111111001101000010100011101101010010",
+      "1000001011100011110000101100111101010",
+      "1011101010111111001100001111101111101",
+      "1011101000001100100111101111101010011",
+      "1011101001110101111111010110000111001",
+      "1000001001011010011101001110001001100",
+      "1111111011000101110010101001110100000"
+    ];
     function getInitialDemoPlayers() {
       const sample = [
         { id: 'p1',  name: '阿凱', level: 8,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
@@ -852,8 +836,7 @@
       ];
       return sample.map(p => ({
         ...p,
-        partners: {},
-        opponents: {},
+        playedWith: {},
         lastPlayedAt: 0
       }));
     }
@@ -861,6 +844,7 @@
     let state = {
       customIconDataUrl: null,
       customIconPreset: 'ORANGE',
+      customQrDataUrl: null,
       players: [],
       courts: [
         { id: 1, name: '1號場', slots: ['p1', 'p2', 'p3', 'p4'], startTime: Date.now() - 420000 },
@@ -879,39 +863,35 @@
     function seedSampleMatchHistory() {
       if (state.matchLogs && state.matchLogs.length > 0) return;
       const demoMatches = [
-        { courtName: '1號場', teamA: ['p1', 'p2'], teamB: ['p3', 'p4'], time: '18:18' },
-        { courtName: '2號場', teamA: ['p5', 'p7'], teamB: ['p6', 'p8'], time: '18:24' },
-        { courtName: '3號場', teamA: ['p1', 'p10'], teamB: ['p11', 'p12'], time: '18:40' }
+        { courtName: '1號場', players: ['p1', 'p2', 'p3', 'p4'], time: '18:18' },
+        { courtName: '2號場', players: ['p5', 'p7', 'p6', 'p8'], time: '18:24' },
+        { courtName: '3號場', players: ['p1', 'p10', 'p11', 'p12'], time: '18:40' }
       ];
       demoMatches.forEach((m, idx) => {
-        const [a1, a2] = m.teamA;
-        const [b1, b2] = m.teamB;
-        [a1, a2, b1, b2].forEach(pid => {
+        const four = m.players;
+        four.forEach(pid => {
           const p = state.players.find(x => x.id === pid);
           if (p) {
             p.games = (p.games || 0) + 1;
             p.lastPlayedAt = Date.now() - (3 - idx) * 600000;
           }
         });
-        recordPartner(a1, a2);
-        recordPartner(b1, b2);
-        recordOpponent(a1, b1);
-        recordOpponent(a1, b2);
-        recordOpponent(a2, b1);
-        recordOpponent(a2, b2);
-
+        for (let i = 0; i < four.length; i++) {
+          for (let j = i + 1; j < four.length; j++) {
+            recordPlayedTogether(four[i], four[j]);
+          }
+        }
         state.matchLogs.unshift({
           id: 'log_demo_' + idx,
           courtName: m.courtName,
-          teamA: [a1, a2],
-          teamB: [b1, b2],
+          players: [...four],
           finishedAt: m.time
         });
       });
     }
 
     /********************************************************************
-     * 2. LOCAL STORAGE PERSISTENCE & ICON MANAGEMENT
+     * 2. LOCAL STORAGE PERSISTENCE, ICON & QR CODE MANAGEMENT
      ********************************************************************/
     function loadState() {
       try {
@@ -919,6 +899,10 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           state = { ...state, ...parsed };
+          // Ensure every player has unified playedWith object
+          state.players.forEach(p => {
+            if (!p.playedWith) p.playedWith = {};
+          });
         } else {
           state.players = getInitialDemoPlayers();
           seedSampleMatchHistory();
@@ -1030,6 +1014,79 @@
       if (modalPreview) modalPreview.innerHTML = htmlContent;
     }
 
+    // Generate crisp SVG of the exact LINE Group QR code uploaded by user
+    function generateLineQrSvg() {
+      const size = LINE_GROUP_QR_MATRIX.length; // 37
+      let rects = '';
+      for (let r = 0; r < size; r++) {
+        const rowStr = LINE_GROUP_QR_MATRIX[r];
+        for (let c = 0; c < size; c++) {
+          if (rowStr[c] === '1') {
+            rects += `<rect x="${c}" y="${r}" width="1.03" height="1.03" fill="#000000" />`;
+          }
+        }
+      }
+      return `
+        <svg viewBox="0 0 37 37" class="w-full h-full" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+          <rect width="37" height="37" fill="#ffffff" />
+          ${rects}
+          <!-- Center LINE Bubble Badge -->
+          <g shape-rendering="geometricPrecision">
+            <circle cx="18.5" cy="18.5" r="4.6" fill="#ffffff" />
+            <path d="M18.5 14.4 C15.7 14.4 13.5 16.2 13.5 18.4 C13.5 20.3 15.2 21.9 17.5 22.3 C17.7 22.3 17.9 22.5 17.9 22.7 L17.8 23.6 C17.8 23.8 18.0 23.9 18.2 23.8 L20.1 22.5 C22.1 22.0 23.5 20.4 23.5 18.4 C23.5 16.2 21.3 14.4 18.5 14.4 Z" fill="#06C755" />
+            <text x="18.5" y="19.3" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="2.75" letter-spacing="-0.1">LINE</text>
+          </g>
+        </svg>
+      `;
+    }
+
+    function openQrModal() {
+      renderQrModalContent();
+      const modal = document.getElementById('qr-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeQrModal() {
+      const modal = document.getElementById('qr-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderQrModalContent() {
+      const container = document.getElementById('qr-code-container');
+      const resetBtn = document.getElementById('reset-qr-btn');
+      if (!container) return;
+
+      if (state.customQrDataUrl) {
+        container.innerHTML = `<img src="${state.customQrDataUrl}" alt="LINE群組QR" class="w-full h-full object-contain" />`;
+        if (resetBtn) resetBtn.classList.remove('hidden');
+      } else {
+        container.innerHTML = generateLineQrSvg();
+        if (resetBtn) resetBtn.classList.add('hidden');
+      }
+    }
+
+    function handleCustomQrUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        state.customQrDataUrl = e.target.result;
+        saveState();
+        renderQrModalContent();
+        showToast('已更新群組 QR Code 圖片！', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetDefaultQr() {
+      state.customQrDataUrl = null;
+      saveState();
+      renderQrModalContent();
+      showToast('已還原為預設 LINE 群組 QR Code', 'info');
+    }
+
     /********************************************************************
      * 3. HELPER FUNCTIONS (SKILL LEVELS, TIME SLOTS, LOCATIONS)
      ********************************************************************/
@@ -1091,22 +1148,15 @@
       return { status: 'WAIT', label: '等待上場' };
     }
 
-    function getPartnerCount(idA, idB) {
+    function getPlayedTogetherCount(idA, idB) {
       if (!idA || !idB) return 0;
       const pA = getPlayerById(idA);
-      if (!pA || !pA.partners) return 0;
-      return pA.partners[idB] || 0;
-    }
-
-    function getOpponentCount(idA, idB) {
-      if (!idA || !idB) return 0;
-      const pA = getPlayerById(idA);
-      if (!pA || !pA.opponents) return 0;
-      return pA.opponents[idB] || 0;
+      if (!pA || !pA.playedWith) return 0;
+      return pA.playedWith[idB] || 0;
     }
 
     /********************************************************************
-     * 4. SMART AUTO-MATCHING ALGORITHM (智慧排點演算法)
+     * 4. SMART AUTO-MATCHING ALGORITHM (純粹找最少同場打過的4人)
      ********************************************************************/
     function autoFillPrepArea() {
       const available = state.players.filter(p => {
@@ -1140,40 +1190,26 @@
           for (let k = j + 1; k < pool.length - 1; k++) {
             for (let l = k + 1; l < pool.length; l++) {
               const four = [pool[i], pool[j], pool[k], pool[l]];
-              const gamesPenalty = (four[0].games + four[1].games + four[2].games + four[3].games) * 35;
+              const gamesPenalty = (four[0].games + four[1].games + four[2].games + four[3].games) * 40;
 
-              const pairings = [
-                [four[0], four[1], four[2], four[3]],
-                [four[0], four[2], four[1], four[3]],
-                [four[0], four[3], four[1], four[2]]
-              ];
-
-              for (const [pA1, pA2, pB1, pB2] of pairings) {
-                const partnerRepeats = getPartnerCount(pA1.id, pA2.id) + getPartnerCount(pB1.id, pB2.id);
-                const partnerPenalty = partnerRepeats * 120;
-
-                const oppRepeats =
-                  getOpponentCount(pA1.id, pB1.id) +
-                  getOpponentCount(pA1.id, pB2.id) +
-                  getOpponentCount(pA2.id, pB1.id) +
-                  getOpponentCount(pA2.id, pB2.id);
-                const oppPenalty = oppRepeats * 25;
-
-                const sumA = pA1.level + pA2.level;
-                const sumB = pB1.level + pB2.level;
-                const levelDiff = Math.abs(sumA - sumB);
-                const levelPenalty = levelDiff * 18;
-
-                const levels = [pA1.level, pA2.level, pB1.level, pB2.level];
-                const spread = Math.max(...levels) - Math.min(...levels);
-                const spreadPenalty = spread > 6 ? (spread - 6) * 15 : 0;
-
-                const totalScore = gamesPenalty + partnerPenalty + oppPenalty + levelPenalty + spreadPenalty + (Math.random() * 2);
-
-                if (totalScore < bestScore) {
-                  bestScore = totalScore;
-                  bestQuartet = [pA1.id, pA2.id, pB1.id, pB2.id];
+              // Sum all 6 pairwise played-together counts among the 4 players
+              let togetherRepeats = 0;
+              for (let a = 0; a < 4; a++) {
+                for (let b = a + 1; b < 4; b++) {
+                  togetherRepeats += getPlayedTogetherCount(four[a].id, four[b].id);
                 }
+              }
+              const repeatPenalty = togetherRepeats * 85;
+
+              const levels = [four[0].level, four[1].level, four[2].level, four[3].level];
+              const spread = Math.max(...levels) - Math.min(...levels);
+              const spreadPenalty = spread > 5 ? (spread - 5) * 20 : spread * 4;
+
+              const totalScore = gamesPenalty + repeatPenalty + spreadPenalty + (Math.random() * 2);
+
+              if (totalScore < bestScore) {
+                bestScore = totalScore;
+                bestQuartet = [four[0].id, four[1].id, four[2].id, four[3].id];
               }
             }
           }
@@ -1185,21 +1221,8 @@
         clearSelection();
         saveState();
         renderAll();
-        showToast('已智慧配出最少搭檔重複且程度最平衡的 4 人！', 'success');
+        showToast('已自動配出最少同場重疊的 4 位球友！', 'success');
       }
-    }
-
-    function shufflePrepTeams() {
-      const valid = state.prepSlots.filter(Boolean);
-      if (valid.length < 2) {
-        showToast('準備區人數不足，無法換隊友', 'warn');
-        return;
-      }
-      const [s0, s1, s2, s3] = state.prepSlots;
-      state.prepSlots = [s0, s2, s1, s3];
-      saveState();
-      renderAll();
-      showToast('已切換準備區隊友組合', 'info');
     }
 
     function clearPrepArea() {
@@ -1210,7 +1233,7 @@
     }
 
     /********************************************************************
-     * 5. COURT MANAGEMENT & MATCH COMPLETION (自動計算上場與搭檔次數)
+     * 5. COURT MANAGEMENT & MATCH COMPLETION (自動計算上場與同場次數)
      ********************************************************************/
     function assignPrepToCourt(courtIndex) {
       const court = state.courts[courtIndex];
@@ -1247,10 +1270,10 @@
         return;
       }
 
-      const [a1, a2, b1, b2] = court.slots;
+      const four = [...court.slots];
       const now = Date.now();
 
-      [a1, a2, b1, b2].forEach(pid => {
+      four.forEach(pid => {
         const p = getPlayerById(pid);
         if (p) {
           p.games = (p.games || 0) + 1;
@@ -1258,19 +1281,17 @@
         }
       });
 
-      recordPartner(a1, a2);
-      recordPartner(b1, b2);
-
-      recordOpponent(a1, b1);
-      recordOpponent(a1, b2);
-      recordOpponent(a2, b1);
-      recordOpponent(a2, b2);
+      // Record all 6 pairs among the 4 players as having played together
+      for (let i = 0; i < four.length; i++) {
+        for (let j = i + 1; j < four.length; j++) {
+          recordPlayedTogether(four[i], four[j]);
+        }
+      }
 
       state.matchLogs.unshift({
         id: 'm_' + now,
         courtName: court.name,
-        teamA: [a1, a2],
-        teamB: [b1, b2],
+        players: four,
         finishedAt: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
       });
 
@@ -1280,7 +1301,7 @@
       clearSelection();
       saveState();
       renderAll();
-      showToast(`${court.name} 完賽結算完成！4位球員上場次數 +1 並已記錄對戰關係`, 'success');
+      showToast(`${court.name} 完賽結算！4位球員上場 +1 並已記錄同場球友`, 'success');
     }
 
     function cancelCourtMatch(courtIndex) {
@@ -1294,20 +1315,14 @@
       showToast(`已將 ${court.name} 球員退回等待區（不計場次）`, 'info');
     }
 
-    function recordPartner(id1, id2) {
+    function recordPlayedTogether(id1, id2) {
       const p1 = getPlayerById(id1);
       const p2 = getPlayerById(id2);
       if (!p1 || !p2) return;
-      p1.partners[id2] = (p1.partners[id2] || 0) + 1;
-      p2.partners[id1] = (p2.partners[id1] || 0) + 1;
-    }
-
-    function recordOpponent(id1, id2) {
-      const p1 = getPlayerById(id1);
-      const p2 = getPlayerById(id2);
-      if (!p1 || !p2) return;
-      p1.opponents[id2] = (p1.opponents[id2] || 0) + 1;
-      p2.opponents[id1] = (p2.opponents[id1] || 0) + 1;
+      if (!p1.playedWith) p1.playedWith = {};
+      if (!p2.playedWith) p2.playedWith = {};
+      p1.playedWith[id2] = (p1.playedWith[id2] || 0) + 1;
+      p2.playedWith[id1] = (p2.playedWith[id1] || 0) + 1;
     }
 
     /********************************************************************
@@ -1566,9 +1581,6 @@
         const activeCount = playersOnCourt.filter(Boolean).length;
         const isFull = activeCount === 4;
 
-        const sumA = (playersOnCourt[0]?.level || 0) + (playersOnCourt[1]?.level || 0);
-        const sumB = (playersOnCourt[2]?.level || 0) + (playersOnCourt[3]?.level || 0);
-
         return `
           <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between shadow-lg">
             <!-- Court Top Bar -->
@@ -1591,18 +1603,11 @@
               </button>
             </div>
 
-            <!-- Green Court Visual Representation -->
+            <!-- Green Court Visual Representation (4 Unified Slots) -->
             <div class="badminton-court rounded-xl p-2.5 flex flex-col gap-2">
-              <!-- Team A Side (Top 2 Slots) -->
-              <div>
-                <div class="flex justify-between text-[10px] text-emerald-200/80 font-semibold mb-1 px-1">
-                  <span>A 隊</span>
-                  <span>總級數: ${sumA || '-'}</span>
-                </div>
-                <div class="grid grid-cols-2 gap-1.5">
-                  ${renderCourtSlotHTML(cIdx, 0, playersOnCourt[0])}
-                  ${renderCourtSlotHTML(cIdx, 1, playersOnCourt[1])}
-                </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                ${renderCourtSlotHTML(cIdx, 0, playersOnCourt[0])}
+                ${renderCourtSlotHTML(cIdx, 1, playersOnCourt[1])}
               </div>
 
               <!-- Net Line -->
@@ -1612,16 +1617,9 @@
                 </span>
               </div>
 
-              <!-- Team B Side (Bottom 2 Slots) -->
-              <div>
-                <div class="grid grid-cols-2 gap-1.5">
-                  ${renderCourtSlotHTML(cIdx, 2, playersOnCourt[2])}
-                  ${renderCourtSlotHTML(cIdx, 3, playersOnCourt[3])}
-                </div>
-                <div class="flex justify-between text-[10px] text-emerald-200/80 font-semibold mt-1 px-1">
-                  <span>B 隊</span>
-                  <span>總級數: ${sumB || '-'}</span>
-                </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                ${renderCourtSlotHTML(cIdx, 2, playersOnCourt[2])}
+                ${renderCourtSlotHTML(cIdx, 3, playersOnCourt[3])}
               </div>
             </div>
 
@@ -1687,60 +1685,39 @@
     }
 
     function renderPrepArea() {
-      const teamAContainer = document.getElementById('prep-team-a');
-      const teamBContainer = document.getElementById('prep-team-b');
+      const gridContainer = document.getElementById('prep-slots-grid');
+      gridContainer.innerHTML = [0, 1, 2, 3].map(idx => renderPrepSlotCard(idx)).join('');
 
-      teamAContainer.innerHTML = [0, 1].map(idx => renderPrepSlotCard(idx)).join('');
-      teamBContainer.innerHTML = [2, 3].map(idx => renderPrepSlotCard(idx)).join('');
+      const activePlayers = state.prepSlots.map(id => getPlayerById(id)).filter(Boolean);
+      const filledCount = activePlayers.length;
 
-      const p0 = getPlayerById(state.prepSlots[0]);
-      const p1 = getPlayerById(state.prepSlots[1]);
-      const p2 = getPlayerById(state.prepSlots[2]);
-      const p3 = getPlayerById(state.prepSlots[3]);
+      const avgLevel = filledCount > 0
+        ? (activePlayers.reduce((sum, p) => sum + p.level, 0) / filledCount).toFixed(1)
+        : '-';
 
-      const sumA = (p0?.level || 0) + (p1?.level || 0);
-      const sumB = (p2?.level || 0) + (p3?.level || 0);
-
-      const repeatA = p0 && p1 ? getPartnerCount(p0.id, p1.id) : 0;
-      const repeatB = p2 && p3 ? getPartnerCount(p2.id, p3.id) : 0;
-
-      document.getElementById('prep-teamA-stats').innerHTML =
-        `總級數: <strong class="text-white">${sumA || '-'}</strong>` +
-        (repeatA > 0 ? ` <span class="text-amber-400 ml-1">(已搭檔${repeatA}次)</span>` : p0 && p1 ? ` <span class="text-emerald-400 ml-1">(今日首搭)</span>` : '');
-
-      document.getElementById('prep-teamB-stats').innerHTML =
-        `總級數: <strong class="text-white">${sumB || '-'}</strong>` +
-        (repeatB > 0 ? ` <span class="text-amber-400 ml-1">(已搭檔${repeatB}次)</span>` : p2 && p3 ? ` <span class="text-emerald-400 ml-1">(今日首搭)</span>` : '');
+      document.getElementById('prep-avg-stats').innerHTML = `平均級數: <strong class="text-white">${avgLevel}</strong>`;
 
       const badge = document.getElementById('prep-chemistry-badge');
-      const diffEl = document.getElementById('prep-diff-indicator');
       const hintEl = document.getElementById('prep-pair-history-hint');
 
-      const filledCount = [p0, p1, p2, p3].filter(Boolean).length;
       if (filledCount === 4) {
-        const diff = Math.abs(sumA - sumB);
-        diffEl.innerHTML = `差 <span class="${diff <= 2 ? 'text-emerald-400' : 'text-amber-400'} font-extrabold">${diff}</span> 級`;
-
-        const oppCount =
-          getOpponentCount(p0.id, p2.id) +
-          getOpponentCount(p0.id, p3.id) +
-          getOpponentCount(p1.id, p2.id) +
-          getOpponentCount(p1.id, p3.id);
-
-        if (repeatA === 0 && repeatB === 0 && diff <= 2) {
-          badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold';
-          badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i>完美配對（全新搭檔＋實力相當）';
-        } else if (repeatA > 0 || repeatB > 0) {
-          badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold';
-          badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>有重複搭檔 (${repeatA + repeatB}次)，可點「換邊/換隊友」`;
-        } else {
-          badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold';
-          badge.innerHTML = `已排滿 4 人（兩隊級數差 ${diff}）`;
+        let totalOverlap = 0;
+        for (let i = 0; i < 4; i++) {
+          for (let j = i + 1; j < 4; j++) {
+            totalOverlap += getPlayedTogetherCount(activePlayers[i].id, activePlayers[j].id);
+          }
         }
 
-        hintEl.innerHTML = `📊 對戰分析：A、B兩隊球員今日彼此隔網交手過共 <strong class="text-slate-200">${oppCount}</strong> 人次`;
+        if (totalOverlap === 0) {
+          badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold';
+          badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i>全新組合（這4人今日尚未同場過）';
+        } else {
+          badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold';
+          badge.innerHTML = `已排滿 4 人（今日彼此同場重疊共 ${totalOverlap} 次）`;
+        }
+
+        hintEl.innerHTML = `📊 同場統計：這 4 位球員今日彼此同場打過累計 <strong class="text-emerald-300">${totalOverlap}</strong> 人次`;
       } else {
-        diffEl.textContent = `${filledCount}/4 人`;
         badge.className = 'text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-semibold';
         badge.textContent = `準備區尚缺 ${4 - filledCount} 人`;
         hintEl.textContent = '💡 提示：點擊任一位置即可與等待區球員替換，或按「智慧自動配點」';
@@ -1852,14 +1829,13 @@
         const eligibleNow = isPlayerEligibleInCurrentHour(p);
         const isSelectedRoster = selectedSource && selectedSource.type === 'ROSTER' && selectedSource.playerId === p.id;
 
-        const partnerIds = Object.keys(p.partners || {});
-        const opponentIds = Object.keys(p.opponents || {});
-        const recentPartnersText = partnerIds.length > 0
-          ? partnerIds.slice(0, 3).map(id => {
+        const playedWithEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
+        const recentPlayedText = playedWithEntries.length > 0
+          ? playedWithEntries.slice(0, 4).map(([id, cnt]) => {
               const mate = getPlayerById(id);
-              return mate ? `${escapeHTML(mate.name)}(${p.partners[id]})` : '';
-            }).filter(Boolean).join('、') + (partnerIds.length > 3 ? ` 等${partnerIds.length}人` : '')
-          : '尚無搭檔紀錄';
+              return mate ? `${escapeHTML(mate.name)}(${cnt})` : '';
+            }).filter(Boolean).join('、') + (playedWithEntries.length > 4 ? ` 等${playedWithEntries.length}人` : '')
+          : '尚無同場紀錄';
 
         let statusBadge = '';
         if (loc.status === 'COURT') {
@@ -1876,7 +1852,7 @@
 
         return `
           <div onclick="openHistoryModal('${p.id}')"
-               title="點擊查看「${escapeHTML(p.name)}」今日跟誰搭檔過與跟誰對戰過"
+               title="點擊查看「${escapeHTML(p.name)}」今日總共跟誰打過"
                class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${!eligibleNow ? 'opacity-60' : ''}">
             
             <div class="flex items-center justify-between gap-2">
@@ -1918,17 +1894,17 @@
               </div>
             </div>
 
-            <!-- Bottom Row: Clickable Partner & Opponent Summary Bar -->
+            <!-- Bottom Row: Clean Unified Played-With Summary Bar -->
             <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-900">
               <div class="flex items-center gap-2 truncate">
                 <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次</span>
                 <span class="text-slate-600">|</span>
                 <span class="truncate text-slate-300">
-                  <i class="fa-solid fa-handshake text-emerald-400 mr-1"></i>搭檔：${recentPartnersText}
+                  <i class="fa-solid fa-user-group text-emerald-400 mr-1"></i>打過：${recentPlayedText}
                 </span>
               </div>
               <span class="text-[11px] text-amber-300 font-bold shrink-0 flex items-center gap-1 ml-2">
-                對戰(${opponentIds.length}人) <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                共${playedWithEntries.length}人 <i class="fa-solid fa-chevron-right text-[9px]"></i>
               </span>
             </div>
           </div>
@@ -2035,8 +2011,7 @@
           paid,
           games: 0,
           resting: false,
-          partners: {},
-          opponents: {},
+          playedWith: {},
           lastPlayedAt: 0
         };
         state.players.push(newPlayer);
@@ -2057,21 +2032,21 @@
       badge.className = `w-10 h-10 rounded-xl border flex items-center justify-center font-black text-xs ${lvInfo.classes}`;
       badge.textContent = lvInfo.label;
 
-      document.getElementById('hist-player-name').textContent = `${p.name} 的今日對戰紀錄`;
+      document.getElementById('hist-player-name').textContent = `${p.name} 的同場紀錄`;
       document.getElementById('hist-player-meta').textContent =
         `參與時段：${p.timeSlot} ｜ 今日已上場：${p.games} 次 ｜ 繳費狀態：${p.paid ? '已繳費' : '未繳費'}`;
 
-      const partnerEntries = Object.entries(p.partners || {}).sort((a, b) => b[1] - a[1]);
-      const partnersListEl = document.getElementById('hist-partners-list');
-      const partnersTotalEl = document.getElementById('hist-partners-total');
-      if (partnersTotalEl) {
-        partnersTotalEl.textContent = `共與 ${partnerEntries.length} 人搭檔過`;
+      const playedEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
+      const playedListEl = document.getElementById('hist-playedwith-list');
+      const playedTotalEl = document.getElementById('hist-playedwith-total');
+      if (playedTotalEl) {
+        playedTotalEl.textContent = `今日共與 ${playedEntries.length} 位不同球友打過`;
       }
 
-      if (partnerEntries.length === 0) {
-        partnersListEl.innerHTML = `<div class="text-xs text-slate-500 col-span-2">今日尚無搭檔紀錄</div>`;
+      if (playedEntries.length === 0) {
+        playedListEl.innerHTML = `<div class="text-xs text-slate-500 col-span-2">今日尚無同場打球紀錄</div>`;
       } else {
-        partnersListEl.innerHTML = partnerEntries.map(([otherId, count]) => {
+        playedListEl.innerHTML = playedEntries.map(([otherId, count]) => {
           const other = getPlayerById(otherId);
           const oLv = other ? getLevelBadgeInfo(other.level) : null;
           return `
@@ -2080,62 +2055,35 @@
                 <span class="text-xs font-bold text-slate-200 truncate">${other ? escapeHTML(other.name) : '已刪除球員'}</span>
                 ${oLv ? `<span class="text-[10px] px-1 rounded border ${oLv.classes}">${oLv.label}</span>` : ''}
               </div>
-              <span class="text-xs font-extrabold text-emerald-400 shrink-0">搭檔 ${count} 次</span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      const oppEntries = Object.entries(p.opponents || {}).sort((a, b) => b[1] - a[1]);
-      const oppListEl = document.getElementById('hist-opponents-list');
-      const oppTotalEl = document.getElementById('hist-opponents-total');
-      if (oppTotalEl) {
-        oppTotalEl.textContent = `共與 ${oppEntries.length} 人交手過`;
-      }
-
-      if (oppEntries.length === 0) {
-        oppListEl.innerHTML = `<div class="text-xs text-slate-500 col-span-2">今日尚無對戰紀錄</div>`;
-      } else {
-        oppListEl.innerHTML = oppEntries.map(([otherId, count]) => {
-          const other = getPlayerById(otherId);
-          const oLv = other ? getLevelBadgeInfo(other.level) : null;
-          return `
-            <div onclick="openHistoryModal('${otherId}')" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition">
-              <div class="flex items-center gap-1.5 truncate">
-                <span class="text-xs font-bold text-slate-200 truncate">${other ? escapeHTML(other.name) : '已刪除球員'}</span>
-                ${oLv ? `<span class="text-[10px] px-1 rounded border ${oLv.classes}">${oLv.label}</span>` : ''}
-              </div>
-              <span class="text-xs font-extrabold text-rose-400 shrink-0">對戰 ${count} 次</span>
+              <span class="text-xs font-extrabold text-emerald-400 shrink-0">同場 ${count} 次</span>
             </div>
           `;
         }).join('');
       }
 
       const timelineEl = document.getElementById('hist-matches-timeline');
-      const playerMatches = (state.matchLogs || []).filter(
-        m => m.teamA.includes(playerId) || m.teamB.includes(playerId)
-      );
+      const playerMatches = (state.matchLogs || []).filter(m => {
+        const list = m.players || [...(m.teamA || []), ...(m.teamB || [])];
+        return list.includes(playerId);
+      });
 
       if (timelineEl) {
         if (playerMatches.length === 0) {
           timelineEl.innerHTML = `<div class="text-xs text-slate-500">今日尚無此球員的完賽場次明細</div>`;
         } else {
           timelineEl.innerHTML = playerMatches.map((m, idx) => {
-            const inTeamA = m.teamA.includes(playerId);
-            const myTeam = inTeamA ? m.teamA : m.teamB;
-            const oppTeam = inTeamA ? m.teamB : m.teamA;
-            const partnerId = myTeam.find(id => id !== playerId);
-            const partnerName = getPlayerById(partnerId)?.name || '未知';
-            const oppNames = oppTeam.map(id => getPlayerById(id)?.name || '未知').join(' & ');
+            const list = m.players || [...(m.teamA || []), ...(m.teamB || [])];
+            const others = list
+              .filter(id => id !== playerId)
+              .map(id => getPlayerById(id)?.name || '未知')
+              .join('、');
 
             return `
               <div class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
                 <div class="flex items-center gap-2">
                   <span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold text-[10px]">#${playerMatches.length - idx} (${m.courtName})</span>
                   <span class="text-slate-200">
-                    與 <strong class="text-emerald-300">${escapeHTML(partnerName)}</strong> 搭檔
-                    <span class="text-amber-400 font-black mx-1">VS</span>
-                    對手 <strong class="text-rose-300">${escapeHTML(oppNames)}</strong>
+                    同場球友：<strong class="text-emerald-300">${escapeHTML(others)}</strong>
                   </span>
                 </div>
                 <span class="text-[10px] text-slate-400">${m.finishedAt}</span>
@@ -2219,22 +2167,59 @@
         list.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">今日尚無完賽場次紀錄</div>`;
       } else {
         list.innerHTML = logs.map((m, idx) => {
-          const namesA = m.teamA.map(id => getPlayerById(id)?.name || '未知').join(' & ');
-          const namesB = m.teamB.map(id => getPlayerById(id)?.name || '未知').join(' & ');
+          const ids = m.players || [...(m.teamA || []), ...(m.teamB || [])];
+          const names = ids.map(id => getPlayerById(id)?.name || '未知').join('、');
           return `
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
                 <span class="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-bold">#${logs.length - idx}</span>
                 <span class="font-bold text-emerald-300">${m.courtName}</span>
-                <span class="text-white font-semibold">${escapeHTML(namesA)}</span>
-                <span class="text-amber-400 font-black">VS</span>
-                <span class="text-white font-semibold">${escapeHTML(namesB)}</span>
+                <span class="text-slate-400">同場球員：</span>
+                <span class="text-white font-semibold">${escapeHTML(names)}</span>
               </div>
-              <span class="text-slate-400 text-[11px]">${m.finishedAt}</span>
+              <span class="text-slate-400 text-[11px] shrink-0">${m.finishedAt}</span>
             </div>
           `;
         }).join('');
       }
+      document.getElementById('match-log-modal').classList.remove('hidden');
+      document.getElementById('match-log-modal').classList.add('flex');
+    }
+
+    function closeMatchLogModal() {
+      document.getElementById('match-log-modal').classList.add('hidden');
+      document.getElementById('match-log-modal').classList.remove('flex');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('settings-modal').classList.remove('hidden');
+      document.getElementById('settings-modal').classList.add('flex');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settings-modal').classList.add('hidden');
+      document.getElementById('settings-modal').classList.remove('flex');
+    }
+
+    function resetMatchCountsOnly() {
+      state.players.forEach(p => {
+        p.games = 0;
+        p.playedWith = {};
+        p.lastPlayedAt = 0;
+        p.paid = false;
+      });
+      state.courts.forEach(c => {
+        c.slots = [null, null, null, null];
+        c.startTime = null;
+      });
+      state.prepSlots = [null, null, null, null];
+      state.shuttlesUsed = 0;
+      state.matchLogs = [];
+      closeSettingsModal();
+      saveState();
+      renderAll();
+      showToast('已開啟新的一天！所有場次、同場紀錄與用球數已歸零', 'success');
+    }
       document.getElementById('match-log-modal').classList.remove('hidden');
       document.getElementById('match-log-modal').classList.add('flex');
     }
