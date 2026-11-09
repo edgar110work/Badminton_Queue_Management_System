@@ -3,8 +3,22 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>貓貓羽球排點系統｜台灣推廣1-15級・三場地智慧管理</title>
+
+  <!-- ================= PWA / 桌面捷徑圖示與全螢幕 App 支援 ================= -->
+  <meta name="theme-color" content="#0b1120" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="貓貓羽球" />
+  <meta name="application-name" content="貓貓羽球" />
+  <!-- 預設綁定同資料夾下的 6796.jpg，並支援更換貓咪圖片時由 JS 即時產生 512x512 高畫質捷徑圖示同步更新 -->
+  <link id="app-favicon" rel="icon" type="image/jpeg" href="./6796.jpg" />
+  <link id="app-apple-touch-icon" rel="apple-touch-icon" sizes="180x180" href="./6796.jpg" />
+  <link id="app-apple-touch-icon-precomposed" rel="apple-touch-icon-precomposed" href="./6796.jpg" />
+  <link id="app-manifest" rel="manifest" href="" />
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -883,14 +897,19 @@
       </div>
 
       <div class="space-y-4">
-        <!-- Current Preview -->
+        <!-- Current Preview & Home Screen Shortcut Sync Info -->
         <div class="flex items-center gap-4 bg-slate-800/70 border border-slate-700 rounded-xl p-3">
           <div id="modal-icon-preview"
             class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center overflow-hidden border-2 border-amber-300 shadow-lg shrink-0">
           </div>
           <div class="text-xs text-slate-300 space-y-1">
-            <div class="font-bold text-white text-sm">目前系統圖示預覽</div>
-            <p class="text-slate-400">圖片會自動壓縮最佳化並儲存於瀏覽器中，重整網頁也不會消失。</p>
+            <div class="font-bold text-white text-sm flex items-center gap-1.5 flex-wrap">
+              <span>目前系統與桌面捷徑圖示預覽</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                <i class="fa-solid fa-mobile-screen-button mr-0.5"></i>已同步桌面捷徑
+              </span>
+            </div>
+            <p class="text-slate-400">更換圖片後會自動產生 512×512 高畫質圖示並同步至瀏覽器捷徑與「加入主畫面」App Icon（支援全螢幕 App 模式）。</p>
           </div>
         </div>
 
@@ -1281,25 +1300,28 @@
       reader.onload = function (e) {
         const img = new Image();
         img.onload = function () {
+          // 產生 512x512 置中滿版正方形高畫質圖示，完美支援 iOS/Android 桌面捷徑與系統 Icon
           const canvas = document.createElement('canvas');
-          const maxDim = 160;
-          let w = img.width;
-          let h = img.height;
-          if (w > h) {
-            if (w > maxDim) { h = Math.round(h * (maxDim / w)); w = maxDim; }
-          } else {
-            if (h > maxDim) { w = Math.round(w * (maxDim / h)); h = maxDim; }
-          }
-          canvas.width = w;
-          canvas.height = h;
+          const size = 512;
+          canvas.width = size;
+          canvas.height = size;
           const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          const compressedDataUrl = canvas.toDataURL('image/png', 0.9);
+          ctx.fillStyle = '#0b1120';
+          ctx.fillRect(0, 0, size, size);
+
+          const scale = Math.max(size / img.width, size / img.height);
+          const sw = size / scale;
+          const sh = size / scale;
+          const sx = (img.width - sw) / 2;
+          const sy = (img.height - sh) / 2;
+          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, size, size);
+
+          const compressedDataUrl = canvas.toDataURL('image/png', 0.92);
           state.customIconDataUrl = compressedDataUrl;
           state.iconUserChanged = true;
           saveState();
           renderBrandIcon();
-          showToast('已成功換上您的自訂貓貓圖片 Icon！', 'success');
+          showToast('已換上自訂貓貓圖片並同步更新桌面捷徑 Icon！', 'success');
         };
         img.src = e.target.result;
       };
@@ -1320,7 +1342,7 @@
       state.iconUserChanged = true;
       saveState();
       renderBrandIcon();
-      showToast(presetKey === 'DEFAULT_6796' ? '已切換為預設 6796.jpg 貓咪圖示！' : '已切換內建貓咪圖示！', 'success');
+      showToast(presetKey === 'DEFAULT_6796' ? '已切換為預設 6796.jpg 並同步桌面捷徑圖示！' : '已切換內建貓咪並同步桌面捷徑圖示！', 'success');
     }
 
     function applyIconUrl() {
@@ -1335,7 +1357,154 @@
       saveState();
       renderBrandIcon();
       urlInput.value = '';
-      showToast('已套用網路圖片作為貓貓圖示！', 'success');
+      showToast('已套用網路圖片並同步桌面捷徑圖示！', 'success');
+    }
+
+    const PRESET_BG_GRADIENTS = {
+      DEFAULT_6796: ['#f59e0b', '#f43f5e'],
+      ORANGE: ['#fbbf24', '#ea580c'],
+      BLACK: ['#334155', '#020617'],
+      CALICO: ['#fb7185', '#f59e0b'],
+      WHITE: ['#38bdf8', '#6366f1'],
+      SIAMESE: ['#10b981', '#0f766e']
+    };
+
+    function applyShortcutIconHref(iconHref) {
+      if (!iconHref) return;
+      ['app-favicon', 'app-apple-touch-icon', 'app-apple-touch-icon-precomposed'].forEach(id => {
+        const link = document.getElementById(id);
+        if (link) {
+          link.href = iconHref;
+          link.type = iconHref.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+        }
+      });
+
+      const manifestLink = document.getElementById('app-manifest');
+      if (manifestLink) {
+        const startUrl = window.location.href.split('#')[0];
+        const manifestObj = {
+          name: '貓貓羽球排點系統',
+          short_name: '貓貓羽球',
+          description: '台灣推廣1-15級・三場地智慧羽球排點系統',
+          start_url: startUrl,
+          display: 'standalone',
+          background_color: '#0b1120',
+          theme_color: '#0b1120',
+          icons: [
+            {
+              src: iconHref,
+              sizes: '192x192',
+              type: iconHref.startsWith('data:image/png') ? 'image/png' : 'image/jpeg',
+              purpose: 'any maskable'
+            },
+            {
+              src: iconHref,
+              sizes: '512x512',
+              type: iconHref.startsWith('data:image/png') ? 'image/png' : 'image/jpeg',
+              purpose: 'any maskable'
+            }
+          ]
+        };
+        const manifestJson = encodeURIComponent(JSON.stringify(manifestObj));
+        manifestLink.href = `data:application/manifest+json;charset=utf-8,${manifestJson}`;
+      }
+    }
+
+    function renderSvgPresetToHighResPng(presetKey, callback) {
+      const svgRaw = CAT_PRESET_SVGS[presetKey] || DEFAULT_CAT_SVG;
+      const colors = PRESET_BG_GRADIENTS[presetKey] || PRESET_BG_GRADIENTS.ORANGE;
+      // 將 SVG 調整為 512x512 獨立渲染尺寸
+      const svgForCanvas = svgRaw.replace('class="w-8 h-8"', 'width="400" height="400"');
+      const svgBlob = new Blob([svgForCanvas], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = function () {
+        const canvas = document.createElement('canvas');
+        const size = 512;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createLinearGradient(0, 0, size, size);
+        grad.addColorStop(0, colors[0]);
+        grad.addColorStop(1, colors[1]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, 56, 56, 400, 400);
+        URL.revokeObjectURL(url);
+        callback(canvas.toDataURL('image/png'));
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+
+    function syncAppShortcutIcons() {
+      // 1. 使用者自訂上傳圖片或網址
+      if (state.customIconDataUrl) {
+        if (state.customIconDataUrl.startsWith('data:image/')) {
+          applyShortcutIconHref(state.customIconDataUrl);
+        } else {
+          // 嘗試將外部網址轉成 512x512 PNG，若跨域受限則直接套用原網址
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = function () {
+            try {
+              const canvas = document.createElement('canvas');
+              const size = 512;
+              canvas.width = size;
+              canvas.height = size;
+              const ctx = canvas.getContext('2d');
+              const scale = Math.max(size / img.width, size / img.height);
+              const sw = size / scale;
+              const sh = size / scale;
+              ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, 0, 0, size, size);
+              applyShortcutIconHref(canvas.toDataURL('image/png'));
+            } catch (err) {
+              applyShortcutIconHref(state.customIconDataUrl);
+            }
+          };
+          img.onerror = function () {
+            applyShortcutIconHref(state.customIconDataUrl);
+          };
+          img.src = state.customIconDataUrl;
+        }
+        return;
+      }
+
+      // 2. 預設使用同資料夾下的 ./6796.jpg（若本機無 6796.jpg 則自動轉用 512x512 高畫質內建貓咪 PNG）
+      const presetKey = state.customIconPreset || 'DEFAULT_6796';
+      if (presetKey === 'DEFAULT_6796') {
+        const img = new Image();
+        img.onload = function () {
+          try {
+            const canvas = document.createElement('canvas');
+            const size = 512;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const scale = Math.max(size / img.width, size / img.height);
+            const sw = size / scale;
+            const sh = size / scale;
+            ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, 0, 0, size, size);
+            applyShortcutIconHref(canvas.toDataURL('image/png'));
+          } catch (err) {
+            applyShortcutIconHref(new URL('./6796.jpg', window.location.href).href);
+          }
+        };
+        img.onerror = function () {
+          renderSvgPresetToHighResPng('ORANGE', (pngDataUrl) => {
+            applyShortcutIconHref(pngDataUrl);
+          });
+        };
+        img.src = './6796.jpg';
+        return;
+      }
+
+      // 3. 選擇內建 5 款可愛貓咪頭像時，自動繪製 512x512 高畫質漸層 PNG 作為桌面捷徑圖示
+      renderSvgPresetToHighResPng(presetKey, (pngDataUrl) => {
+        applyShortcutIconHref(pngDataUrl);
+      });
     }
 
     function renderBrandIcon() {
@@ -1352,6 +1521,9 @@
 
       if (box) box.innerHTML = htmlContent;
       if (modalPreview) modalPreview.innerHTML = htmlContent;
+
+      // 同步更新桌面捷徑與 PWA App 圖示
+      syncAppShortcutIcons();
     }
 
     // Generate crisp SVG of the exact LINE Group QR code uploaded by user
