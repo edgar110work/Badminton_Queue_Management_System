@@ -43,6 +43,7 @@
       color: #f8fafc;
       overflow-x: hidden;
     }
+    /* Custom subtle scrollbars for iPad & Desktop */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -58,12 +59,15 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(148, 163, 184, 0.8);
     }
+
+    /* Realistic Badminton Court Surface */
     .badminton-court {
       background: linear-gradient(145deg, #065f46 0%, #064e3b 100%);
       position: relative;
       border: 2px solid rgba(167, 243, 208, 0.65);
       box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35), 0 8px 20px -4px rgba(0, 0, 0, 0.5);
     }
+    /* Court Net Line */
     .court-net {
       position: relative;
       display: flex;
@@ -84,6 +88,8 @@
         transparent 10px
       );
     }
+
+    /* Selection Pulse Animation for Swap/Assign */
     @keyframes pulse-ring {
       0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
       70% { box-shadow: 0 0 0 8px rgba(250, 204, 21, 0); }
@@ -98,13 +104,15 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
 
-  <!-- ================= TOP NAVIGATION ================= -->
+  <!-- ================= TOP NAVIGATION & DASHBOARD HEADER ================= -->
   <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-5 py-2.5 shadow-lg">
     <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
       
+      <!-- Brand, Custom Cat Icon & Current Period Filter -->
       <div class="flex items-center gap-3">
         <div class="relative group cursor-pointer" onclick="openIconModal()" title="點擊更換自訂貓咪圖片 Icon">
           <div id="brand-icon-box" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center shadow-lg shadow-orange-950/60 overflow-hidden border-2 border-amber-300/60 transition transform group-hover:scale-105 active:scale-95">
+            <!-- Rendered by JS -->
           </div>
           <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-800 border border-slate-600 text-amber-300 flex items-center justify-center text-[10px] shadow">
             <i class="fa-solid fa-camera"></i>
@@ -117,13 +125,14 @@
               貓貓羽球排點系統
               <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">推廣1-15級</span>
             </h1>
-            <button onclick="openIconModal()" class="text-[11px] px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold transition flex items-center gap-1">
+            <button onclick="openIconModal()" class="text-[11px] px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold transition flex items-center gap-1" title="開啟更換貓貓圖示視窗">
               <i class="fa-solid fa-paw text-[10px]"></i> 更換圖示
             </button>
           </div>
-          <p class="text-[11px] text-slate-400 hidden sm:block">點擊球員姓名可查看今日跟誰打過・支援 iPad 與電腦</p>
+          <p class="text-[11px] text-slate-400 hidden sm:block">點「更換圖示」支援電腦拖曳/貼上圖片・點球員姓名可查看今日跟誰打過</p>
         </div>
 
+        <!-- Time Period Selector (Controls who is eligible in Auto-Match) -->
         <div class="hidden md:flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 ml-2">
           <span class="text-xs text-slate-400 px-2 font-medium"><i class="fa-regular fa-clock mr-1 text-emerald-400"></i>現在時段：</span>
           <button onclick="setCurrentHourFilter('ALL')" id="period-btn-ALL" class="period-btn px-2.5 py-1 rounded-lg text-xs font-semibold transition">全部</button>
@@ -133,11 +142,15 @@
         </div>
       </div>
 
+      <!-- Right Side Widgets: Shuttlecock Counter + Fee Summary + History/Settings -->
       <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-        <!-- Shuttlecock Counter -->
+        
+        <!-- Independent Shuttlecock Counter Widget -->
         <div class="flex items-center bg-slate-800/90 border border-slate-700/80 rounded-xl px-2.5 py-1.5 gap-2">
           <div class="flex items-center gap-1.5">
-            <span class="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-sm font-bold">🪶</span>
+            <span class="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center text-sm font-bold">
+              🪶
+            </span>
             <div>
               <div class="text-[10px] text-slate-400 leading-none">今日用球</div>
               <div class="text-sm font-extrabold text-amber-300 leading-tight">
@@ -147,13 +160,19 @@
             </div>
           </div>
           <div class="flex items-center gap-1 border-l border-slate-700 pl-2">
-            <button onclick="adjustShuttles(-1)" title="減少1顆" class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 flex items-center justify-center text-xs font-bold transition">-1</button>
-            <button onclick="adjustShuttles(1)" title="消耗1顆新球" class="px-2.5 h-7 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 flex items-center justify-center text-xs font-extrabold shadow transition">+1顆</button>
-            <button onclick="adjustShuttles(12)" title="開新球筒 (+12顆)" class="px-2 h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 active:scale-95 text-amber-300 flex items-center justify-center text-xs font-bold transition">+1筒</button>
+            <button onclick="adjustShuttles(-1)" title="減少1顆" class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 flex items-center justify-center text-xs font-bold transition">
+              -1
+            </button>
+            <button onclick="adjustShuttles(1)" title="消耗1顆新球" class="px-2.5 h-7 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 flex items-center justify-center text-xs font-extrabold shadow transition">
+              +1顆
+            </button>
+            <button onclick="adjustShuttles(12)" title="開新球筒 (+12顆)" class="px-2 h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 active:scale-95 text-amber-300 flex items-center justify-center text-xs font-bold transition">
+              +1筒
+            </button>
           </div>
         </div>
 
-        <!-- Fee Summary -->
+        <!-- Fee & Revenue Quick Pill -->
         <button onclick="openFinanceModal()" class="flex items-center gap-2 bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl px-3 py-1.5 transition active:scale-95">
           <i class="fa-solid fa-coins text-emerald-400 text-sm"></i>
           <div class="text-left">
@@ -162,50 +181,70 @@
           </div>
         </button>
 
-        <!-- Match History -->
+        <!-- Match History Log Button -->
         <button onclick="openMatchLogModal()" class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 transition active:scale-95">
           <i class="fa-solid fa-list-check text-sky-400"></i>
           <span class="hidden sm:inline">總場次</span>
           <span id="completed-matches-badge" class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded-md font-bold">0</span>
         </button>
 
-        <!-- LINE QR Code Invite Button -->
-        <button onclick="openQrModal()" class="flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl px-3 py-2 text-xs font-extrabold shadow-lg shadow-emerald-950/50 transition active:scale-95">
+        <!-- LINE Group QR Code Invite Button -->
+        <button onclick="openQrModal()" class="flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl px-3 py-2 text-xs font-extrabold shadow-lg shadow-emerald-950/50 transition active:scale-95" title="顯示 LINE 群組邀請 QR Code">
           <i class="fa-brands fa-line text-base"></i>
           <span>邀請入群</span>
         </button>
 
-        <!-- Settings -->
+        <!-- Reset / Demo Data Menu -->
         <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 flex items-center justify-center text-slate-300 transition active:scale-95" title="系統設定與重置">
           <i class="fa-solid fa-gear"></i>
         </button>
       </div>
     </div>
+
+    <!-- Mobile Time Period Bar -->
+    <div class="flex md:hidden items-center justify-between bg-slate-800/80 p-1 rounded-xl border border-slate-700/80 mt-2">
+      <span class="text-xs text-slate-400 px-2 font-medium"><i class="fa-regular fa-clock mr-1 text-emerald-400"></i>現在時段：</span>
+      <div class="flex gap-1">
+        <button onclick="setCurrentHourFilter('ALL')" id="m-period-btn-ALL" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">全部</button>
+        <button onclick="setCurrentHourFilter('18-19')" id="m-period-btn-18-19" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">18-19</button>
+        <button onclick="setCurrentHourFilter('19-20')" id="m-period-btn-19-20" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">19-20</button>
+        <button onclick="setCurrentHourFilter('20-21')" id="m-period-btn-20-21" class="m-period-btn px-2 py-1 rounded-lg text-xs font-semibold">20-21</button>
+      </div>
+    </div>
   </header>
 
-  <!-- Selection Banner -->
+  <!-- ================= ACTIVE SELECTION HINT BANNER ================= -->
   <div id="selection-banner" class="hidden bg-amber-500/20 border-b border-amber-400/40 px-4 py-2 text-center text-xs sm:text-sm text-amber-200 font-medium flex items-center justify-center gap-3">
-    <span><i class="fa-solid fa-hand-pointer mr-1.5 animate-bounce"></i><span id="selection-banner-text">已選取位置</span></span>
-    <button onclick="clearSelection()" class="px-2.5 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs">取消</button>
+    <span><i class="fa-solid fa-hand-pointer mr-1.5 animate-bounce"></i><span id="selection-banner-text">已選取位置，請點擊下方名單球員或另一個位置進行替換/互換</span></span>
+    <button onclick="clearSelection()" class="px-2.5 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition">取消選取</button>
   </div>
 
-  <!-- ================= MAIN WORKSPACE ================= -->
+  <!-- ================= MAIN WORKSPACE (IPAD PRO LANDSCAPE 12-COL GRID) ================= -->
   <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-    <!-- LEFT AREA: COURTS & PREP AREA -->
+    <!-- LEFT / CENTER AREA (7 COLUMNS ON IPAD LANDSCAPE): 3 COURTS + PREPARATION QUEUE -->
     <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
-      <!-- 3 Courts -->
+
+      <!-- SECTION 1: 3 BADMINTON COURTS -->
       <section>
         <div class="flex items-center justify-between mb-2.5">
-          <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-table-tennis-paddle-ball text-emerald-400"></i> 場地即時看板（3面場地）
-          </h2>
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-table-tennis-paddle-ball text-emerald-400"></i>
+              場地即時看板（3面場地）
+            </h2>
+            <span class="text-xs text-slate-400 hidden sm:inline">點擊場上球員可與準備區/等待區互換，點「結束結算」自動統計場次與對戰關係</span>
+          </div>
         </div>
-        <div id="courts-container" class="grid grid-cols-1 md:grid-cols-3 gap-3.5"></div>
+
+        <!-- 3 Courts Grid -->
+        <div id="courts-container" class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <!-- Dynamically rendered by JS -->
+        </div>
       </section>
 
-      <!-- Prep Area -->
-      <section class="bg-slate-900/90 border-2 border-indigo-500/40 rounded-2xl p-4 shadow-xl relative">
+      <!-- SECTION 2: PREPARATION / STAGING AREA (排點準備區) -->
+      <section class="bg-slate-900/90 border-2 border-indigo-500/40 rounded-2xl p-4 shadow-xl relative overflow-hidden">
         <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
           <div class="flex items-center gap-2.5">
             <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 flex items-center justify-center font-bold">
@@ -213,141 +252,224 @@
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <h2 class="text-base font-extrabold text-white">下一場排點準備區（4人同場）</h2>
-                <span id="prep-chemistry-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">等待排點中</span>
+                <h2 class="text-base font-extrabold text-white">下一場排點準備區（4人同場即可）</h2>
+                <span id="prep-chemistry-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">
+                  等待排點中
+                </span>
               </div>
-              <p class="text-xs text-slate-400">自動挑選最少同場打過的 4 人</p>
+              <p class="text-xs text-slate-400">不強制分隊友或對手，按「智慧自動配點」自動挑選最少同場打過的 4 人</p>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="autoFillPrepArea()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 text-white font-bold text-xs shadow flex items-center gap-1.5 transition">
-              <i class="fa-solid fa-bolt"></i> 智慧自動配點
+
+          <!-- Action Buttons for Prep Area -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="autoFillPrepArea()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/60 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-bolt"></i>
+              智慧自動配點
             </button>
-            <button onclick="clearPrepArea()" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs">清空</button>
+            <button onclick="clearPrepArea()" title="清空準備區" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 active:scale-95 text-slate-300 hover:text-rose-300 text-xs transition">
+              <i class="fa-solid fa-eraser"></i>
+              清空
+            </button>
           </div>
         </div>
 
+        <!-- Clean 4 Slots in Prep Area (No Team A / Team B split) -->
         <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3">
           <div class="flex items-center justify-between mb-2.5">
-            <span class="text-xs font-bold text-indigo-300"><i class="fa-solid fa-users-viewfinder"></i> 準備上場 4 位名單</span>
-            <span id="prep-avg-stats" class="text-[11px] text-slate-400">平均級數: -</span>
+            <span class="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-users-viewfinder"></i> 準備上場 4 位名單（上場後自行分邊）
+            </span>
+            <span id="prep-avg-stats" class="text-[11px] text-slate-400 font-medium">平均級數: -</span>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="prep-slots-grid"></div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="prep-slots-grid">
+            <!-- Prep Slots 0, 1, 2, 3 rendered by JS -->
+          </div>
         </div>
 
-        <div class="mt-3.5 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
-          <div id="prep-pair-history-hint" class="text-xs text-slate-400">💡 點擊任一位置可與等待區球員替換</div>
+        <!-- Dispatch to Courts Bar -->
+        <div class="mt-3.5 pt-3 border-t border-slate-800/90 flex flex-wrap items-center justify-between gap-2">
+          <div id="prep-pair-history-hint" class="text-xs text-slate-400">
+            💡 提示：點擊任一位置即可與等待區球員替換
+          </div>
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs text-slate-400 font-medium">派發上場：</span>
-            <button onclick="assignPrepToCourt(0)" id="assign-court-btn-0" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition">送入 1號場</button>
-            <button onclick="assignPrepToCourt(1)" id="assign-court-btn-1" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition">送入 2號場</button>
-            <button onclick="assignPrepToCourt(2)" id="assign-court-btn-2" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition">送入 3號場</button>
+            <button onclick="assignPrepToCourt(0)" id="assign-court-btn-0" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
+              <i class="fa-solid fa-play mr-1"></i>送入 1號場
+            </button>
+            <button onclick="assignPrepToCourt(1)" id="assign-court-btn-1" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
+              <i class="fa-solid fa-play mr-1"></i>送入 2號場
+            </button>
+            <button onclick="assignPrepToCourt(2)" id="assign-court-btn-2" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs transition active:scale-95">
+              <i class="fa-solid fa-play mr-1"></i>送入 3號場
+            </button>
           </div>
+        </div>
+      </section>
+
+      <!-- LEVEL LEGEND & TIME SLOT EXPLANATION -->
+      <section class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-bold text-slate-300"><i class="fa-solid fa-layer-group text-emerald-400 mr-1"></i>台灣推廣分級色標：</span>
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">1-3級 新手階</span>
+          <span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">4-6級 初階</span>
+          <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">7-9級 中階</span>
+          <span class="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">10-12級 高階</span>
+          <span class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold">13-15級 職業/甲組</span>
+        </div>
+        <div class="text-slate-400">
+          點擊球員卡片即可檢視「<strong class="text-slate-200">今日總共跟誰打過幾次</strong>」
         </div>
       </section>
     </div>
 
-    <!-- RIGHT AREA: ROSTER & PLAYERS -->
+    <!-- RIGHT AREA (5 COLUMNS ON IPAD LANDSCAPE): PLAYER ROSTER, FILTERS & ADD PLAYER -->
     <div class="lg:col-span-5 xl:col-span-4 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col max-h-[calc(100vh-100px)]">
+      
+      <!-- Roster Header & Add Player Trigger -->
       <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-800">
         <div>
           <h2 class="text-base font-extrabold text-white flex items-center gap-2">
-            <i class="fa-solid fa-users text-emerald-400"></i> 球員名單與等待區
+            <i class="fa-solid fa-users text-emerald-400"></i>
+            球員名單與等待區
             <span id="roster-count-badge" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">0人</span>
           </h2>
-          <p class="text-[11px] text-slate-400">依「上場次數少 ➔ 等待最久」排序</p>
+          <p class="text-[11px] text-slate-400">自動依「上場次數少 ➔ 等待最久」優先排序</p>
         </div>
-        <button onclick="openAddPlayerModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 shadow">
-          <i class="fa-solid fa-user-plus"></i> 新增球員
+        <button onclick="openAddPlayerModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 transition">
+          <i class="fa-solid fa-user-plus"></i>
+          新增球員
         </button>
       </div>
 
+      <!-- Filter Tabs: Time Slots & Status -->
       <div class="py-2.5 border-b border-slate-800 flex flex-col gap-2">
         <div class="flex items-center justify-between gap-1 overflow-x-auto pb-0.5">
-          <button onclick="setRosterFilter('ALL')" id="roster-tab-ALL" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">全部</button>
-          <button onclick="setRosterFilter('WAIT')" id="roster-tab-WAIT" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">等待上場</button>
-          <button onclick="setRosterFilter('18-21')" id="roster-tab-18-21" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">18-21</button>
-          <button onclick="setRosterFilter('18-20')" id="roster-tab-18-20" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">18-20</button>
-          <button onclick="setRosterFilter('19-21')" id="roster-tab-19-21" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">19-21</button>
-          <button onclick="setRosterFilter('UNPAID')" id="roster-tab-UNPAID" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">未繳費</button>
+          <button onclick="setRosterFilter('ALL')" id="roster-tab-ALL" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">全部</button>
+          <button onclick="setRosterFilter('WAIT')" id="roster-tab-WAIT" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">等待上場</button>
+          <button onclick="setRosterFilter('18-21')" id="roster-tab-18-21" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">18-21時段</button>
+          <button onclick="setRosterFilter('18-20')" id="roster-tab-18-20" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">18-20時段</button>
+          <button onclick="setRosterFilter('19-21')" id="roster-tab-19-21" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">19-21時段</button>
+          <button onclick="setRosterFilter('UNPAID')" id="roster-tab-UNPAID" class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">未繳費</button>
         </div>
 
+        <!-- Quick Search & Sort Info -->
         <div class="flex items-center gap-2">
           <div class="relative flex-1">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-            <input type="text" id="player-search-input" oninput="renderRoster()" placeholder="搜尋球員姓名..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500" />
+            <input type="text" id="player-search-input" oninput="renderRoster()" placeholder="搜尋球員姓名..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
           </div>
           <select id="roster-sort-select" onchange="renderRoster()" class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
             <option value="GAMES_ASC">依場次 (少→多)</option>
             <option value="LEVEL_DESC">依程度 (高→低)</option>
             <option value="LEVEL_ASC">依程度 (低→高)</option>
+            <option value="TIMESLOT">依參與時段</option>
           </select>
         </div>
       </div>
 
-      <div id="roster-list" class="flex-1 overflow-y-auto space-y-2 py-2.5 pr-1"></div>
+      <!-- Scrollable Player List -->
+      <div id="roster-list" class="flex-1 overflow-y-auto space-y-2 py-2.5 pr-1">
+        <!-- Dynamically rendered by JS -->
+      </div>
     </div>
+
   </main>
 
-  <!-- ================= MODAL: ADD / EDIT PLAYER ================= -->
+  <!-- ================= MODAL 1: ADD / EDIT PLAYER ================= -->
   <div id="player-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
         <h3 id="player-modal-title" class="text-lg font-extrabold text-white">新增球員</h3>
-        <button onclick="closePlayerModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closePlayerModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
+
       <form id="player-form" onsubmit="savePlayerForm(event)" class="space-y-4">
         <input type="hidden" id="form-player-id" value="" />
+
+        <!-- Player Name -->
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">球員姓名 / 暱稱 *</label>
           <input type="text" id="form-player-name" required placeholder="例如：阿凱、小美" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" />
         </div>
+
+        <!-- Taiwan Badminton Skill Level (1-15) -->
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label class="text-xs font-bold text-slate-300">台灣推廣羽球分級 (1 - 15 級)</label>
-            <span id="form-level-preview" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">7級 (中階)</span>
+            <span id="form-level-preview" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              7級 (中階)
+            </span>
           </div>
           <input type="range" id="form-player-level" min="1" max="15" value="7" oninput="updateLevelPreview(this.value)" class="w-full accent-emerald-500 cursor-pointer h-2 rounded-lg bg-slate-800" />
+          <div class="flex justify-between text-[10px] text-slate-400 mt-1 px-0.5">
+            <span>1-3 新手</span>
+            <span>4-6 初階</span>
+            <span>7-9 中階</span>
+            <span>10-12 高階</span>
+            <span>13-15 甲組</span>
+          </div>
+          <!-- Quick Level Buttons -->
+          <div class="grid grid-cols-5 gap-1.5 mt-2">
+            <button type="button" onclick="setFormLevel(2)" class="py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold">2級 新手</button>
+            <button type="button" onclick="setFormLevel(5)" class="py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-bold">5級 初階</button>
+            <button type="button" onclick="setFormLevel(7)" class="py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold">7級 中下</button>
+            <button type="button" onclick="setFormLevel(9)" class="py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold">9級 中上</button>
+            <button type="button" onclick="setFormLevel(11)" class="py-1 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold">11級 高階</button>
+          </div>
         </div>
+
+        <!-- Participation Time Slot (18-21, 18-20, 19-21) -->
         <div>
           <label class="block text-xs font-bold text-slate-300 mb-1.5">參與時段 *</label>
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="form-timeslot" value="18-21" checked class="peer sr-only" />
-              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-400 peer-checked:text-emerald-300 text-slate-300">
+              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-400 peer-checked:text-emerald-300 text-slate-300 transition">
                 <div class="text-xs font-extrabold">18:00 - 21:00</div>
+                <div class="text-[10px] opacity-75">全場 (3小時)</div>
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="form-timeslot" value="18-20" class="peer sr-only" />
-              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-sky-500/20 peer-checked:border-sky-400 peer-checked:text-sky-300 text-slate-300">
+              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-sky-500/20 peer-checked:border-sky-400 peer-checked:text-sky-300 text-slate-300 transition">
                 <div class="text-xs font-extrabold">18:00 - 20:00</div>
+                <div class="text-[10px] opacity-75">上半場 (2小時)</div>
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="form-timeslot" value="19-21" class="peer sr-only" />
-              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-purple-500/20 peer-checked:border-purple-400 peer-checked:text-purple-300 text-slate-300">
+              <div class="text-center py-2.5 px-2 rounded-xl border border-slate-700 bg-slate-950 peer-checked:bg-purple-500/20 peer-checked:border-purple-400 peer-checked:text-purple-300 text-slate-300 transition">
                 <div class="text-xs font-extrabold">19:00 - 21:00</div>
+                <div class="text-[10px] opacity-75">下半場 (2小時)</div>
               </div>
             </label>
           </div>
         </div>
+
+        <!-- Paid Status -->
         <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl p-3">
-          <div><div class="text-xs font-bold text-slate-200">是否已繳費</div></div>
+          <div>
+            <div class="text-xs font-bold text-slate-200">是否已繳交零打/季繳費用</div>
+            <div class="text-[11px] text-slate-400">可隨時在名單上直接點擊切換</div>
+          </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="form-player-paid" class="sr-only peer" />
-            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
           </label>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closePlayerModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">取消</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-extrabold">儲存</button>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closePlayerModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">取消</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold shadow-lg">儲存球員</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ================= MODAL: HISTORY ================= -->
+  <!-- ================= MODAL 2: PLAYER PLAYED-WITH HISTORY (CLEAN & UNIFIED) ================= -->
   <div id="history-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[88vh] flex flex-col">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -358,158 +480,414 @@
             <p id="hist-player-meta" class="text-xs text-slate-400"></p>
           </div>
         </div>
-        <button onclick="closeHistoryModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeHistoryModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
+
       <div class="flex-1 overflow-y-auto space-y-4 my-4 pr-1">
+        <!-- Unified Played-With List -->
         <div class="bg-slate-950/90 border border-emerald-500/30 rounded-xl p-3.5">
           <h4 class="text-xs font-bold text-emerald-400 mb-2.5 flex items-center justify-between">
             <span><i class="fa-solid fa-user-group mr-1.5"></i>今日總共跟誰同場打過</span>
-            <span id="hist-playedwith-total" class="text-[11px] text-slate-400"></span>
+            <span id="hist-playedwith-total" class="text-[11px] text-slate-400 font-normal"></span>
           </h4>
           <div id="hist-playedwith-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
         </div>
+
+        <!-- Individual Match-by-Match Timeline -->
         <div class="bg-slate-950/90 border border-sky-500/30 rounded-xl p-3.5">
-          <h4 class="text-xs font-bold text-sky-400 mb-2.5"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>個人參與場次明細</h4>
+          <h4 class="text-xs font-bold text-sky-400 mb-2.5 flex items-center justify-between">
+            <span><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>個人今日參與場次明細</span>
+            <span class="text-[11px] text-slate-400 font-normal">同場球友列表</span>
+          </h4>
           <div id="hist-matches-timeline" class="space-y-2"></div>
         </div>
       </div>
+
       <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-        <button id="hist-delete-btn" class="px-3 py-2 rounded-xl bg-rose-950 text-rose-300 text-xs font-bold"><i class="fa-solid fa-trash-can mr-1"></i>刪除球員</button>
+        <button id="hist-delete-btn" class="px-3 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-300 text-xs font-bold">
+          <i class="fa-solid fa-trash-can mr-1"></i>刪除球員
+        </button>
         <div class="flex gap-2">
-          <button id="hist-edit-btn" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-bold">編輯</button>
+          <button id="hist-edit-btn" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
+            <i class="fa-solid fa-pen mr-1"></i>編輯資料
+          </button>
           <button onclick="closeHistoryModal()" class="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-extrabold">關閉</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ================= MODAL: FINANCE ================= -->
+  <!-- ================= MODAL 3: FINANCE & SHUTTLECOCK COST CALCULATOR ================= -->
   <div id="finance-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-        <h3 class="text-lg font-extrabold text-white"><i class="fa-solid fa-calculator text-emerald-400 mr-2"></i>繳費與用球成本統計</h3>
-        <button onclick="closeFinanceModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-calculator text-emerald-400"></i>
+          繳費統計與獨立用球成本試算
+        </h3>
+        <button onclick="closeFinanceModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
+
       <div class="space-y-4">
+        <!-- Unit Price Settings -->
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-            <label class="block text-[11px] text-slate-400 mb-1">每人零打收費</label>
+            <label class="block text-[11px] text-slate-400 mb-1">每人零打收費 (元)</label>
             <input type="number" id="fin-fee-per-person" value="200" oninput="updateFinanceCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-emerald-300" />
           </div>
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-            <label class="block text-[11px] text-slate-400 mb-1">單顆球成本</label>
+            <label class="block text-[11px] text-slate-400 mb-1">單顆羽球成本 (元/顆)</label>
             <input type="number" id="fin-cost-per-shuttle" value="45" oninput="updateFinanceCalc()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-300" />
           </div>
         </div>
+
+        <!-- Summary Cards -->
         <div class="grid grid-cols-3 gap-2.5 text-center">
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
             <div class="text-[11px] text-slate-400">已收球費</div>
-            <div id="fin-collected" class="text-base font-black text-emerald-400">$0</div>
+            <div id="fin-collected" class="text-base font-black text-emerald-400 mt-0.5">$0</div>
+            <div id="fin-paid-count" class="text-[10px] text-slate-500">0人已繳</div>
           </div>
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-            <div class="text-[11px] text-slate-400">耗球成本</div>
-            <div id="fin-shuttle-cost" class="text-base font-black text-amber-400">$0</div>
+            <div class="text-[11px] text-slate-400">今日耗球成本</div>
+            <div id="fin-shuttle-cost" class="text-base font-black text-amber-400 mt-0.5">$0</div>
+            <div id="fin-shuttle-used" class="text-[10px] text-slate-500">共 0 顆</div>
           </div>
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-            <div class="text-[11px] text-slate-400">結餘</div>
-            <div id="fin-net-balance" class="text-base font-black text-sky-400">$0</div>
+            <div class="text-[11px] text-slate-400">扣球資結餘</div>
+            <div id="fin-net-balance" class="text-base font-black text-sky-400 mt-0.5">$0</div>
+            <div class="text-[10px] text-slate-500">未含場租</div>
           </div>
         </div>
+
+        <!-- Unpaid List Quick Toggle -->
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-          <div class="text-xs font-bold text-rose-400 mb-2">未繳費名單（點擊標記已繳）：</div>
+          <div class="text-xs font-bold text-rose-400 mb-2">尚未繳費名單（點擊直接標記已繳）：</div>
           <div id="fin-unpaid-list" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto"></div>
         </div>
       </div>
+
       <div class="flex justify-end mt-4 pt-3 border-t border-slate-800">
         <button onclick="closeFinanceModal()" class="px-5 py-2 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs">完成</button>
       </div>
     </div>
   </div>
 
-  <!-- ================= MODAL: QR CODE (GITHUB LINKED) ================= -->
-  <div id="qr-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="closeQrModal()">
-    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center relative" onclick="event.stopPropagation()">
-      <button onclick="closeQrModal()" class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#06C755]/20 border border-[#06C755]/40 text-[#06C755] text-xs font-extrabold mb-2">
-        <i class="fa-brands fa-line text-base"></i> LINE 群組邀請
+  <!-- ================= MODAL 4: COMPLETED MATCHES LOG ================= -->
+  <div id="match-log-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-sky-400"></i>
+          今日完賽場次紀錄
+        </h3>
+        <button onclick="closeMatchLogModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-      <h3 class="text-xl font-black text-white">掃描加入群組</h3>
-      <p class="text-xs text-slate-400 mt-1 mb-4">請打開手機 LINE 掃描下方行動條碼</p>
-      
-      <!-- QR Image Container linked to GitHub 6793.jpg -->
-      <div class="bg-white p-3 rounded-2xl shadow-inner mx-auto w-64 h-64 flex items-center justify-center">
-        <div id="qr-code-container" class="w-full h-full flex items-center justify-center"></div>
-      </div>
-
-      <div class="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-800">
-        <label for="qr-upload-input" class="text-[11px] text-slate-400 hover:text-amber-300 cursor-pointer underline">
-          <input type="file" id="qr-upload-input" accept="image/*" class="sr-only" onchange="handleCustomQrUpload(event)" />
-          更換 QR 圖片
-        </label>
-        <button onclick="resetDefaultQr()" id="reset-qr-btn" class="hidden text-[11px] text-sky-400 hover:underline">還原預設</button>
-        <button onclick="closeQrModal()" class="px-5 py-2 rounded-xl bg-[#06C755] text-white font-extrabold text-xs">關閉</button>
+      <div id="match-log-list" class="flex-1 overflow-y-auto space-y-2 my-3 pr-1"></div>
+      <div class="flex justify-end pt-3 border-t border-slate-800">
+        <button onclick="closeMatchLogModal()" class="px-5 py-2 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs">關閉</button>
       </div>
     </div>
   </div>
 
-  <!-- ================= MODAL: SETTINGS ================= -->
+  <!-- ================= MODAL 5: SYSTEM SETTINGS & RESET ================= -->
   <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-        <h3 class="text-lg font-extrabold text-white">系統設定與重置</h3>
-        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="text-lg font-extrabold text-white">系統管理與資料重置</h3>
+        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <div class="space-y-3">
         <button onclick="resetMatchCountsOnly()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left flex items-center justify-between transition">
-          <div><div class="font-bold text-sm text-amber-300">開啟新的一天（歸零場次與用球）</div></div>
+          <div>
+            <div class="font-bold text-sm text-amber-300">開啟新的一天（保留球員名單，歸零場次與用球）</div>
+            <div class="text-xs text-slate-400">適合固定球團每週開團前歸零使用</div>
+          </div>
           <i class="fa-solid fa-rotate-right text-amber-400"></i>
         </button>
+
         <button onclick="loadDemoPlayers()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-left flex items-center justify-between transition">
-          <div><div class="font-bold text-sm text-sky-300">載入 16 人測試名單</div></div>
+          <div>
+            <div class="font-bold text-sm text-sky-300">載入預設 16 人測試名單（含三時段與各級數）</div>
+            <div class="text-xs text-slate-400">重置為範例球團資料方便體驗排點</div>
+          </div>
           <i class="fa-solid fa-users-gear text-sky-400"></i>
         </button>
+
         <button onclick="clearAllPlayers()" class="w-full py-3 px-4 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/30 text-left flex items-center justify-between transition">
-          <div><div class="font-bold text-sm text-rose-300">清空所有球員與資料</div></div>
+          <div>
+            <div class="font-bold text-sm text-rose-300">清空所有球員與紀錄</div>
+            <div class="text-xs text-rose-400/80">從空白名單開始建立您的專屬球團</div>
+          </div>
           <i class="fa-solid fa-trash-can text-rose-400"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ================= MODAL: ICON ================= -->
+  <!-- ================= MODAL 6: CUSTOM CAT ICON PICKER ================= -->
   <div id="icon-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-        <h3 class="text-lg font-black text-white"><i class="fa-solid fa-cat text-amber-400 mr-2"></i>更換系統貓貓圖示</h3>
-        <button onclick="closeIconModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="text-lg font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-cat text-amber-400"></i> 更換系統貓貓圖示 (支援電腦與 iPad)
+        </h3>
+        <button onclick="closeIconModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
+
       <div class="space-y-4">
-        <label for="icon-file-input" class="block w-full border-2 border-dashed border-amber-500/50 hover:border-amber-400 bg-slate-800/50 rounded-xl p-5 text-center cursor-pointer transition">
-          <input type="file" id="icon-file-input" accept="image/*" class="sr-only" onchange="handleIconUpload(event)">
-          <div class="text-sm font-black text-white">點擊選擇照片或將圖片拖拉至此</div>
-        </label>
-        <div class="grid grid-cols-5 gap-2">
-          <button onclick="selectPresetCat('ORANGE')" class="p-2 rounded-xl bg-slate-800 border border-slate-700 flex flex-col items-center gap-1"><div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">🐱</div><span class="text-[11px]">橘貓</span></button>
-          <button onclick="selectPresetCat('BLACK')" class="p-2 rounded-xl bg-slate-800 border border-slate-700 flex flex-col items-center gap-1"><div class="w-10 h-10 rounded-xl bg-slate-700 flex items-center justify-center">🐈‍⬛</div><span class="text-[11px]">黑貓</span></button>
-          <button onclick="selectPresetCat('CALICO')" class="p-2 rounded-xl bg-slate-800 border border-slate-700 flex flex-col items-center gap-1"><div class="w-10 h-10 rounded-xl bg-rose-400 flex items-center justify-center">🐈</div><span class="text-[11px]">三花</span></button>
-          <button onclick="selectPresetCat('WHITE')" class="p-2 rounded-xl bg-slate-800 border border-slate-700 flex flex-col items-center gap-1"><div class="w-10 h-10 rounded-xl bg-sky-400 flex items-center justify-center">🐱</div><span class="text-[11px]">白貓</span></button>
-          <button onclick="selectPresetCat('SIAMESE')" class="p-2 rounded-xl bg-slate-800 border border-slate-700 flex flex-col items-center gap-1"><div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center">🐱</div><span class="text-[11px]">暹羅</span></button>
+        <!-- Current Preview -->
+        <div class="flex items-center gap-4 bg-slate-800/70 border border-slate-700 rounded-xl p-3">
+          <div id="modal-icon-preview" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center overflow-hidden border-2 border-amber-300 shadow-lg shrink-0">
+          </div>
+          <div class="text-xs text-slate-300 space-y-1">
+            <div class="font-bold text-white text-sm">目前系統圖示預覽</div>
+            <p class="text-slate-400">圖片會自動壓縮最佳化並儲存於瀏覽器中，重整網頁也不會消失。</p>
+          </div>
         </div>
+
+        <!-- Method 1 & 2: Native <label> File Upload + Drag & Drop + Ctrl+V Paste -->
+        <div>
+          <div class="text-xs font-bold text-amber-300 mb-1.5">
+            方式一：從電腦 / iPad 選擇圖片、直接拖曳圖片、或按 <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-white">Ctrl+V</kbd> 貼上截圖
+          </div>
+          <label for="icon-file-input" id="icon-dropzone"
+                 class="block w-full border-2 border-dashed border-amber-500/50 hover:border-amber-400 bg-slate-800/50 hover:bg-slate-800/90 rounded-xl p-5 text-center cursor-pointer transition">
+            <input type="file" id="icon-file-input" accept="image/*" class="sr-only" onchange="handleIconUpload(event)">
+            <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-2 text-lg">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div class="text-sm font-black text-white">點擊此處從電腦/iPad選擇照片</div>
+            <div class="text-xs text-slate-400 mt-1">或將電腦桌面的圖片直接「拖拉」進來，也可直接按 Ctrl+V 貼上複製的圖片</div>
+          </label>
+        </div>
+
+        <!-- Method 3: Built-in 5 Cute Cat Presets -->
+        <div>
+          <div class="text-xs font-bold text-emerald-300 mb-1.5">
+            方式二：一鍵切換內建可愛貓咪頭像 (5款)
+          </div>
+          <div class="grid grid-cols-5 gap-2">
+            <button type="button" onclick="selectPresetCat('ORANGE')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center overflow-hidden" id="preset-cat-ORANGE"></div>
+              <span class="text-[11px] font-bold text-slate-200">橘貓大吉</span>
+            </button>
+            <button type="button" onclick="selectPresetCat('BLACK')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-950 flex items-center justify-center overflow-hidden" id="preset-cat-BLACK"></div>
+              <span class="text-[11px] font-bold text-slate-200">黑貓酷哥</span>
+            </button>
+            <button type="button" onclick="selectPresetCat('CALICO')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-amber-500 flex items-center justify-center overflow-hidden" id="preset-cat-CALICO"></div>
+              <span class="text-[11px] font-bold text-slate-200">三花小咪</span>
+            </button>
+            <button type="button" onclick="selectPresetCat('WHITE')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center overflow-hidden" id="preset-cat-WHITE"></div>
+              <span class="text-[11px] font-bold text-slate-200">白貓雪球</span>
+            </button>
+            <button type="button" onclick="selectPresetCat('SIAMESE')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-amber-400 flex flex-col items-center gap-1 transition active:scale-95">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center overflow-hidden" id="preset-cat-SIAMESE"></div>
+              <span class="text-[11px] font-bold text-slate-200">暹羅豆漿</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Method 4: Image URL Input -->
+        <div>
+          <div class="text-xs font-bold text-sky-300 mb-1.5">
+            方式三：貼上網路圖片網址 (URL)
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="url" id="custom-icon-url-input" placeholder="https://example.com/my-cat.png" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+            <button type="button" onclick="applyIconUrl()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shrink-0 transition">
+              套用網址
+            </button>
+          </div>
+        </div>
+
         <div class="flex justify-end pt-2 border-t border-slate-800">
-          <button onclick="closeIconModal()" class="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">關閉</button>
+          <button type="button" onclick="closeIconModal()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">完成關閉</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ================= MODAL 7: LINE GROUP QR CODE INVITE ================= -->
+  <div id="qr-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="closeQrModal()">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center relative" onclick="event.stopPropagation()">
+      <button onclick="closeQrModal()" class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#06C755]/20 border border-[#06C755]/40 text-[#06C755] text-xs font-extrabold mb-2">
+        <i class="fa-brands fa-line text-base"></i> LINE 球團群組邀請
+      </div>
+      <h3 class="text-xl font-black text-white">掃描加入貓貓羽球群組</h3>
+      <p class="text-xs text-slate-400 mt-1 mb-4">請打開手機 LINE 掃描下方行動條碼加入群組</p>
+
+      <!-- Exact SVG Vector Recreation of User's LINE QR Code (6793.jpg) + Optional Custom Upload -->
+      <div class="bg-white p-4 rounded-2xl shadow-inner mx-auto w-64 h-64 flex items-center justify-center relative overflow-hidden">
+        <div id="qr-code-container" class="w-full h-full flex items-center justify-center">
+          <!-- Rendered by JS (Exact 37x37 QR matrix from 6793.jpg with LINE logo) -->
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-800">
+        <label for="qr-upload-input" class="text-[11px] text-slate-400 hover:text-amber-300 cursor-pointer underline decoration-dotted">
+          <input type="file" id="qr-upload-input" accept="image/*" class="sr-only" onchange="handleCustomQrUpload(event)" />
+          更換其他 QR 圖片
+        </label>
+        <button onclick="resetDefaultQr()" id="reset-qr-btn" class="hidden text-[11px] text-sky-400 hover:underline">
+          還原預設群組 QR
+        </button>
+        <button onclick="closeQrModal()" class="px-5 py-2 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-extrabold text-xs shadow">
+          完成關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <!-- ================= APPLICATION JAVASCRIPT ================= -->
   <script>
+    /********************************************************************
+     * 1. STATE ARCHITECTURE & DEFAULT SAMPLE DATA
+     ********************************************************************/
     const STORAGE_KEY = 'MEOW_BADMINTON_PRO_STATE_V3';
 
-    // 預設 QR Code 直接指向 GitHub 同個資料夾中的 6793.jpg
-    const DEFAULT_CUSTOM_QR_URL = "./6793.jpg";
+    const DEFAULT_CAT_SVG = `
+      <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FFFBEB" stroke="#78350F" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M17 14L20 22L25 18Z" fill="#F43F5E"/>
+        <path d="M47 14L44 22L39 18Z" fill="#F43F5E"/>
+        <circle cx="24" cy="33" r="3.5" fill="#451A03"/>
+        <circle cx="40" cy="33" r="3.5" fill="#451A03"/>
+        <ellipse cx="19" cy="38" rx="3.5" ry="2" fill="#FDA4AF"/>
+        <ellipse cx="45" cy="38" rx="3.5" ry="2" fill="#FDA4AF"/>
+        <path d="M29 37H35L32 40.5L29 37Z" fill="#F43F5E"/>
+        <path d="M32 40.5C32 43 29 45 26 44M32 40.5C32 43 35 45 38 44" stroke="#78350F" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    const CAT_PRESET_SVGS = {
+      ORANGE: DEFAULT_CAT_SVG,
+      BLACK: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#1E293B" stroke="#F8FAFC" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="24" cy="33" r="4" fill="#FACC15"/>
+          <circle cx="40" cy="33" r="4" fill="#FACC15"/>
+          <circle cx="24" cy="33" r="1.6" fill="#0F172A"/>
+          <circle cx="40" cy="33" r="1.6" fill="#0F172A"/>
+          <path d="M29 38H35L32 41L29 38Z" fill="#FB7185"/>
+        </svg>
+      `,
+      CALICO: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FFFBEB" stroke="#78350F" stroke-width="2.5"/>
+          <path d="M14 24C18 18 25 20 26 27C22 30 15 29 14 24Z" fill="#EA580C"/>
+          <path d="M50 24C46 18 39 20 38 27C42 30 49 29 50 24Z" fill="#334155"/>
+          <circle cx="24" cy="34" r="3.3" fill="#1E293B"/>
+          <circle cx="40" cy="34" r="3.3" fill="#1E293B"/>
+          <path d="M29 38H35L32 41L29 38Z" fill="#F43F5E"/>
+        </svg>
+      `,
+      WHITE: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FFFFFF" stroke="#475569" stroke-width="2.5"/>
+          <circle cx="24" cy="33" r="3.6" fill="#0284C7"/>
+          <circle cx="40" cy="33" r="3.6" fill="#0284C7"/>
+          <ellipse cx="19" cy="38" rx="3.2" ry="1.8" fill="#FDA4AF"/>
+          <ellipse cx="45" cy="38" rx="3.2" ry="1.8" fill="#FDA4AF"/>
+          <path d="M29 37H35L32 40.5L29 37Z" fill="#FB7185"/>
+        </svg>
+      `,
+      SIAMESE: `
+        <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 26L16 10L28 18H36L48 10L52 26C54 31 54 41 48 47C43 52 37 54 32 54C27 54 21 52 16 47C10 41 10 31 12 26Z" fill="#FDE68A" stroke="#451A03" stroke-width="2.5"/>
+          <ellipse cx="32" cy="37" rx="13" ry="10" fill="#78350F"/>
+          <circle cx="25" cy="34" r="3.3" fill="#38BDF8"/>
+          <circle cx="39" cy="34" r="3.3" fill="#38BDF8"/>
+          <path d="M30 39H34L32 41.5L30 39Z" fill="#FDA4AF"/>
+        </svg>
+      `
+    };
+
+    // Exact 37x37 QR Matrix decoded from the uploaded LINE QR Code image (6793.jpg)
+    const LINE_GROUP_QR_MATRIX = [
+      "1111111010001011001010011010101111111",
+      "1000001001001111110000011001101000001",
+      "1011101010011011000000110100001011101",
+      "1011101010110011100111110001001011101",
+      "1011101011001001110000001111001011101",
+      "1000001011011110110011100010001000001",
+      "1111111010101010101010101010101111111",
+      "0000000011101010110000010001100000000",
+      "1101111110011101100010010111111000000",
+      "0101010011011100001011110001010101001",
+      "1011111001111010101111010011001111011",
+      "1010000110101001110010001001100100010",
+      "1011111011100000100010101110111101101",
+      "0010110110111001011110000100111011001",
+      "1001001000110100000000010110101010000",
+      "0110010111000100000000011011001111101",
+      "1110111000100100000000000110110001001",
+      "0110010010001100000000001011100111010",
+      "1100101011011000000000001111000011111",
+      "0101010101110100000000001110000100110",
+      "1001101111011100000000011001111010100",
+      "0000010101101100000000010011101101100",
+      "1001111010110001000001000110001010110",
+      "0110110001111111110011010000101110001",
+      "1011101110001001001111010010111010101",
+      "0111010000110001011010101011010111000",
+      "1010001000101011110001110110001010110",
+      "0111110011100001011000010100001110001",
+      "1111111000110110110011011100111110100",
+      "0000000010001101000110101000100010111",
+      "1111111001101000010100011101101010010",
+      "1000001011100011110000101100111101010",
+      "1011101010111111001100001111101111101",
+      "1011101000001100100111101111101010011",
+      "1011101001110101111111010110000111001",
+      "1000001001011010011101001110001001100",
+      "1111111011000101110010101001110100000"
+    ];
+    function getInitialDemoPlayers() {
+      const sample = [
+        { id: 'p1',  name: '阿凱', level: 8,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p2',  name: '小傑', level: 7,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p3',  name: '瑋哥', level: 9,  timeSlot: '18-20', paid: true,  games: 0, resting: false },
+        { id: 'p4',  name: '阿哲', level: 6,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p5',  name: '小美', level: 5,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p6',  name: '庭庭', level: 4,  timeSlot: '18-20', paid: false, games: 0, resting: false },
+        { id: 'p7',  name: '志豪', level: 6,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p8',  name: '冠宇', level: 5,  timeSlot: '18-20', paid: true,  games: 0, resting: false },
+        { id: 'p9',  name: '大衛', level: 10, timeSlot: '19-21', paid: true,  games: 0, resting: false },
+        { id: 'p10', name: '柏翰', level: 9,  timeSlot: '18-21', paid: false, games: 0, resting: false },
+        { id: 'p11', name: '子軒', level: 8,  timeSlot: '19-21', paid: true,  games: 0, resting: false },
+        { id: 'p12', name: '家豪', level: 7,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p13', name: '雅筑', level: 3,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+        { id: 'p14', name: '心怡', level: 4,  timeSlot: '19-21', paid: false, games: 0, resting: false },
+        { id: 'p15', name: '建宏', level: 11, timeSlot: '19-21', paid: true,  games: 0, resting: false },
+        { id: 'p16', name: '品源', level: 6,  timeSlot: '18-21', paid: true,  games: 0, resting: false },
+      ];
+      return sample.map(p => ({
+        ...p,
+        playedWith: {},
+        lastPlayedAt: 0
+      }));
+    }
 
     let state = {
       customIconDataUrl: null,
@@ -530,45 +908,184 @@
 
     let selectedSource = null;
 
-    function getInitialDemoPlayers() {
-      const sample = [
-        { id: 'p1', name: '阿凱', level: 8, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p2', name: '小傑', level: 7, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p3', name: '瑋哥', level: 9, timeSlot: '18-20', paid: true, games: 0, resting: false },
-        { id: 'p4', name: '阿哲', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p5', name: '小美', level: 5, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p6', name: '庭庭', level: 4, timeSlot: '18-20', paid: false, games: 0, resting: false },
-        { id: 'p7', name: '志豪', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p8', name: '冠宇', level: 5, timeSlot: '18-20', paid: true, games: 0, resting: false },
-        { id: 'p9', name: '大衛', level: 10, timeSlot: '19-21', paid: true, games: 0, resting: false },
-        { id: 'p10', name: '柏翰', level: 9, timeSlot: '18-21', paid: false, games: 0, resting: false },
-        { id: 'p11', name: '子軒', level: 8, timeSlot: '19-21', paid: true, games: 0, resting: false },
-        { id: 'p12', name: '家豪', level: 7, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p13', name: '雅筑', level: 3, timeSlot: '18-21', paid: true, games: 0, resting: false },
-        { id: 'p14', name: '心怡', level: 4, timeSlot: '19-21', paid: false, games: 0, resting: false },
-        { id: 'p15', name: '建宏', level: 11, timeSlot: '19-21', paid: true, games: 0, resting: false },
-        { id: 'p16', name: '品源', level: 6, timeSlot: '18-21', paid: true, games: 0, resting: false },
+    function seedSampleMatchHistory() {
+      if (state.matchLogs && state.matchLogs.length > 0) return;
+      const demoMatches = [
+        { courtName: '1號場', players: ['p1', 'p2', 'p3', 'p4'], time: '18:18' },
+        { courtName: '2號場', players: ['p5', 'p7', 'p6', 'p8'], time: '18:24' },
+        { courtName: '3號場', players: ['p1', 'p10', 'p11', 'p12'], time: '18:40' }
       ];
-      return sample.map(p => ({ ...p, playedWith: {}, lastPlayedAt: 0 }));
+      demoMatches.forEach((m, idx) => {
+        const four = m.players;
+        four.forEach(pid => {
+          const p = state.players.find(x => x.id === pid);
+          if (p) {
+            p.games = (p.games || 0) + 1;
+            p.lastPlayedAt = Date.now() - (3 - idx) * 600000;
+          }
+        });
+        for (let i = 0; i < four.length; i++) {
+          for (let j = i + 1; j < four.length; j++) {
+            recordPlayedTogether(four[i], four[j]);
+          }
+        }
+        state.matchLogs.unshift({
+          id: 'log_demo_' + idx,
+          courtName: m.courtName,
+          players: [...four],
+          finishedAt: m.time
+        });
+      });
     }
 
+    /********************************************************************
+     * 2. LOCAL STORAGE PERSISTENCE, ICON & QR CODE MANAGEMENT
+     ********************************************************************/
     function loadState() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-          state = { ...state, ...JSON.parse(saved) };
-          state.players.forEach(p => { if (!p.playedWith) p.playedWith = {}; });
+          const parsed = JSON.parse(saved);
+          state = { ...state, ...parsed };
+          // Ensure every player has unified playedWith object
+          state.players.forEach(p => {
+            if (!p.playedWith) p.playedWith = {};
+          });
         } else {
           state.players = getInitialDemoPlayers();
+          seedSampleMatchHistory();
           saveState();
         }
       } catch (e) {
+        console.error('Failed to load state:', e);
         state.players = getInitialDemoPlayers();
       }
     }
 
     function saveState() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error('Failed to save state:', e);
+      }
+    }
+
+    function openIconModal() {
+      Object.keys(CAT_PRESET_SVGS).forEach(key => {
+        const el = document.getElementById(`preset-cat-${key}`);
+        if (el) el.innerHTML = CAT_PRESET_SVGS[key];
+      });
+      renderBrandIcon();
+      const modal = document.getElementById('icon-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeIconModal() {
+      const modal = document.getElementById('icon-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function processAndSaveImageFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showToast('請選擇有效的圖片檔案 (PNG / JPG / GIF / WebP)', 'warn');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 160;
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > maxDim) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+          } else {
+            if (h > maxDim) { w = Math.round(w * (maxDim / h)); h = maxDim; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedDataUrl = canvas.toDataURL('image/png', 0.9);
+          state.customIconDataUrl = compressedDataUrl;
+          saveState();
+          renderBrandIcon();
+          showToast('已成功換上您的自訂貓貓圖片 Icon！', 'success');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleIconUpload(event) {
+      const file = event.target.files?.[0];
+      if (file) {
+        processAndSaveImageFile(file);
+        event.target.value = '';
+      }
+    }
+
+    function selectPresetCat(presetKey) {
+      state.customIconDataUrl = null;
+      state.customIconPreset = presetKey;
+      saveState();
+      renderBrandIcon();
+      showToast('已切換內建貓咪圖示！', 'success');
+    }
+
+    function applyIconUrl() {
+      const urlInput = document.getElementById('custom-icon-url-input');
+      const url = (urlInput?.value || '').trim();
+      if (!url) {
+        showToast('請先輸入圖片網址', 'warn');
+        return;
+      }
+      state.customIconDataUrl = url;
+      saveState();
+      renderBrandIcon();
+      urlInput.value = '';
+      showToast('已套用網路圖片作為貓貓圖示！', 'success');
+    }
+
+    function renderBrandIcon() {
+      const box = document.getElementById('brand-icon-box');
+      const modalPreview = document.getElementById('modal-icon-preview');
+      const presetSvg = CAT_PRESET_SVGS[state.customIconPreset || 'ORANGE'] || DEFAULT_CAT_SVG;
+      const htmlContent = state.customIconDataUrl
+        ? `<img src="${state.customIconDataUrl}" alt="貓貓Icon" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='🐾';" />`
+        : presetSvg;
+
+      if (box) box.innerHTML = htmlContent;
+      if (modalPreview) modalPreview.innerHTML = htmlContent;
+    }
+
+    // Generate crisp SVG of the exact LINE Group QR code uploaded by user
+    function generateLineQrSvg() {
+      const size = LINE_GROUP_QR_MATRIX.length; // 37
+      let rects = '';
+      for (let r = 0; r < size; r++) {
+        const rowStr = LINE_GROUP_QR_MATRIX[r];
+        for (let c = 0; c < size; c++) {
+          if (rowStr[c] === '1') {
+            rects += `<rect x="${c}" y="${r}" width="1.03" height="1.03" fill="#000000" />`;
+          }
+        }
+      }
+      return `
+        <svg viewBox="0 0 37 37" class="w-full h-full" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+          <rect width="37" height="37" fill="#ffffff" />
+          ${rects}
+          <!-- Center LINE Bubble Badge -->
+          <g shape-rendering="geometricPrecision">
+            <circle cx="18.5" cy="18.5" r="4.6" fill="#ffffff" />
+            <path d="M18.5 14.4 C15.7 14.4 13.5 16.2 13.5 18.4 C13.5 20.3 15.2 21.9 17.5 22.3 C17.7 22.3 17.9 22.5 17.9 22.7 L17.8 23.6 C17.8 23.8 18.0 23.9 18.2 23.8 L20.1 22.5 C22.1 22.0 23.5 20.4 23.5 18.4 C23.5 16.2 21.3 14.4 18.5 14.4 Z" fill="#06C755" />
+            <text x="18.5" y="19.3" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-weight="900" font-size="2.75" letter-spacing="-0.1">LINE</text>
+          </g>
+        </svg>
+      `;
     }
 
     function openQrModal() {
@@ -589,11 +1106,12 @@
       const resetBtn = document.getElementById('reset-qr-btn');
       if (!container) return;
 
-      const activeQr = state.customQrDataUrl || DEFAULT_CUSTOM_QR_URL;
-      container.innerHTML = `<img src="${activeQr}" alt="LINE群組QR" class="w-full h-full object-contain" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-xs text-slate-800 font-bold\'>找不到 6793.jpg<br>請確認檔案是否在同個資料夾</div>';" />`;
-      if (resetBtn) {
-        if (state.customQrDataUrl) resetBtn.classList.remove('hidden');
-        else resetBtn.classList.add('hidden');
+      if (state.customQrDataUrl) {
+        container.innerHTML = `<img src="${state.customQrDataUrl}" alt="LINE群組QR" class="w-full h-full object-contain" />`;
+        if (resetBtn) resetBtn.classList.remove('hidden');
+      } else {
+        container.innerHTML = generateLineQrSvg();
+        if (resetBtn) resetBtn.classList.add('hidden');
       }
     }
 
@@ -605,7 +1123,7 @@
         state.customQrDataUrl = e.target.result;
         saveState();
         renderQrModalContent();
-        showToast('已更新 QR 圖片', 'success');
+        showToast('已更新群組 QR Code 圖片！', 'success');
       };
       reader.readAsDataURL(file);
     }
@@ -614,89 +1132,192 @@
       state.customQrDataUrl = null;
       saveState();
       renderQrModalContent();
-      showToast('已還原預設群組 QR', 'info');
+      showToast('已還原為預設 LINE 群組 QR Code', 'info');
     }
 
+    /********************************************************************
+     * 3. HELPER FUNCTIONS (SKILL LEVELS, TIME SLOTS, LOCATIONS)
+     ********************************************************************/
     function getPlayerById(id) {
+      if (!id) return null;
       return state.players.find(p => p.id === id) || null;
     }
 
     function getLevelBadgeInfo(level) {
       const lv = Number(level) || 1;
-      if (lv <= 3) return { label: `${lv}級`, tier: '新手', classes: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' };
-      if (lv <= 6) return { label: `${lv}級`, tier: '初階', classes: 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
-      if (lv <= 9) return { label: `${lv}級`, tier: '中階', classes: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
-      if (lv <= 12) return { label: `${lv}級`, tier: '高階', classes: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
-      return { label: `${lv}級`, tier: '甲組', classes: 'bg-purple-500/20 text-purple-300 border-purple-500/40' };
+      if (lv <= 3) {
+        return { label: `${lv}級`, tier: '新手', classes: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' };
+      } else if (lv <= 6) {
+        return { label: `${lv}級`, tier: '初階', classes: 'bg-sky-500/20 text-sky-300 border-sky-500/40' };
+      } else if (lv <= 9) {
+        return { label: `${lv}級`, tier: '中階', classes: 'bg-amber-500/20 text-amber-300 border-amber-500/40' };
+      } else if (lv <= 12) {
+        return { label: `${lv}級`, tier: '高階', classes: 'bg-rose-500/20 text-rose-300 border-rose-500/40' };
+      } else {
+        return { label: `${lv}級`, tier: '甲組', classes: 'bg-purple-500/20 text-purple-300 border-purple-500/40' };
+      }
     }
 
     function getTimeSlotBadge(timeSlot) {
-      if (timeSlot === '18-20') return { text: '18-20', classes: 'bg-sky-500/15 text-sky-300 border-sky-500/30' };
-      if (timeSlot === '19-21') return { text: '19-21', classes: 'bg-purple-500/15 text-purple-300 border-purple-500/30' };
+      if (timeSlot === '18-20') {
+        return { text: '18-20', classes: 'bg-sky-500/15 text-sky-300 border-sky-500/30' };
+      } else if (timeSlot === '19-21') {
+        return { text: '19-21', classes: 'bg-purple-500/15 text-purple-300 border-purple-500/30' };
+      }
       return { text: '18-21', classes: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' };
+    }
+
+    function isPlayerEligibleInCurrentHour(player) {
+      if (!player) return false;
+      if (state.currentHourFilter === 'ALL') return true;
+      if (state.currentHourFilter === '18-19') {
+        return player.timeSlot === '18-21' || player.timeSlot === '18-20';
+      }
+      if (state.currentHourFilter === '19-20') {
+        return true;
+      }
+      if (state.currentHourFilter === '20-21') {
+        return player.timeSlot === '18-21' || player.timeSlot === '19-21';
+      }
+      return true;
     }
 
     function getPlayerLocation(playerId) {
       for (let c = 0; c < state.courts.length; c++) {
         const sIdx = state.courts[c].slots.indexOf(playerId);
-        if (sIdx !== -1) return { status: 'COURT', courtIndex: c, slotIndex: sIdx, label: `${state.courts[c].name}比賽中` };
+        if (sIdx !== -1) {
+          return { status: 'COURT', courtIndex: c, slotIndex: sIdx, label: `${state.courts[c].name}比賽中` };
+        }
       }
       const pIdx = state.prepSlots.indexOf(playerId);
-      if (pIdx !== -1) return { status: 'PREP', slotIndex: pIdx, label: '準備區候命' };
+      if (pIdx !== -1) {
+        return { status: 'PREP', slotIndex: pIdx, label: '準備區候命' };
+      }
       return { status: 'WAIT', label: '等待上場' };
     }
 
     function getPlayedTogetherCount(idA, idB) {
+      if (!idA || !idB) return 0;
       const pA = getPlayerById(idA);
       if (!pA || !pA.playedWith) return 0;
       return pA.playedWith[idB] || 0;
     }
 
+    /********************************************************************
+     * 4. SMART AUTO-MATCHING ALGORITHM (純粹找最少同場打過的4人)
+     ********************************************************************/
     function autoFillPrepArea() {
       const available = state.players.filter(p => {
         if (p.resting) return false;
+        if (!isPlayerEligibleInCurrentHour(p)) return false;
         const loc = getPlayerLocation(p.id);
         return loc.status === 'WAIT' || loc.status === 'PREP';
       });
 
       if (available.length < 4) {
-        showToast('等待區球員不足 4 人', 'warn');
+        showToast('目前符合時段且在等待區的球員不足 4 人！', 'warn');
         return;
       }
 
-      available.sort((a, b) => a.games - b.games);
-      const pool = available.slice(0, Math.min(available.length, 8));
-      
-      let bestQuartet = [pool[0].id, pool[1].id, pool[2].id, pool[3].id];
-      state.prepSlots = bestQuartet;
-      saveState();
-      renderAll();
-      showToast('已自動配出 4 位球友！', 'success');
+      available.sort((a, b) => {
+        if (a.games !== b.games) return a.games - b.games;
+        const aShort = a.timeSlot !== '18-21' ? 0 : 1;
+        const bShort = b.timeSlot !== '18-21' ? 0 : 1;
+        if (aShort !== bShort) return aShort - bShort;
+        return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
+      });
+
+      const poolSize = Math.min(available.length, 9);
+      const pool = available.slice(0, poolSize);
+
+      let bestQuartet = null;
+      let bestScore = Infinity;
+
+      for (let i = 0; i < pool.length - 3; i++) {
+        for (let j = i + 1; j < pool.length - 2; j++) {
+          for (let k = j + 1; k < pool.length - 1; k++) {
+            for (let l = k + 1; l < pool.length; l++) {
+              const four = [pool[i], pool[j], pool[k], pool[l]];
+              const gamesPenalty = (four[0].games + four[1].games + four[2].games + four[3].games) * 40;
+
+              // Sum all 6 pairwise played-together counts among the 4 players
+              let togetherRepeats = 0;
+              for (let a = 0; a < 4; a++) {
+                for (let b = a + 1; b < 4; b++) {
+                  togetherRepeats += getPlayedTogetherCount(four[a].id, four[b].id);
+                }
+              }
+              const repeatPenalty = togetherRepeats * 85;
+
+              const levels = [four[0].level, four[1].level, four[2].level, four[3].level];
+              const spread = Math.max(...levels) - Math.min(...levels);
+              const spreadPenalty = spread > 5 ? (spread - 5) * 20 : spread * 4;
+
+              const totalScore = gamesPenalty + repeatPenalty + spreadPenalty + (Math.random() * 2);
+
+              if (totalScore < bestScore) {
+                bestScore = totalScore;
+                bestQuartet = [four[0].id, four[1].id, four[2].id, four[3].id];
+              }
+            }
+          }
+        }
+      }
+
+      if (bestQuartet) {
+        state.prepSlots = bestQuartet;
+        clearSelection();
+        saveState();
+        renderAll();
+        showToast('已自動配出最少同場重疊的 4 位球友！', 'success');
+      }
     }
 
     function clearPrepArea() {
       state.prepSlots = [null, null, null, null];
+      clearSelection();
       saveState();
       renderAll();
     }
 
+    /********************************************************************
+     * 5. COURT MANAGEMENT & MATCH COMPLETION (自動計算上場與同場次數)
+     ********************************************************************/
     function assignPrepToCourt(courtIndex) {
       const court = state.courts[courtIndex];
+      if (!court) return;
+
       const readyIds = state.prepSlots.filter(Boolean);
       if (readyIds.length < 4) {
-        showToast('準備區需排滿 4 人才能派發！', 'warn');
+        showToast('準備區需排滿 4 位球員才能派發上場！', 'warn');
         return;
       }
+
+      const courtOccupied = court.slots.some(Boolean);
+      if (courtOccupied) {
+        showToast(`${court.name} 目前還有球員在場上，請先點擊「結束結算」或「退回準備區」`, 'warn');
+        return;
+      }
+
       court.slots = [...state.prepSlots];
       court.startTime = Date.now();
       state.prepSlots = [null, null, null, null];
+
+      clearSelection();
       saveState();
       renderAll();
-      showToast(`${court.name} 比賽開始！`, 'success');
+      showToast(`${court.name} 比賽開始！可點擊自動配點準備下一場`, 'success');
     }
 
     function finishCourtMatch(courtIndex) {
       const court = state.courts[courtIndex];
+      if (!court) return;
+      const ids = court.slots.filter(Boolean);
+      if (ids.length < 4) {
+        showToast('場上不足 4 人，若要清空場地請點「退回等待區」', 'warn');
+        return;
+      }
+
       const four = [...court.slots];
       const now = Date.now();
 
@@ -708,6 +1329,7 @@
         }
       });
 
+      // Record all 6 pairs among the 4 players as having played together
       for (let i = 0; i < four.length; i++) {
         for (let j = i + 1; j < four.length; j++) {
           recordPlayedTogether(four[i], four[j]);
@@ -723,17 +1345,22 @@
 
       court.slots = [null, null, null, null];
       court.startTime = null;
+
+      clearSelection();
       saveState();
       renderAll();
-      showToast(`${court.name} 完賽結算 +1場！`, 'success');
+      showToast(`${court.name} 完賽結算！4位球員上場 +1 並已記錄同場球友`, 'success');
     }
 
     function cancelCourtMatch(courtIndex) {
-      state.courts[courtIndex].slots = [null, null, null, null];
-      state.courts[courtIndex].startTime = null;
+      const court = state.courts[courtIndex];
+      if (!court) return;
+      court.slots = [null, null, null, null];
+      court.startTime = null;
+      clearSelection();
       saveState();
       renderAll();
-      showToast('已退回等待區', 'info');
+      showToast(`已將 ${court.name} 球員退回等待區（不計場次）`, 'info');
     }
 
     function recordPlayedTogether(id1, id2) {
@@ -746,17 +1373,35 @@
       p2.playedWith[id1] = (p2.playedWith[id1] || 0) + 1;
     }
 
+    /********************************************************************
+     * 6. INTERACTIVE TOUCH / CLICK SWAP & MANUAL ADJUSTMENT
+     ********************************************************************/
     function handlePrepSlotClick(slotIndex) {
       if (!selectedSource) {
         selectedSource = { type: 'PREP', slotIndex };
+        updateSelectionBanner();
         renderAll();
         return;
       }
+
+      if (selectedSource.type === 'PREP' && selectedSource.slotIndex === slotIndex) {
+        clearSelection();
+        return;
+      }
+
       if (selectedSource.type === 'PREP') {
         const temp = state.prepSlots[slotIndex];
         state.prepSlots[slotIndex] = state.prepSlots[selectedSource.slotIndex];
         state.prepSlots[selectedSource.slotIndex] = temp;
+      } else if (selectedSource.type === 'COURT') {
+        const c = state.courts[selectedSource.courtIndex];
+        const temp = state.prepSlots[slotIndex];
+        state.prepSlots[slotIndex] = c.slots[selectedSource.slotIndex];
+        c.slots[selectedSource.slotIndex] = temp;
+      } else if (selectedSource.type === 'ROSTER') {
+        PlacePlayerIntoPrepSlot(selectedSource.playerId, slotIndex);
       }
+
       clearSelection();
       saveState();
       renderAll();
@@ -765,54 +1410,183 @@
     function handleCourtSlotClick(courtIndex, slotIndex) {
       if (!selectedSource) {
         selectedSource = { type: 'COURT', courtIndex, slotIndex };
+        updateSelectionBanner();
         renderAll();
         return;
       }
+
+      if (selectedSource.type === 'COURT' && selectedSource.courtIndex === courtIndex && selectedSource.slotIndex === slotIndex) {
+        clearSelection();
+        return;
+      }
+
+      if (selectedSource.type === 'COURT') {
+        const c1 = state.courts[selectedSource.courtIndex];
+        const c2 = state.courts[courtIndex];
+        const temp = c2.slots[slotIndex];
+        c2.slots[slotIndex] = c1.slots[selectedSource.slotIndex];
+        c1.slots[selectedSource.slotIndex] = temp;
+      } else if (selectedSource.type === 'PREP') {
+        const c = state.courts[courtIndex];
+        const temp = c.slots[slotIndex];
+        c.slots[slotIndex] = state.prepSlots[selectedSource.slotIndex];
+        state.prepSlots[selectedSource.slotIndex] = temp;
+      } else if (selectedSource.type === 'ROSTER') {
+        PlacePlayerIntoCourtSlot(selectedSource.playerId, courtIndex, slotIndex);
+      }
+
+      const targetCourt = state.courts[courtIndex];
+      if (targetCourt.slots.every(Boolean) && !targetCourt.startTime) {
+        targetCourt.startTime = Date.now();
+      }
+
       clearSelection();
       saveState();
       renderAll();
     }
 
     function handleRosterPlayerAssign(playerId) {
+      const player = getPlayerById(playerId);
+      if (!player) return;
+
+      if (selectedSource) {
+        if (selectedSource.type === 'PREP') {
+          PlacePlayerIntoPrepSlot(playerId, selectedSource.slotIndex);
+          clearSelection();
+          saveState();
+          renderAll();
+          return;
+        }
+        if (selectedSource.type === 'COURT') {
+          PlacePlayerIntoCourtSlot(playerId, selectedSource.courtIndex, selectedSource.slotIndex);
+          clearSelection();
+          saveState();
+          renderAll();
+          return;
+        }
+      }
+
+      const loc = getPlayerLocation(playerId);
+      if (loc.status === 'PREP') {
+        state.prepSlots[loc.slotIndex] = null;
+        saveState();
+        renderAll();
+        showToast(`${player.name} 已從準備區移回等待區`, 'info');
+        return;
+      }
+      if (loc.status === 'COURT') {
+        showToast(`${player.name} 目前正在 ${loc.label}，若要換人請先點選場上格子`, 'warn');
+        return;
+      }
+
       const emptyIdx = state.prepSlots.findIndex(s => s === null);
       if (emptyIdx !== -1) {
         state.prepSlots[emptyIdx] = playerId;
         saveState();
         renderAll();
       } else {
-        showToast('準備區已滿', 'warn');
+        selectedSource = { type: 'ROSTER', playerId };
+        updateSelectionBanner();
+        renderAll();
+        showToast(`準備區已滿，請點擊準備區或場地上的任一位置讓「${player.name}」替換上去`, 'info');
       }
+    }
+
+    function PlacePlayerIntoPrepSlot(playerId, targetSlotIndex) {
+      removePlayerFromEverywhere(playerId);
+      state.prepSlots[targetSlotIndex] = playerId;
+    }
+
+    function PlacePlayerIntoCourtSlot(playerId, courtIndex, slotIndex) {
+      removePlayerFromEverywhere(playerId);
+      state.courts[courtIndex].slots[slotIndex] = playerId;
+      if (state.courts[courtIndex].slots.every(Boolean) && !state.courts[courtIndex].startTime) {
+        state.courts[courtIndex].startTime = Date.now();
+      }
+    }
+
+    function removePlayerFromEverywhere(playerId) {
+      state.prepSlots = state.prepSlots.map(id => (id === playerId ? null : id));
+      state.courts.forEach(c => {
+        c.slots = c.slots.map(id => (id === playerId ? null : id));
+      });
     }
 
     function removePrepSlotPlayer(event, slotIndex) {
       event.stopPropagation();
       state.prepSlots[slotIndex] = null;
+      clearSelection();
       saveState();
       renderAll();
     }
 
     function clearSelection() {
       selectedSource = null;
+      updateSelectionBanner();
       renderAll();
     }
 
+    function updateSelectionBanner() {
+      const banner = document.getElementById('selection-banner');
+      const text = document.getElementById('selection-banner-text');
+      if (!selectedSource) {
+        banner.classList.add('hidden');
+        return;
+      }
+      banner.classList.remove('hidden');
+      if (selectedSource.type === 'PREP') {
+        const p = getPlayerById(state.prepSlots[selectedSource.slotIndex]);
+        text.textContent = p
+          ? `已選取準備區的「${p.name}」，請點擊右側名單球員或另一位置進行替換`
+          : `已選取準備區空位 (第 ${selectedSource.slotIndex + 1} 格)，請點擊右側名單球員放入`;
+      } else if (selectedSource.type === 'COURT') {
+        const c = state.courts[selectedSource.courtIndex];
+        const p = getPlayerById(c.slots[selectedSource.slotIndex]);
+        text.textContent = p
+          ? `已選取 ${c.name} 的「${p.name}」，請點擊另一位置或右側球員進行換人`
+          : `已選取 ${c.name} 空位，請點擊右側球員直接放入`;
+      } else if (selectedSource.type === 'ROSTER') {
+        const p = getPlayerById(selectedSource.playerId);
+        text.textContent = `已選取球員「${p ? p.name : ''}」，請點擊準備區或場地上的位置進行替換`;
+      }
+    }
+
+    /********************************************************************
+     * 7. SHUTTLECOCK COUNTER & FILTERS
+     ********************************************************************/
     function adjustShuttles(delta) {
       state.shuttlesUsed = Math.max(0, (state.shuttlesUsed || 0) + delta);
       saveState();
       renderHeaderStats();
+      if (delta === 12) {
+        showToast('已開啟新球筒 (+12顆)', 'info');
+      } else if (delta > 0) {
+        showToast(`用球 +${delta} 顆 (目前共 ${state.shuttlesUsed} 顆)`, 'info');
+      }
     }
 
     function setCurrentHourFilter(period) {
       state.currentHourFilter = period;
       saveState();
       renderAll();
+      const labels = {
+        'ALL': '全部時段皆可排點',
+        '18-19': '18:00-19:00（自動排除 19-21 尚未到場球友）',
+        '19-20': '19:00-20:00（全體時段球友皆在場）',
+        '20-21': '20:00-21:00（自動排除 18-20 已離場球友）'
+      };
+      showToast(`時段切換：${labels[period]}`, 'info');
     }
 
     function setRosterFilter(filter) {
       state.rosterFilter = filter;
+      saveState();
       renderRoster();
     }
 
+    /********************************************************************
+     * 8. RENDER ENGINE (COURTS, PREP AREA, ROSTER, STATS)
+     ********************************************************************/
     function renderAll() {
       renderBrandIcon();
       renderHeaderStats();
@@ -821,43 +1595,100 @@
       renderRoster();
     }
 
-    function renderBrandIcon() {
-      const box = document.getElementById('brand-icon-box');
-      if (box) box.innerHTML = `🐱`;
-    }
-
     function renderHeaderStats() {
       document.getElementById('shuttle-count-display').textContent = state.shuttlesUsed || 0;
-      document.getElementById('shuttle-tubes-display').textContent = `(${((state.shuttlesUsed || 0) / 12).toFixed(1)}筒)`;
+      const tubes = ((state.shuttlesUsed || 0) / 12).toFixed(1).replace('.0', '');
+      document.getElementById('shuttle-tubes-display').textContent = `(${tubes}筒)`;
+
       const paidCount = state.players.filter(p => p.paid).length;
       document.getElementById('fee-summary-pill').textContent = `${paidCount} / ${state.players.length} 人已繳`;
+
       document.getElementById('completed-matches-badge').textContent = (state.matchLogs || []).length;
+
+      ['ALL', '18-19', '19-20', '20-21'].forEach(p => {
+        const btn = document.getElementById(`period-btn-${p}`);
+        const mBtn = document.getElementById(`m-period-btn-${p}`);
+        const active = state.currentHourFilter === p;
+        if (btn) {
+          btn.className = `period-btn px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+            active ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-300 hover:text-white'
+          }`;
+        }
+        if (mBtn) {
+          mBtn.className = `m-period-btn px-2 py-1 rounded-lg text-xs font-bold transition ${
+            active ? 'bg-emerald-500 text-slate-950 shadow' : 'text-slate-300'
+          }`;
+        }
+      });
     }
 
     function renderCourts() {
       const container = document.getElementById('courts-container');
       container.innerHTML = state.courts.map((court, cIdx) => {
         const playersOnCourt = court.slots.map(id => getPlayerById(id));
-        const isFull = playersOnCourt.filter(Boolean).length === 4;
+        const activeCount = playersOnCourt.filter(Boolean).length;
+        const isFull = activeCount === 4;
+
         return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between shadow-lg">
+          <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between shadow-lg">
+            <!-- Court Top Bar -->
             <div class="flex items-center justify-between mb-2">
-              <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-black text-xs">${court.name}</span>
-              ${isFull ? `<span class="text-[11px] text-amber-300">比賽進行中</span>` : `<span class="text-[11px] text-slate-400">待命中</span>`}
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-black text-xs">
+                  ${court.name}
+                </span>
+                ${
+                  isFull
+                    ? `<span class="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                        <span class="court-timer" data-start="${court.startTime || Date.now()}">${formatDuration(court.startTime)}</span>
+                       </span>`
+                    : `<span class="text-[11px] text-slate-400">空場待命 (${activeCount}/4)</span>`
+                }
+              </div>
+              <button onclick="adjustShuttles(1)" title="此場地換新球 (+1顆)" class="px-2 py-0.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-[11px] font-bold transition active:scale-95">
+                🪶+1球
+              </button>
             </div>
+
+            <!-- Green Court Visual Representation (4 Unified Slots) -->
             <div class="badminton-court rounded-xl p-2.5 flex flex-col gap-2">
               <div class="grid grid-cols-2 gap-1.5">
                 ${renderCourtSlotHTML(cIdx, 0, playersOnCourt[0])}
                 ${renderCourtSlotHTML(cIdx, 1, playersOnCourt[1])}
               </div>
-              <div class="court-net my-0.5"><span class="px-2 bg-emerald-950 text-emerald-200 text-[9px]">NET</span></div>
+
+              <!-- Net Line -->
+              <div class="court-net my-0.5">
+                <span class="px-2 py-0.2 bg-emerald-950/90 border border-emerald-400/40 rounded-full text-[9px] font-black text-emerald-200 tracking-widest uppercase">
+                  NET 球網
+                </span>
+              </div>
+
               <div class="grid grid-cols-2 gap-1.5">
                 ${renderCourtSlotHTML(cIdx, 2, playersOnCourt[2])}
                 ${renderCourtSlotHTML(cIdx, 3, playersOnCourt[3])}
               </div>
             </div>
+
+            <!-- Court Bottom Controls -->
             <div class="mt-2.5 flex items-center gap-1.5">
-              ${isFull ? `<button onclick="finishCourtMatch(${cIdx})" class="w-full py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">結束結算 (+1場)</button>` : `<button onclick="assignPrepToCourt(${cIdx})" class="w-full py-2 rounded-xl bg-slate-800 text-slate-200 text-xs">由準備區派發</button>`}
+              ${
+                activeCount > 0
+                  ? `
+                    <button onclick="finishCourtMatch(${cIdx})" ${!isFull ? 'disabled' : ''} class="flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 active:scale-95 text-slate-950 font-extrabold text-xs shadow transition flex items-center justify-center gap-1">
+                      <i class="fa-solid fa-flag-checkered"></i> 結束結算 (+1場)
+                    </button>
+                    <button onclick="cancelCourtMatch(${cIdx})" title="不計場次退回等待區" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+                      退回
+                    </button>
+                  `
+                  : `
+                    <button onclick="assignPrepToCourt(${cIdx})" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-emerald-600/80 border border-slate-700 hover:border-emerald-400 text-slate-200 hover:text-white font-bold text-xs transition active:scale-95">
+                      <i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> 由準備區派發上場
+                    </button>
+                  `
+              }
             </div>
           </div>
         `;
@@ -865,62 +1696,464 @@
     }
 
     function renderCourtSlotHTML(courtIndex, slotIndex, player) {
+      const isSelected =
+        selectedSource &&
+        selectedSource.type === 'COURT' &&
+        selectedSource.courtIndex === courtIndex &&
+        selectedSource.slotIndex === slotIndex;
+
       if (!player) {
-        return `<div onclick="handleCourtSlotClick(${courtIndex}, ${slotIndex})" class="h-14 rounded border border-dashed border-emerald-300/40 bg-emerald-950/40 flex items-center justify-center cursor-pointer text-[10px] text-emerald-200/70">+排入</div>`;
+        return `
+          <div onclick="handleCourtSlotClick(${courtIndex}, ${slotIndex})"
+               class="h-16 rounded-lg border border-dashed border-emerald-300/40 bg-emerald-950/40 hover:bg-emerald-900/50 flex flex-col items-center justify-center cursor-pointer transition ${isSelected ? 'selected-slot' : ''}">
+            <i class="fa-solid fa-plus text-emerald-300/60 text-xs"></i>
+            <span class="text-[10px] text-emerald-200/70">點擊排入</span>
+          </div>
+        `;
       }
+
       const lvInfo = getLevelBadgeInfo(player.level);
+      const tsInfo = getTimeSlotBadge(player.timeSlot);
+
       return `
-        <div onclick="handleCourtSlotClick(${courtIndex}, ${slotIndex})" class="h-14 rounded bg-slate-950 border border-emerald-400/30 p-1 flex flex-col justify-between cursor-pointer">
-          <div class="flex items-center justify-between"><span class="font-bold text-xs text-white truncate">${player.name}</span><span class="text-[9px] px-1 rounded ${lvInfo.classes}">${lvInfo.label}</span></div>
-          <div class="text-[10px] text-slate-300 text-right">${player.games}場</div>
+        <div onclick="handleCourtSlotClick(${courtIndex}, ${slotIndex})"
+             class="h-16 rounded-lg bg-slate-950/85 hover:bg-slate-900 border border-emerald-400/30 p-1.5 flex flex-col justify-between cursor-pointer transition relative ${isSelected ? 'selected-slot' : ''}">
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-extrabold text-xs text-white truncate">${escapeHTML(player.name)}</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
+          </div>
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="px-1 rounded border ${tsInfo.classes}">${tsInfo.text}</span>
+            <button onclick="event.stopPropagation(); openHistoryModal('${player.id}')" class="text-slate-300 hover:text-amber-300 font-semibold underline decoration-dotted" title="查看與誰打過">
+              ${player.games}場・紀錄
+            </button>
+          </div>
         </div>
       `;
     }
 
     function renderPrepArea() {
       const gridContainer = document.getElementById('prep-slots-grid');
-      gridContainer.innerHTML = [0, 1, 2, 3].map(idx => {
-        const playerId = state.prepSlots[idx];
-        const player = getPlayerById(playerId);
-        if (!player) {
-          return `<div onclick="handlePrepSlotClick(${idx})" class="h-16 rounded-xl border border-dashed border-slate-700 bg-slate-900 flex items-center justify-center cursor-pointer text-xs text-slate-400">點擊排入</div>`;
+      gridContainer.innerHTML = [0, 1, 2, 3].map(idx => renderPrepSlotCard(idx)).join('');
+
+      const activePlayers = state.prepSlots.map(id => getPlayerById(id)).filter(Boolean);
+      const filledCount = activePlayers.length;
+
+      const avgLevel = filledCount > 0
+        ? (activePlayers.reduce((sum, p) => sum + p.level, 0) / filledCount).toFixed(1)
+        : '-';
+
+      document.getElementById('prep-avg-stats').innerHTML = `平均級數: <strong class="text-white">${avgLevel}</strong>`;
+
+      const badge = document.getElementById('prep-chemistry-badge');
+      const hintEl = document.getElementById('prep-pair-history-hint');
+
+      if (filledCount === 4) {
+        let totalOverlap = 0;
+        for (let i = 0; i < 4; i++) {
+          for (let j = i + 1; j < 4; j++) {
+            totalOverlap += getPlayedTogetherCount(activePlayers[i].id, activePlayers[j].id);
+          }
         }
+
+        if (totalOverlap === 0) {
+          badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold';
+          badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i>全新組合（這4人今日尚未同場過）';
+        } else {
+          badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold';
+          badge.innerHTML = `已排滿 4 人（今日彼此同場重疊共 ${totalOverlap} 次）`;
+        }
+
+        hintEl.innerHTML = `📊 同場統計：這 4 位球員今日彼此同場打過累計 <strong class="text-emerald-300">${totalOverlap}</strong> 人次`;
+      } else {
+        badge.className = 'text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-semibold';
+        badge.textContent = `準備區尚缺 ${4 - filledCount} 人`;
+        hintEl.textContent = '💡 提示：點擊任一位置即可與等待區球員替換，或按「智慧自動配點」';
+      }
+
+      state.courts.forEach((c, idx) => {
+        const btn = document.getElementById(`assign-court-btn-${idx}`);
+        if (btn) {
+          const courtBusy = c.slots.some(Boolean);
+          btn.disabled = filledCount < 4 || courtBusy;
+        }
+      });
+    }
+
+    function renderPrepSlotCard(slotIndex) {
+      const playerId = state.prepSlots[slotIndex];
+      const player = getPlayerById(playerId);
+      const isSelected = selectedSource && selectedSource.type === 'PREP' && selectedSource.slotIndex === slotIndex;
+
+      if (!player) {
         return `
-          <div class="h-16 rounded-xl bg-slate-900 border border-slate-700 p-2 flex flex-col justify-between relative">
-            <button onclick="removePrepSlotPlayer(event, ${idx})" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-slate-800 text-slate-300 text-[10px]">×</button>
-            <div class="font-extrabold text-xs text-white truncate">${player.name}</div>
-            <div class="text-[10px] text-emerald-400">${player.games}場</div>
+          <div onclick="handlePrepSlotClick(${slotIndex})"
+               class="h-20 rounded-xl border-2 border-dashed border-slate-700 hover:border-indigo-400 bg-slate-900/50 hover:bg-slate-900 flex flex-col items-center justify-center cursor-pointer transition ${isSelected ? 'selected-slot' : ''}">
+            <i class="fa-solid fa-user-plus text-slate-500 text-sm mb-1"></i>
+            <span class="text-xs text-slate-400 font-semibold">點擊選取球員</span>
+          </div>
+        `;
+      }
+
+      const lvInfo = getLevelBadgeInfo(player.level);
+      const tsInfo = getTimeSlotBadge(player.timeSlot);
+
+      return `
+        <div onclick="handlePrepSlotClick(${slotIndex})"
+             class="h-20 rounded-xl bg-slate-900 hover:bg-slate-800/90 border border-slate-700 p-2.5 flex flex-col justify-between cursor-pointer transition relative group ${isSelected ? 'selected-slot' : ''}">
+          <button onclick="removePrepSlotPlayer(event, ${slotIndex})" title="移出準備區"
+                  class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white border border-slate-600 flex items-center justify-center text-[10px] shadow">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="flex items-center justify-between gap-1">
+            <span class="font-extrabold text-sm text-white truncate">${escapeHTML(player.name)}</span>
+            <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span class="px-1.5 py-0.2 rounded border text-[10px] font-semibold ${tsInfo.classes}">${tsInfo.text}</span>
+            <button onclick="event.stopPropagation(); openHistoryModal('${player.id}')" class="font-bold text-slate-300 hover:text-amber-300 underline decoration-dotted" title="查看與誰打過">
+              已上 <strong class="text-emerald-400">${player.games}</strong> 場 🔍
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRoster() {
+      ['ALL', 'WAIT', '18-21', '18-20', '19-21', 'UNPAID'].forEach(tab => {
+        const el = document.getElementById(`roster-tab-${tab}`);
+        if (el) {
+          const active = state.rosterFilter === tab;
+          el.className = `roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition ${
+            active ? 'bg-emerald-500 text-slate-950 shadow' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+          }`;
+        }
+      });
+
+      const search = (document.getElementById('player-search-input')?.value || '').trim().toLowerCase();
+      const sortMode = document.getElementById('roster-sort-select')?.value || 'GAMES_ASC';
+
+      let filtered = state.players.filter(p => {
+        if (search && !p.name.toLowerCase().includes(search)) return false;
+        const loc = getPlayerLocation(p.id);
+        if (state.rosterFilter === 'WAIT' && loc.status !== 'WAIT') return false;
+        if (state.rosterFilter === '18-21' && p.timeSlot !== '18-21') return false;
+        if (state.rosterFilter === '18-20' && p.timeSlot !== '18-20') return false;
+        if (state.rosterFilter === '19-21' && p.timeSlot !== '19-21') return false;
+        if (state.rosterFilter === 'UNPAID' && p.paid) return false;
+        return true;
+      });
+
+      filtered.sort((a, b) => {
+        const locA = getPlayerLocation(a.id).status === 'WAIT' ? 0 : 1;
+        const locB = getPlayerLocation(b.id).status === 'WAIT' ? 0 : 1;
+        if (sortMode === 'GAMES_ASC') {
+          if (locA !== locB) return locA - locB;
+          if (a.games !== b.games) return a.games - b.games;
+          return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
+        }
+        if (sortMode === 'LEVEL_DESC') return b.level - a.level;
+        if (sortMode === 'LEVEL_ASC') return a.level - b.level;
+        if (sortMode === 'TIMESLOT') return a.timeSlot.localeCompare(b.timeSlot);
+        return 0;
+      });
+
+      document.getElementById('roster-count-badge').textContent = `${state.players.length}人`;
+
+      const listEl = document.getElementById('roster-list');
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-8 text-slate-500 text-xs">
+            沒有符合篩選條件的球員
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(p => {
+        const lvInfo = getLevelBadgeInfo(p.level);
+        const tsInfo = getTimeSlotBadge(p.timeSlot);
+        const loc = getPlayerLocation(p.id);
+        const eligibleNow = isPlayerEligibleInCurrentHour(p);
+        const isSelectedRoster = selectedSource && selectedSource.type === 'ROSTER' && selectedSource.playerId === p.id;
+
+        const playedWithEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
+        const recentPlayedText = playedWithEntries.length > 0
+          ? playedWithEntries.slice(0, 4).map(([id, cnt]) => {
+              const mate = getPlayerById(id);
+              return mate ? `${escapeHTML(mate.name)}(${cnt})` : '';
+            }).filter(Boolean).join('、') + (playedWithEntries.length > 4 ? ` 等${playedWithEntries.length}人` : '')
+          : '尚無同場紀錄';
+
+        let statusBadge = '';
+        if (loc.status === 'COURT') {
+          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">${loc.label}</span>`;
+        } else if (loc.status === 'PREP') {
+          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold">準備區</span>`;
+        } else if (p.resting) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 text-[10px] font-bold">休息中</span>`;
+        } else if (!eligibleNow) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">非本時段</span>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-semibold">等待中</span>`;
+        }
+
+        return `
+          <div onclick="openHistoryModal('${p.id}')"
+               title="點擊查看「${escapeHTML(p.name)}」今日總共跟誰打過"
+               class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${!eligibleNow ? 'opacity-60' : ''}">
+            
+            <div class="flex items-center justify-between gap-2">
+              <!-- Left: Player Name + Skill Level + Time Slot -->
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-extrabold text-sm text-white truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
+                  <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}" title="台灣推廣 ${lvInfo.label} (${lvInfo.tier})">
+                    ${lvInfo.label}・${lvInfo.tier}
+                  </span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${tsInfo.classes}">
+                    <i class="fa-regular fa-clock mr-0.5"></i>${tsInfo.text}
+                  </span>
+                  ${statusBadge}
+                </div>
+              </div>
+
+              <!-- Right: Paid Toggle + Assign to Prep Button -->
+              <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
+                <button onclick="togglePlayerPaid('${p.id}')" title="點擊切換繳費狀態"
+                        class="px-2 py-1 rounded-lg border text-[11px] font-bold transition active:scale-95 ${
+                          p.paid
+                            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
+                            : 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30'
+                        }">
+                  ${p.paid ? '✓已繳' : '$未繳'}
+                </button>
+
+                <button onclick="handleRosterPlayerAssign('${p.id}')"
+                        class="px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition active:scale-95 ${
+                          loc.status === 'PREP'
+                            ? 'bg-indigo-600/30 border border-indigo-400 text-indigo-200'
+                            : loc.status === 'COURT'
+                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow'
+                        }">
+                  ${loc.status === 'PREP' ? '移出準備' : loc.status === 'COURT' ? '場上' : '+排點'}
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom Row: Clean Unified Played-With Summary Bar -->
+            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-900">
+              <div class="flex items-center gap-2 truncate">
+                <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次</span>
+                <span class="text-slate-600">|</span>
+                <span class="truncate text-slate-300">
+                  <i class="fa-solid fa-user-group text-emerald-400 mr-1"></i>打過：${recentPlayedText}
+                </span>
+              </div>
+              <span class="text-[11px] text-amber-300 font-bold shrink-0 flex items-center gap-1 ml-2">
+                共${playedWithEntries.length}人 <i class="fa-solid fa-chevron-right text-[9px]"></i>
+              </span>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    function renderRoster() {
-      const listEl = document.getElementById('roster-list');
-      const filtered = state.players;
-      listEl.innerHTML = filtered.map(p => `
-        <div onclick="openHistoryModal('${p.id}')" class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between cursor-pointer hover:border-amber-500">
-          <div>
-            <div class="font-extrabold text-xs text-white">${p.name} <span class="text-[10px] text-amber-300">${p.games}場</span></div>
-            <div class="text-[10px] text-slate-400">點擊查看今日跟誰打過</div>
-          </div>
-          <button onclick="event.stopPropagation(); handleRosterPlayerAssign('${p.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs">+排點</button>
-        </div>
-      `).join('');
+    /********************************************************************
+     * 9. PLAYER CRUD & INDIVIDUAL PARTNER/OPPONENT HISTORY MODAL
+     ********************************************************************/
+    function togglePlayerPaid(playerId) {
+      const p = getPlayerById(playerId);
+      if (!p) return;
+      p.paid = !p.paid;
+      saveState();
+      renderAll();
+      showToast(`${p.name} 已標記為「${p.paid ? '已繳費' : '未繳費'}」`, p.paid ? 'success' : 'warn');
+    }
+
+    function togglePlayerRest(playerId) {
+      const p = getPlayerById(playerId);
+      if (!p) return;
+      p.resting = !p.resting;
+      saveState();
+      renderAll();
+      showToast(`${p.name} 已設為「${p.resting ? '休息暫停排點' : '可正常排點'}」`, 'info');
+    }
+
+    function updateLevelPreview(val) {
+      const lvInfo = getLevelBadgeInfo(val);
+      const preview = document.getElementById('form-level-preview');
+      if (preview) {
+        preview.textContent = `${lvInfo.label} (${lvInfo.tier})`;
+        preview.className = `text-xs font-black px-2.5 py-0.5 rounded-full border ${lvInfo.classes}`;
+      }
+    }
+
+    function setFormLevel(val) {
+      const slider = document.getElementById('form-player-level');
+      if (slider) {
+        slider.value = val;
+        updateLevelPreview(val);
+      }
+    }
+
+    function openAddPlayerModal() {
+      document.getElementById('player-modal-title').textContent = '新增球員';
+      document.getElementById('form-player-id').value = '';
+      document.getElementById('form-player-name').value = '';
+      setFormLevel(5);
+      const radios = document.getElementsByName('form-timeslot');
+      radios.forEach(r => { r.checked = (r.value === '18-21'); });
+      document.getElementById('form-player-paid').checked = true;
+      document.getElementById('player-modal').classList.remove('hidden');
+      document.getElementById('player-modal').classList.add('flex');
+    }
+
+    function openEditPlayerModal(playerId) {
+      const p = getPlayerById(playerId);
+      if (!p) return;
+      document.getElementById('player-modal-title').textContent = `編輯球員：${p.name}`;
+      document.getElementById('form-player-id').value = p.id;
+      document.getElementById('form-player-name').value = p.name;
+      setFormLevel(p.level);
+      const radios = document.getElementsByName('form-timeslot');
+      radios.forEach(r => { r.checked = (r.value === p.timeSlot); });
+      document.getElementById('form-player-paid').checked = !!p.paid;
+      document.getElementById('player-modal').classList.remove('hidden');
+      document.getElementById('player-modal').classList.add('flex');
+    }
+
+    function closePlayerModal() {
+      document.getElementById('player-modal').classList.add('hidden');
+      document.getElementById('player-modal').classList.remove('flex');
+    }
+
+    function savePlayerForm(event) {
+      event.preventDefault();
+      const id = document.getElementById('form-player-id').value;
+      const name = document.getElementById('form-player-name').value.trim();
+      const level = parseInt(document.getElementById('form-player-level').value, 10) || 5;
+      const radios = document.getElementsByName('form-timeslot');
+      let timeSlot = '18-21';
+      radios.forEach(r => { if (r.checked) timeSlot = r.value; });
+      const paid = document.getElementById('form-player-paid').checked;
+
+      if (!name) return;
+
+      if (id) {
+        const existing = getPlayerById(id);
+        if (existing) {
+          existing.name = name;
+          existing.level = level;
+          existing.timeSlot = timeSlot;
+          existing.paid = paid;
+          showToast(`已更新「${name}」的資料`, 'success');
+        }
+      } else {
+        const newPlayer = {
+          id: 'p_' + Date.now(),
+          name,
+          level,
+          timeSlot,
+          paid,
+          games: 0,
+          resting: false,
+          playedWith: {},
+          lastPlayedAt: 0
+        };
+        state.players.push(newPlayer);
+        showToast(`已新增球員「${name} (${level}級)」`, 'success');
+      }
+
+      closePlayerModal();
+      saveState();
+      renderAll();
     }
 
     function openHistoryModal(playerId) {
       const p = getPlayerById(playerId);
       if (!p) return;
+      const lvInfo = getLevelBadgeInfo(p.level);
+
+      const badge = document.getElementById('hist-player-badge');
+      badge.className = `w-10 h-10 rounded-xl border flex items-center justify-center font-black text-xs ${lvInfo.classes}`;
+      badge.textContent = lvInfo.label;
+
       document.getElementById('hist-player-name').textContent = `${p.name} 的同場紀錄`;
-      document.getElementById('hist-player-meta').textContent = `參與時段：${p.timeSlot} ｜ 已上場：${p.games} 次`;
-      
-      const playedEntries = Object.entries(p.playedWith || {});
-      document.getElementById('hist-playedwith-total').textContent = `今日共與 ${playedEntries.length} 人同場過`;
-      document.getElementById('hist-playedwith-list').innerHTML = playedEntries.map(([id, cnt]) => {
-        const other = getPlayerById(id);
-        return `<div class="bg-slate-900 p-2 rounded text-xs flex justify-between"><span>${other ? other.name : ''}</span><span class="text-emerald-400">${cnt}次</span></div>`;
-      }).join('') || '<div class="text-xs text-slate-500">尚無紀錄</div>';
+      document.getElementById('hist-player-meta').textContent =
+        `參與時段：${p.timeSlot} ｜ 今日已上場：${p.games} 次 ｜ 繳費狀態：${p.paid ? '已繳費' : '未繳費'}`;
+
+      const playedEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
+      const playedListEl = document.getElementById('hist-playedwith-list');
+      const playedTotalEl = document.getElementById('hist-playedwith-total');
+      if (playedTotalEl) {
+        playedTotalEl.textContent = `今日共與 ${playedEntries.length} 位不同球友打過`;
+      }
+
+      if (playedEntries.length === 0) {
+        playedListEl.innerHTML = `<div class="text-xs text-slate-500 col-span-2">今日尚無同場打球紀錄</div>`;
+      } else {
+        playedListEl.innerHTML = playedEntries.map(([otherId, count]) => {
+          const other = getPlayerById(otherId);
+          const oLv = other ? getLevelBadgeInfo(other.level) : null;
+          return `
+            <div onclick="openHistoryModal('${otherId}')" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="text-xs font-bold text-slate-200 truncate">${other ? escapeHTML(other.name) : '已刪除球員'}</span>
+                ${oLv ? `<span class="text-[10px] px-1 rounded border ${oLv.classes}">${oLv.label}</span>` : ''}
+              </div>
+              <span class="text-xs font-extrabold text-emerald-400 shrink-0">同場 ${count} 次</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const timelineEl = document.getElementById('hist-matches-timeline');
+      const playerMatches = (state.matchLogs || []).filter(m => {
+        const list = m.players || [...(m.teamA || []), ...(m.teamB || [])];
+        return list.includes(playerId);
+      });
+
+      if (timelineEl) {
+        if (playerMatches.length === 0) {
+          timelineEl.innerHTML = `<div class="text-xs text-slate-500">今日尚無此球員的完賽場次明細</div>`;
+        } else {
+          timelineEl.innerHTML = playerMatches.map((m, idx) => {
+            const list = m.players || [...(m.teamA || []), ...(m.teamB || [])];
+            const others = list
+              .filter(id => id !== playerId)
+              .map(id => getPlayerById(id)?.name || '未知')
+              .join('、');
+
+            return `
+              <div class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold text-[10px]">#${playerMatches.length - idx} (${m.courtName})</span>
+                  <span class="text-slate-200">
+                    同場球友：<strong class="text-emerald-300">${escapeHTML(others)}</strong>
+                  </span>
+                </div>
+                <span class="text-[10px] text-slate-400">${m.finishedAt}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      document.getElementById('hist-edit-btn').onclick = () => {
+        closeHistoryModal();
+        openEditPlayerModal(playerId);
+      };
+
+      document.getElementById('hist-delete-btn').onclick = () => {
+        removePlayerFromEverywhere(playerId);
+        state.players = state.players.filter(item => item.id !== playerId);
+        closeHistoryModal();
+        saveState();
+        renderAll();
+        showToast(`已刪除球員「${p.name}」`, 'warn');
+      };
 
       document.getElementById('history-modal').classList.remove('hidden');
       document.getElementById('history-modal').classList.add('flex');
@@ -931,6 +2164,9 @@
       document.getElementById('history-modal').classList.remove('flex');
     }
 
+    /********************************************************************
+     * 10. FINANCE, MATCH LOG & SETTINGS MODALS
+     ********************************************************************/
     function openFinanceModal() {
       updateFinanceCalc();
       document.getElementById('finance-modal').classList.remove('hidden');
@@ -943,36 +2179,64 @@
     }
 
     function updateFinanceCalc() {
-      const collected = state.players.filter(p => p.paid).length * 200;
-      const cost = (state.shuttlesUsed || 0) * 45;
-      document.getElementById('fin-collected').textContent = `$${collected}`;
-      document.getElementById('fin-shuttle-cost').textContent = `$${cost}`;
-      document.getElementById('fin-net-balance').textContent = `$${collected - cost}`;
-      document.getElementById('fin-unpaid-list').innerHTML = state.players.filter(p => !p.paid).map(p => `
-        <button onclick="p.paid=true; saveState(); updateFinanceCalc(); renderAll();" class="px-2 py-1 rounded bg-rose-500/20 text-rose-200 text-xs">${p.name} (點擊標記已繳)</button>
-      `).join('') || '<span class="text-xs text-emerald-400">皆已繳費</span>';
+      const feePerPerson = Number(document.getElementById('fin-fee-per-person')?.value) || 0;
+      const costPerShuttle = Number(document.getElementById('fin-cost-per-shuttle')?.value) || 0;
+
+      const paidPlayers = state.players.filter(p => p.paid);
+      const unpaidPlayers = state.players.filter(p => !p.paid);
+
+      const collected = paidPlayers.length * feePerPerson;
+      const shuttleCost = (state.shuttlesUsed || 0) * costPerShuttle;
+      const net = collected - shuttleCost;
+
+      document.getElementById('fin-collected').textContent = `$${collected.toLocaleString()}`;
+      document.getElementById('fin-paid-count').textContent = `${paidPlayers.length} / ${state.players.length} 人已繳`;
+      document.getElementById('fin-shuttle-cost').textContent = `$${shuttleCost.toLocaleString()}`;
+      document.getElementById('fin-shuttle-used').textContent = `共 ${state.shuttlesUsed || 0} 顆`;
+      document.getElementById('fin-net-balance').textContent = `${net >= 0 ? '$' : '-$'}${Math.abs(net).toLocaleString()}`;
+
+      const unpaidContainer = document.getElementById('fin-unpaid-list');
+      if (unpaidPlayers.length === 0) {
+        unpaidContainer.innerHTML = `<span class="text-xs text-emerald-400 font-bold">🎉 全員皆已繳費完畢！</span>`;
+      } else {
+        unpaidContainer.innerHTML = unpaidPlayers.map(p => `
+          <button onclick="togglePlayerPaid('${p.id}'); updateFinanceCalc();"
+                  class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-emerald-500/20 border border-rose-500/40 text-rose-200 hover:text-emerald-300 text-xs font-bold transition">
+            ${escapeHTML(p.name)} (${p.timeSlot}) - 點擊標記已繳
+          </button>
+        `).join('');
+      }
     }
 
-    function openAddPlayerModal() {
-      document.getElementById('player-modal').classList.remove('hidden');
-      document.getElementById('player-modal').classList.add('flex');
+    function openMatchLogModal() {
+      const list = document.getElementById('match-log-list');
+      const logs = state.matchLogs || [];
+      if (logs.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">今日尚無完賽場次紀錄</div>`;
+      } else {
+        list.innerHTML = logs.map((m, idx) => {
+          const ids = m.players || [...(m.teamA || []), ...(m.teamB || [])];
+          const names = ids.map(id => getPlayerById(id)?.name || '未知').join('、');
+          return `
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-bold">#${logs.length - idx}</span>
+                <span class="font-bold text-emerald-300">${m.courtName}</span>
+                <span class="text-slate-400">同場球員：</span>
+                <span class="text-white font-semibold">${escapeHTML(names)}</span>
+              </div>
+              <span class="text-slate-400 text-[11px] shrink-0">${m.finishedAt}</span>
+            </div>
+          `;
+        }).join('');
+      }
+      document.getElementById('match-log-modal').classList.remove('hidden');
+      document.getElementById('match-log-modal').classList.add('flex');
     }
 
-    function closePlayerModal() {
-      document.getElementById('player-modal').classList.add('hidden');
-      document.getElementById('player-modal').classList.remove('flex');
-    }
-
-    function savePlayerForm(e) {
-      e.preventDefault();
-      const name = document.getElementById('form-player-name').value.trim();
-      const level = Number(document.getElementById('form-player-level').value) || 5;
-      if (!name) return;
-      state.players.push({ id: 'p_' + Date.now(), name, level, timeSlot: '18-21', paid: true, games: 0, playedWith: {} });
-      closePlayerModal();
-      saveState();
-      renderAll();
-      showToast(`已新增球員「${name}」`, 'success');
+    function closeMatchLogModal() {
+      document.getElementById('match-log-modal').classList.add('hidden');
+      document.getElementById('match-log-modal').classList.remove('flex');
     }
 
     function openSettingsModal() {
@@ -985,73 +2249,152 @@
       document.getElementById('settings-modal').classList.remove('flex');
     }
 
-    function openIconModal() {
-      document.getElementById('icon-modal').classList.remove('hidden');
-      document.getElementById('icon-modal').classList.add('flex');
-    }
-
-    function closeIconModal() {
-      document.getElementById('icon-modal').classList.add('hidden');
-      document.getElementById('icon-modal').classList.remove('flex');
-    }
-
-    function selectPresetCat(key) {
-      closeIconModal();
-      showToast('已切換圖示', 'success');
-    }
-
-    function handleIconUpload(e) {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          state.customIconDataUrl = evt.target.result;
-          saveState();
-          renderBrandIcon();
-          closeIconModal();
-          showToast('已更換自訂 Icon', 'success');
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
     function resetMatchCountsOnly() {
-      state.players.forEach(p => { p.games = 0; p.playedWith = {}; });
+      state.players.forEach(p => {
+        p.games = 0;
+        p.playedWith = {};
+        p.lastPlayedAt = 0;
+        p.paid = false;
+      });
+      state.courts.forEach(c => {
+        c.slots = [null, null, null, null];
+        c.startTime = null;
+      });
+      state.prepSlots = [null, null, null, null];
       state.shuttlesUsed = 0;
+      state.matchLogs = [];
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已開啟新的一天', 'success');
+      showToast('已開啟新的一天！所有場次、同場紀錄與用球數已歸零', 'success');
     }
 
     function loadDemoPlayers() {
       state.players = getInitialDemoPlayers();
+      state.courts = [
+        { id: 1, name: '1號場', slots: ['p1', 'p2', 'p3', 'p4'], startTime: Date.now() - 420000 },
+        { id: 2, name: '2號場', slots: ['p5', 'p6', 'p7', 'p8'], startTime: Date.now() - 180000 },
+        { id: 3, name: '3號場', slots: [null, null, null, null], startTime: null }
+      ];
+      state.prepSlots = ['p10', 'p12', 'p16', 'p13'];
+      state.shuttlesUsed = 6;
+      state.matchLogs = [];
+      seedSampleMatchHistory();
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已載入測試名單', 'success');
+      showToast('已載入 16 人測試名單（含三場地與對戰紀錄）', 'success');
     }
 
     function clearAllPlayers() {
       state.players = [];
+      state.courts.forEach(c => {
+        c.slots = [null, null, null, null];
+        c.startTime = null;
+      });
+      state.prepSlots = [null, null, null, null];
+      state.shuttlesUsed = 0;
+      state.matchLogs = [];
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已清空', 'info');
+      showToast('已清空所有球員與場上資料，您可以開始新增球員', 'info');
     }
 
-    function showToast(msg, type = 'info') {
+    /********************************************************************
+     * 11. UTILITIES (TIMERS, TOASTS, ESCAPE HTML)
+     ********************************************************************/
+    function formatDuration(startTime) {
+      if (!startTime) return '00:00';
+      const diffSec = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+      const mins = String(Math.floor(diffSec / 60)).padStart(2, '0');
+      const secs = String(diffSec % 60).padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function escapeHTML(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const el = document.createElement('div');
-      el.className = `px-4 py-2.5 rounded-xl border shadow-xl text-xs font-bold bg-slate-900 border-slate-700 text-slate-100`;
-      el.innerHTML = `<span>${msg}</span>`;
+      const colorMap = {
+        success: 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200',
+        warn: 'bg-amber-950/95 border-amber-500/60 text-amber-200',
+        info: 'bg-slate-900/95 border-slate-600 text-slate-100'
+      };
+      el.className = `px-4 py-2.5 rounded-xl border shadow-xl text-xs font-bold flex items-center gap-2 transition-all duration-300 ${colorMap[type] || colorMap.info}`;
+      el.innerHTML = `<i class="fa-solid fa-bell"></i><span>${escapeHTML(message)}</span>`;
       container.appendChild(el);
-      setTimeout(() => el.remove(), 2500);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(8px)';
+        setTimeout(() => el.remove(), 300);
+      }, 2600);
     }
 
-    window.onload = function() {
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && selectedSource) {
+        clearSelection();
+      }
+    });
+
+    window.addEventListener('paste', (e) => {
+      const iconModal = document.getElementById('icon-modal');
+      if (!iconModal || iconModal.classList.contains('hidden')) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            processAndSaveImageFile(file);
+            break;
+          }
+        }
+      }
+    });
+
+    window.onload = function () {
       loadState();
       renderAll();
+
+      const dropzone = document.getElementById('icon-dropzone');
+      if (dropzone) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evtName => {
+          dropzone.addEventListener(evtName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          });
+        });
+        ['dragenter', 'dragover'].forEach(evtName => {
+          dropzone.addEventListener(evtName, () => {
+            dropzone.classList.add('border-amber-300', 'bg-amber-500/15');
+          });
+        });
+        ['dragleave', 'drop'].forEach(evtName => {
+          dropzone.addEventListener(evtName, () => {
+            dropzone.classList.remove('border-amber-300', 'bg-amber-500/15');
+          });
+        });
+        dropzone.addEventListener('drop', (e) => {
+          const file = e.dataTransfer?.files?.[0];
+          if (file) processAndSaveImageFile(file);
+        });
+      }
+
+      setInterval(() => {
+        document.querySelectorAll('.court-timer').forEach(el => {
+          const start = Number(el.getAttribute('data-start'));
+          if (start) el.textContent = formatDuration(start);
+        });
+      }, 1000);
     };
   </script>
 </body>
