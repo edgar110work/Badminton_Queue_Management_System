@@ -464,13 +464,13 @@
             <input type="text" id="player-search-input" oninput="renderRoster()" placeholder="搜尋已到場球員..."
               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
           </div>
-          <button onclick="markTimeSlotPlayersFinished('18-20')" title="將所有 18-20 時段球員標記為「時間到結束」，不再排點但保留紀錄"
+          <button id="btn-1820-timeup" onclick="markTimeSlotPlayersFinished('18-20')" title="將所有 18-20 時段球員標記為「時間到結束」，並同步啟動 20:00 後 3:2 時段比例加權校準"
             class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap transition active:scale-95">
             <i class="fa-regular fa-clock mr-1"></i>18-20時間到結束
           </button>
           <select id="roster-sort-select" onchange="renderRoster()"
             class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-            <option value="GAMES_ASC">依場次 (少→多)</option>
+            <option value="GAMES_ASC">依加權場次 (優先排點)</option>
             <option value="LEVEL_DESC">依程度 (高→低)</option>
             <option value="LEVEL_ASC">依程度 (低→高)</option>
             <option value="TIMESLOT">依參與時段</option>
@@ -1201,6 +1201,8 @@
       currentHourFilter: 'ALL',
       rosterFilter: 'ALL',
       regFilter: 'ALL',
+      hour1BaselineGames: null,
+      is1820Ended: false,
       matchLogs: []
     };
 
@@ -1211,7 +1213,7 @@
       const demoMatches = [
         { courtName: '1號場', players: ['p1', 'p2', 'p3', 'p4'], time: '18:18' },
         { courtName: '2號場', players: ['p5', 'p7', 'p6', 'p8'], time: '18:24' },
-        { courtName: '3號場', players: ['p1', 'p10', 'p11', 'p12'], time: '18:40' }
+        { courtName: '3號場', players: ['p1', 'p10', 'p16', 'p12'], time: '18:40' }
       ];
       demoMatches.forEach((m, idx) => {
         const four = m.players;
@@ -1250,6 +1252,7 @@
             state.customIconDataUrl = null;
           }
           if (!state.regFilter) state.regFilter = 'ALL';
+          if (typeof state.is1820Ended !== 'boolean') state.is1820Ended = false;
           // Ensure every player has unified playedWith object and checkedIn boolean
           state.players.forEach(p => {
             if (!p.playedWith) p.playedWith = {};
@@ -1668,8 +1671,145 @@
     }
 
     /********************************************************************
-     * 4. SMART AUTO-MATCHING ALGORITHM (純粹找最少同場打過的4人)
+     * 4. SMART AUTO-MATCHING ALGORITHM (時段目標比例加權・每小時均等配點)
      ********************************************************************/
+    // 取得各時段的目標總打球時數：18-21 為 3 小時，18-20 與 19-21 為 2 小時
+    function getSlotTargetHours(timeSlot) {
+      if (timeSlot === '18-20' || timeSlot === '19-21') return 2;
+      return 3; // '18-21'
+    }
+
+    // 計算 18:00 進場群組 (18-21 與 18-20) 目前的平均場次
+    function getEarlyGroupAverageGames() {
+      const earlyPlayers = state.players.filter(
+        p => (p.timeSlot === '18-21' || p.timeSlot === '18-20') && (p.checkedIn || (p.games || 0) > 0)
+      );
+      if (earlyPlayers.length === 0) return 0;
+      const totalGames = earlyPlayers.reduce((sum, p) => sum + (p.games || 0), 0);
+      return totalGames / earlyPlayers.length;
+    }
+
+    // 判斷目前是否已進入 20:00-21:00 (18-20 結束後) 的最後一小時階段
+    function isAfter2000Phase() {
+      if (state.is1820Ended || state.currentHourFilter === '20-21') return true;
+      const players1820 = state.players.filter(p => p.timeSlot === '18-20' && (p.checkedIn || (p.games || 0) > 0));
+      return players1820.length > 0 && players1820.every(p => p.resting);
+    }
+
+    // 計算「1小時基準場次 (Hour-1 Pace Baseline)」：
+    // 讓 19:00 才進場的 19-21 (2小時) 球友自動加上第1小時 (18:00-19:00) 的群體平均場次作為起跑基準，
+    // 確保所有人「在場的每個小時打到的場次差不多」，自然讓 3 小時與 2 小時球友達成 3 : 2 的總場次比例（不寫死 6 場或 9 場）。
+    function getHour1Baseline() {
+      const any1921Played = state.players.some(p => p.timeSlot === '19-21' && (p.games || 0) > 0);
+      const earlyAvg = getEarlyGroupAverageGames();
+      const after2000 = isAfter2000Phase();
+
+      // 1. 當 19-21 尚未有人完賽（例如剛到 19:00 準備開始排點），基準即為 18:00 群組在第 1 小時累積的平均場次
+      if (!any1921Played && !after2000) {
+        return Number(earlyAvg.toFixed(2));
+      }
+
+      // 2. 讀取已鎖定的第 1 小時基準場次
+      let baseline = (typeof state.hour1BaselineGames === 'number' && state.hour1BaselineGames > 0)
+        ? state.hour1BaselineGames
+        : 0;
+
+      // 3. 若已進入 20:00 後階段（點擊「18-20時間到結束」flag、切換 20-21 時段、或 18-20 全員結束）：
+      //    利用 18-20 球友打滿 2 小時的平均場次 ÷ 2，以及 18-21 球友目標 3 小時場次 ÷ 3 進行動態校準
+      if (after2000) {
+        const players1820 = state.players.filter(p => p.timeSlot === '18-20' && (p.checkedIn || (p.games || 0) > 0));
+        if (players1820.length > 0) {
+          const avg1820 = players1820.reduce((s, p) => s + (p.games || 0), 0) / players1820.length;
+          baseline = Math.max(baseline, avg1820 / 2);
+        }
+        const players1821 = state.players.filter(p => p.timeSlot === '18-21' && (p.checkedIn || (p.games || 0) > 0));
+        if (players1821.length > 0) {
+          const avg1821 = players1821.reduce((s, p) => s + (p.games || 0), 0) / players1821.length;
+          baseline = Math.max(baseline, avg1821 / 3);
+        }
+      } else if (baseline <= 0 && earlyAvg > 0) {
+        // 若未手動切換時段且尚未鎖定基準，以 18:00 群組平均場次的一半作為每小時基準保底
+        baseline = Math.max(0, earlyAvg / 2);
+      }
+
+      return Number(baseline.toFixed(2));
+    }
+
+    // 計算球員用於排點比較的「時段加權有效場次 (Effective Games)」：
+    // - 18-21 (3h) 與 18-20 (2h) 皆於 18:00 開打，在場期間每小時節奏 1:1 同步，有效場次 = 實際場次
+    // - 19-21 (2h) 於 19:00 開打（少打第1小時），有效場次 = 實際場次 + 1小時基準場次；
+    //   進入 20:00 後更融合 3:2 時段目標比例 (games * 1.5)，確保 3 小時球友不會被後段進場者稀釋場次
+    function getPlayerEffectiveGames(player) {
+      if (!player) return 0;
+      const rawGames = player.games || 0;
+      if (player.timeSlot === '19-21') {
+        const baseline = getHour1Baseline();
+        let effective = rawGames + baseline;
+
+        if (isAfter2000Phase() && baseline > 0) {
+          const ratioScaled = rawGames * (3 / getSlotTargetHours(player.timeSlot)); // 2h -> 3h 比例換算 (×1.5)
+          if (rawGames >= baseline) {
+            effective = Math.max(effective, (effective + ratioScaled) / 2);
+          }
+        }
+        return Number(effective.toFixed(2));
+      }
+      return rawGames;
+    }
+
+    // 評估 4 人組合的「程度平衡度」並自動排出最佳分隊站位 (Slots 0,1 為上隊 vs Slots 2,3 為下隊)
+    // 同時支援兩種平衡型態：
+    //   1.「4人程度相近」(例如 7, 7, 7, 8)
+    //   2.「2強 + 2弱 強弱配」(例如 9, 9, 5, 5 -> 自動配成 9+5 vs 9+5，兩隊總和皆為 14 級)
+    function evaluateQuartetSkillBalance(four) {
+      // 依級數由高到低排序：s0(最強) >= s1(次強) >= s2(次弱) >= s3(最弱)
+      const sorted = [...four].sort((a, b) => (b.level || 1) - (a.level || 1));
+      const L0 = sorted[0].level || 1;
+      const L1 = sorted[1].level || 1;
+      const L2 = sorted[2].level || 1;
+      const L3 = sorted[3].level || 1;
+
+      // 最佳雙打平衡分隊：(最強 s0 + 最弱 s3) vs (次強 s1 + 次弱 s2)
+      const teamASum = L0 + L3;
+      const teamBSum = L1 + L2;
+      const teamDiff = Math.abs(teamASum - teamBSum); // 兩隊總級數差 (越小越平衡，0~1 為極佳)
+
+      // 強組內部差距 (L0 - L1) + 弱組內部差距 (L2 - L3)
+      // 無論是「4人相近 (7,7,7,7)」或「2強2弱 (9,9,5,5)」，pairGap 都會非常小 (0~2)；
+      // 但若是「1強3弱 (10,5,5,5)」或「1超強+2中+1超弱 (12,7,7,2)」，teamDiff 或 pairGap 就會變大而被扣分
+      const pairGap = (L0 - L1) + (L2 - L3);
+      const spread = L0 - L3;
+
+      // 1. 兩隊總實力差懲罰：差 0~1 級幾乎不扣分，差 2 級以上顯著扣分
+      const teamDiffPenalty = teamDiff <= 1 ? teamDiff * 6 : 6 + (teamDiff - 1) * 24;
+      // 2. 配對對稱度懲罰：確保「4人相近」與「2強2弱」皆享低扣分
+      const pairGapPenalty = pairGap <= 2 ? pairGap * 4 : 8 + (pairGap - 2) * 14;
+      // 3. 極端跨度保護：允許 2強2弱 有 4~6 級差距，但超過 6 級以上才微幅加罰避免實力斷層過大
+      const extremeSpreadPenalty = spread > 6 ? (spread - 6) * 18 : 0;
+
+      const skillPenalty = teamDiffPenalty + pairGapPenalty + extremeSpreadPenalty;
+
+      // 判斷平衡類型標籤（供介面提示）
+      let balanceType = '實力均衡';
+      if (spread <= 2) {
+        balanceType = '四人程度相近';
+      } else if (L0 - L1 <= 2 && L2 - L3 <= 2 && L1 - L2 >= 2) {
+        balanceType = '二強二弱互補';
+      } else if (teamDiff <= 1) {
+        balanceType = '兩隊總和平衡';
+      }
+
+      return {
+        skillPenalty,
+        teamASum,
+        teamBSum,
+        teamDiff,
+        balanceType,
+        // 自動將前2格設為上隊 (最強+最弱)，後2格設為下隊 (次強+次弱)，派上場即自動分好兩邊
+        orderedIds: [sorted[0].id, sorted[3].id, sorted[1].id, sorted[2].id]
+      };
+    }
+
     function autoFillPrepArea() {
       const available = state.players.filter(p => {
         if (!p.checkedIn) return false;
@@ -1684,18 +1824,19 @@
         return;
       }
 
+      // 依「時段加權有效場次」由少到多排序（移除舊版對 18-21 的不公平懲罰，同有效場次時以等待最久者優先）
       available.sort((a, b) => {
-        if (a.games !== b.games) return a.games - b.games;
-        const aShort = a.timeSlot !== '18-21' ? 0 : 1;
-        const bShort = b.timeSlot !== '18-21' ? 0 : 1;
-        if (aShort !== bShort) return aShort - bShort;
+        const effA = getPlayerEffectiveGames(a);
+        const effB = getPlayerEffectiveGames(b);
+        if (Math.abs(effA - effB) > 0.05) return effA - effB;
         return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
       });
 
-      const poolSize = Math.min(available.length, 9);
+      const poolSize = Math.min(available.length, 10);
       const pool = available.slice(0, poolSize);
 
       let bestQuartet = null;
+      let bestBalanceInfo = null;
       let bestScore = Infinity;
 
       for (let i = 0; i < pool.length - 3; i++) {
@@ -1703,7 +1844,12 @@
           for (let k = j + 1; k < pool.length - 1; k++) {
             for (let l = k + 1; l < pool.length; l++) {
               const four = [pool[i], pool[j], pool[k], pool[l]];
-              const gamesPenalty = (four[0].games + four[1].games + four[2].games + four[3].games) * 40;
+              const effSum =
+                getPlayerEffectiveGames(four[0]) +
+                getPlayerEffectiveGames(four[1]) +
+                getPlayerEffectiveGames(four[2]) +
+                getPlayerEffectiveGames(four[3]);
+              const gamesPenalty = effSum * 45;
 
               // Sum all 6 pairwise played-together counts among the 4 players
               let togetherRepeats = 0;
@@ -1714,15 +1860,15 @@
               }
               const repeatPenalty = togetherRepeats * 85;
 
-              const levels = [four[0].level, four[1].level, four[2].level, four[3].level];
-              const spread = Math.max(...levels) - Math.min(...levels);
-              const spreadPenalty = spread > 5 ? (spread - 5) * 20 : spread * 4;
+              // 評估程度平衡（同時支援「4人程度相近」與「2強2弱分隊平衡」）
+              const balanceInfo = evaluateQuartetSkillBalance(four);
 
-              const totalScore = gamesPenalty + repeatPenalty + spreadPenalty + (Math.random() * 2);
+              const totalScore = gamesPenalty + repeatPenalty + balanceInfo.skillPenalty + (Math.random() * 2);
 
               if (totalScore < bestScore) {
                 bestScore = totalScore;
-                bestQuartet = [four[0].id, four[1].id, four[2].id, four[3].id];
+                bestQuartet = balanceInfo.orderedIds;
+                bestBalanceInfo = balanceInfo;
               }
             }
           }
@@ -1734,7 +1880,10 @@
         clearSelection();
         saveState();
         renderAll();
-        showToast('已自動配出最少同場重疊的 4 位球友！', 'success');
+        const balanceLabel = bestBalanceInfo
+          ? `（${bestBalanceInfo.balanceType}：${bestBalanceInfo.teamASum}級 vs ${bestBalanceInfo.teamBSum}級）`
+          : '';
+        showToast(`已智慧配出 4 位球友${balanceLabel}！`, 'success');
       }
     }
 
@@ -1785,6 +1934,16 @@
 
       const four = [...court.slots];
       const now = Date.now();
+
+      // 若本場包含 19-21 時段球員，且先前尚未鎖定第 1 小時基準場次，於結算前自動鎖定 18:00 群組的第 1 小時平均場次
+      const has1921InMatch = four.some(pid => {
+        const pl = getPlayerById(pid);
+        return pl && pl.timeSlot === '19-21';
+      });
+      const any1921PlayedBefore = state.players.some(p => p.timeSlot === '19-21' && (p.games || 0) > 0);
+      if (has1921InMatch && !any1921PlayedBefore && (state.hour1BaselineGames === null || state.hour1BaselineGames <= 0)) {
+        state.hour1BaselineGames = Number(getEarlyGroupAverageGames().toFixed(2));
+      }
 
       four.forEach(pid => {
         const p = getPlayerById(pid);
@@ -2052,13 +2211,26 @@
 
     function setCurrentHourFilter(period) {
       state.currentHourFilter = period;
+      if (period === '19-20') {
+        // 切換至 19-20 時，若 19-21 尚未有人完賽，記錄第 1 小時 (18:00-19:00) 的群體平均場次作為基準
+        const any1921Played = state.players.some(p => p.timeSlot === '19-21' && (p.games || 0) > 0);
+        if (!any1921Played) {
+          state.hour1BaselineGames = Number(getEarlyGroupAverageGames().toFixed(2));
+        }
+      } else if (period === '20-21') {
+        // 切換至 20-21 時，同步校準每小時場次基準
+        const earlyAvg = getEarlyGroupAverageGames();
+        if (earlyAvg > 0) {
+          state.hour1BaselineGames = Math.max(state.hour1BaselineGames || 0, Number((earlyAvg / 2).toFixed(2)));
+        }
+      }
       saveState();
       renderAll();
       const labels = {
-        'ALL': '全部時段皆可排點',
+        'ALL': '全部時段皆可排點（自動套用時段比例加權）',
         '18-19': '18:00-19:00（自動排除 19-21 尚未到場球友）',
-        '19-20': '19:00-20:00（全體時段球友皆在場）',
-        '20-21': '20:00-21:00（自動排除 18-20 已離場球友）'
+        '19-20': '19:00-20:00（全體時段在場・自動套用第1小時基準加權）',
+        '20-21': '20:00-21:00（排除 18-20・啟動 3:2 時段比例校準）'
       };
       showToast(`時段切換：${labels[period]}`, 'info');
     }
@@ -2251,15 +2423,23 @@
           }
         }
 
+        const p0 = getPlayerById(state.prepSlots[0]);
+        const p1 = getPlayerById(state.prepSlots[1]);
+        const p2 = getPlayerById(state.prepSlots[2]);
+        const p3 = getPlayerById(state.prepSlots[3]);
+        const team1Sum = (p0?.level || 0) + (p1?.level || 0);
+        const team2Sum = (p2?.level || 0) + (p3?.level || 0);
+        const balanceInfo = evaluateQuartetSkillBalance(activePlayers);
+
         if (totalOverlap === 0) {
           badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold';
-          badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i>全新組合（這4人今日尚未同場過）';
+          badge.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>全新組合・${balanceInfo.balanceType}`;
         } else {
           badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold';
-          badge.innerHTML = `已排滿 4 人（今日彼此同場重疊共 ${totalOverlap} 次）`;
+          badge.innerHTML = `${balanceInfo.balanceType}（同場重疊 ${totalOverlap} 次）`;
         }
 
-        hintEl.innerHTML = `📊 同場統計：這 4 位球員今日彼此同場打過累計 <strong class="text-emerald-300">${totalOverlap}</strong> 人次`;
+        hintEl.innerHTML = `⚖️ 隊伍實力：上隊(1,2格) <strong class="text-amber-300">${team1Sum}級</strong> vs 下隊(3,4格) <strong class="text-amber-300">${team2Sum}級</strong> ｜ 📊 今日彼此同場累計 <strong class="text-emerald-300">${totalOverlap}</strong> 人次`;
       } else {
         badge.className = 'text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-semibold';
         badge.textContent = `準備區尚缺 ${4 - filledCount} 人`;
@@ -2403,7 +2583,7 @@
           <!-- Bottom Row: Clean Unified Played-With Summary Bar -->
           <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-900">
             <div class="flex items-center gap-2 truncate">
-              <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次</span>
+              <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次${p.timeSlot === '19-21' && getHour1Baseline() > 0 ? ` <span class="text-[10px] text-purple-300/90 font-semibold" title="時段比例加權有效場次（含18-19基準折算 +${getHour1Baseline()} 場，確保與3小時球友每小時場次均等）">(排點權重 ${getPlayerEffectiveGames(p)})</span>` : ''}</span>
               <span class="text-slate-600">|</span>
               <span class="truncate text-slate-300">
                 <i class="fa-solid fa-user-group text-emerald-400 mr-1"></i>打過：${recentPlayedText}
@@ -2426,6 +2606,18 @@
             }`;
         }
       });
+
+      const timeupBtn = document.getElementById('btn-1820-timeup');
+      if (timeupBtn) {
+        const active1820Left = state.players.filter(p => p.timeSlot === '18-20' && p.checkedIn && !p.resting).length;
+        if (state.is1820Ended && active1820Left === 0) {
+          timeupBtn.className = 'px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap transition active:scale-95';
+          timeupBtn.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>18-20已結束(3:2校準)`;
+        } else {
+          timeupBtn.className = 'px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap transition active:scale-95';
+          timeupBtn.innerHTML = `<i class="fa-regular fa-clock mr-1"></i>18-20時間到結束`;
+        }
+      }
 
       const search = (document.getElementById('player-search-input')?.value || '').trim().toLowerCase();
       const sortMode = document.getElementById('roster-sort-select')?.value || 'GAMES_ASC';
@@ -2457,6 +2649,9 @@
         const locB = getPlayerLocation(b.id).status === 'WAIT' ? 0 : 1;
         if (sortMode === 'GAMES_ASC') {
           if (locA !== locB) return locA - locB;
+          const effA = getPlayerEffectiveGames(a);
+          const effB = getPlayerEffectiveGames(b);
+          if (Math.abs(effA - effB) > 0.05) return effA - effB;
           if (a.games !== b.games) return a.games - b.games;
           return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
         }
@@ -2751,8 +2946,25 @@
 
     function markTimeSlotPlayersFinished(targetTimeSlot) {
       const targets = state.players.filter(p => p.timeSlot === targetTimeSlot && !p.resting);
+
+      // 當使用者操作 18-20 時間到結束時，同步給予演算法 20:00 結束 flag (is1820Ended = true) 並校準每小時場次基準
+      if (targetTimeSlot === '18-20') {
+        const earlyAvg = getEarlyGroupAverageGames();
+        if (earlyAvg > 0) {
+          state.hour1BaselineGames = Math.max(state.hour1BaselineGames || 0, Number((earlyAvg / 2).toFixed(2)));
+        }
+        state.is1820Ended = true;
+      }
+
       if (targets.length === 0) {
-        showToast(`目前沒有進行中的 ${targetTimeSlot} 時段球員需要設為結束`, 'info');
+        saveState();
+        renderAll();
+        showToast(
+          targetTimeSlot === '18-20'
+            ? `已啟動 20:00 後「3:2 時段比例加權校準」（每小時基準 ${getHour1Baseline()} 場）`
+            : `目前沒有進行中的 ${targetTimeSlot} 時段球員需要設為結束`,
+          'info'
+        );
         return;
       }
       targets.forEach(p => {
@@ -2762,7 +2974,10 @@
       });
       saveState();
       renderAll();
-      showToast(`已將 ${targets.length} 位 ${targetTimeSlot} 時段球員移至「時間到結束」區（保留今日紀錄）`, 'success');
+      showToast(
+        `已將 ${targets.length} 位 ${targetTimeSlot} 球員移至「時間到結束」，並啟動 3:2 時段比例校準（基準 ${getHour1Baseline()} 場/時）！`,
+        'success'
+      );
     }
 
     function updateLevelPreview(val) {
@@ -3088,6 +3303,8 @@
       });
       state.prepSlots = [null, null, null, null];
       state.shuttlesUsed = 0;
+      state.hour1BaselineGames = null;
+      state.is1820Ended = false;
       state.matchLogs = [];
       closeSettingsModal();
       saveState();
@@ -3104,6 +3321,8 @@
       ];
       state.prepSlots = ['p10', 'p12', 'p16', 'p13'];
       state.shuttlesUsed = 6;
+      state.hour1BaselineGames = null;
+      state.is1820Ended = false;
       state.matchLogs = [];
       seedSampleMatchHistory();
       closeSettingsModal();
@@ -3120,6 +3339,8 @@
       });
       state.prepSlots = [null, null, null, null];
       state.shuttlesUsed = 0;
+      state.hour1BaselineGames = null;
+      state.is1820Ended = false;
       state.matchLogs = [];
       closeSettingsModal();
       saveState();
