@@ -1171,8 +1171,8 @@
 
     function ensureHostPlayersExist() {
       const defaultHosts = [
-        { id: 'host_leimeng', name: '雷夢', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
-        { id: 'host_heyu', name: '荷玉', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true }
+        { id: 'host_leimeng', name: '雷夢', level: 9, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_heyu', name: '荷玉', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true }
       ];
       defaultHosts.forEach(defHost => {
         const existing = state.players.find(p => p.id === defHost.id || p.name === defHost.name);
