@@ -449,6 +449,8 @@
             class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">🏁 已結束/離場</button>
           <button onclick="setRosterFilter('WAIT')" id="roster-tab-WAIT"
             class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">等待上場</button>
+          <button onclick="setRosterFilter('18-21')" id="roster-tab-18-21"
+            class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">18-21時段</button>
           <button onclick="setRosterFilter('18-20')" id="roster-tab-18-20"
             class="roster-tab px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition">18-20時段</button>
           <button onclick="setRosterFilter('19-21')" id="roster-tab-19-21"
@@ -471,6 +473,7 @@
           <select id="roster-sort-select" onchange="renderRoster()"
             class="bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
             <option value="GAMES_ASC">依加權場次 (優先排點)</option>
+            <option value="RAW_GAMES_ASC">依總上場次數 (少→多)</option>
             <option value="LEVEL_DESC">依程度 (高→低)</option>
             <option value="LEVEL_ASC">依程度 (低→高)</option>
             <option value="TIMESLOT">依參與時段</option>
@@ -1159,8 +1162,39 @@
       "1000001001011010011101001110001001100",
       "1111111011000101110010101001110100000"
     ];
+    const HOST_NAMES = ['雷夢', '荷玉'];
+
+    function isHostPlayer(player) {
+      if (!player) return false;
+      return !!player.isHost || HOST_NAMES.includes(player.name);
+    }
+
+    function ensureHostPlayersExist() {
+      const defaultHosts = [
+        { id: 'host_leimeng', name: '雷夢', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_heyu', name: '荷玉', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true }
+      ];
+      defaultHosts.forEach(defHost => {
+        const existing = state.players.find(p => p.id === defHost.id || p.name === defHost.name);
+        if (existing) {
+          existing.isHost = true;
+          existing.paid = true;
+          if (typeof existing.checkedIn !== 'boolean') existing.checkedIn = true;
+          if (!existing.playedWith) existing.playedWith = {};
+        } else {
+          state.players.unshift({
+            ...defHost,
+            playedWith: {},
+            lastPlayedAt: 0
+          });
+        }
+      });
+    }
+
     function getInitialDemoPlayers() {
       const sample = [
+        { id: 'host_leimeng', name: '雷夢', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_heyu', name: '荷玉', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
         { id: 'p1', name: '阿凱', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p2', name: '小傑', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p3', name: '瑋哥', level: 9, timeSlot: '18-20', paid: true, checkedIn: true, games: 0, resting: false },
@@ -1180,6 +1214,7 @@
       ];
       return sample.map(p => ({
         ...p,
+        isHost: !!p.isHost || HOST_NAMES.includes(p.name),
         playedWith: {},
         lastPlayedAt: 0
       }));
@@ -1253,11 +1288,14 @@
           }
           if (!state.regFilter) state.regFilter = 'ALL';
           if (typeof state.is1820Ended !== 'boolean') state.is1820Ended = false;
-          // Ensure every player has unified playedWith object and checkedIn boolean
+          // Ensure every player has unified playedWith object and checkedIn boolean, and hosts exist
           state.players.forEach(p => {
             if (!p.playedWith) p.playedWith = {};
             if (typeof p.checkedIn !== 'boolean') p.checkedIn = true;
+            if (HOST_NAMES.includes(p.name)) p.isHost = true;
           });
+          ensureHostPlayersExist();
+          saveState();
         } else {
           state.players = getInitialDemoPlayers();
           seedSampleMatchHistory();
@@ -1679,10 +1717,10 @@
       return 3; // '18-21'
     }
 
-    // 計算 18:00 進場群組 (18-21 與 18-20) 目前的平均場次
+    // 計算 18:00 進場群組 (18-21 與 18-20) 目前的平均場次（排除團主，避免影響一般球友基準）
     function getEarlyGroupAverageGames() {
       const earlyPlayers = state.players.filter(
-        p => (p.timeSlot === '18-21' || p.timeSlot === '18-20') && (p.checkedIn || (p.games || 0) > 0)
+        p => !isHostPlayer(p) && (p.timeSlot === '18-21' || p.timeSlot === '18-20') && (p.checkedIn || (p.games || 0) > 0)
       );
       if (earlyPlayers.length === 0) return 0;
       const totalGames = earlyPlayers.reduce((sum, p) => sum + (p.games || 0), 0);
@@ -1692,7 +1730,7 @@
     // 判斷目前是否已進入 20:00-21:00 (18-20 結束後) 的最後一小時階段
     function isAfter2000Phase() {
       if (state.is1820Ended || state.currentHourFilter === '20-21') return true;
-      const players1820 = state.players.filter(p => p.timeSlot === '18-20' && (p.checkedIn || (p.games || 0) > 0));
+      const players1820 = state.players.filter(p => !isHostPlayer(p) && p.timeSlot === '18-20' && (p.checkedIn || (p.games || 0) > 0));
       return players1820.length > 0 && players1820.every(p => p.resting);
     }
 
@@ -1700,7 +1738,7 @@
     // 讓 19:00 才進場的 19-21 (2小時) 球友自動加上第1小時 (18:00-19:00) 的群體平均場次作為起跑基準，
     // 確保所有人「在場的每個小時打到的場次差不多」，自然讓 3 小時與 2 小時球友達成 3 : 2 的總場次比例（不寫死 6 場或 9 場）。
     function getHour1Baseline() {
-      const any1921Played = state.players.some(p => p.timeSlot === '19-21' && (p.games || 0) > 0);
+      const any1921Played = state.players.some(p => !isHostPlayer(p) && p.timeSlot === '19-21' && (p.games || 0) > 0);
       const earlyAvg = getEarlyGroupAverageGames();
       const after2000 = isAfter2000Phase();
 
@@ -1717,12 +1755,12 @@
       // 3. 若已進入 20:00 後階段（點擊「18-20時間到結束」flag、切換 20-21 時段、或 18-20 全員結束）：
       //    利用 18-20 球友打滿 2 小時的平均場次 ÷ 2，以及 18-21 球友目標 3 小時場次 ÷ 3 進行動態校準
       if (after2000) {
-        const players1820 = state.players.filter(p => p.timeSlot === '18-20' && (p.checkedIn || (p.games || 0) > 0));
+        const players1820 = state.players.filter(p => !isHostPlayer(p) && p.timeSlot === '18-20' && (p.checkedIn || (p.games || 0) > 0));
         if (players1820.length > 0) {
           const avg1820 = players1820.reduce((s, p) => s + (p.games || 0), 0) / players1820.length;
           baseline = Math.max(baseline, avg1820 / 2);
         }
-        const players1821 = state.players.filter(p => p.timeSlot === '18-21' && (p.checkedIn || (p.games || 0) > 0));
+        const players1821 = state.players.filter(p => !isHostPlayer(p) && p.timeSlot === '18-21' && (p.checkedIn || (p.games || 0) > 0));
         if (players1821.length > 0) {
           const avg1821 = players1821.reduce((s, p) => s + (p.games || 0), 0) / players1821.length;
           baseline = Math.max(baseline, avg1821 / 3);
@@ -1812,6 +1850,8 @@
 
     function autoFillPrepArea() {
       const available = state.players.filter(p => {
+        // 團主 (雷夢、荷玉) 不參與自動排點的計算，僅供手動加入排點
+        if (isHostPlayer(p)) return false;
         if (!p.checkedIn) return false;
         if (p.resting) return false;
         if (!isPlayerEligibleInCurrentHour(p)) return false;
@@ -2271,8 +2311,9 @@
       const tubes = ((state.shuttlesUsed || 0) / 12).toFixed(1).replace('.0', '');
       document.getElementById('shuttle-tubes-display').textContent = `(${tubes}筒)`;
 
-      const paidCount = state.players.filter(p => p.paid).length;
-      document.getElementById('fee-summary-pill').textContent = `${paidCount} / ${state.players.length} 人已繳`;
+      const regularPlayers = state.players.filter(p => !isHostPlayer(p));
+      const paidCount = regularPlayers.filter(p => p.paid).length;
+      document.getElementById('fee-summary-pill').textContent = `${paidCount} / ${regularPlayers.length} 人已繳`;
 
       document.getElementById('completed-matches-badge').textContent = (state.matchLogs || []).length;
 
@@ -2380,7 +2421,9 @@
       }
 
       const lvInfo = getLevelBadgeInfo(player.level);
-      const tsInfo = getTimeSlotBadge(player.timeSlot);
+      const tsInfo = isHostPlayer(player)
+        ? { text: '👑團主', classes: 'bg-amber-500/20 text-amber-300 border-amber-400/50' }
+        : getTimeSlotBadge(player.timeSlot);
 
       return `
         <div onclick="handleCourtSlotClick(${courtIndex}, ${slotIndex})"
@@ -2471,7 +2514,9 @@
       }
 
       const lvInfo = getLevelBadgeInfo(player.level);
-      const tsInfo = getTimeSlotBadge(player.timeSlot);
+      const tsInfo = isHostPlayer(player)
+        ? { text: '👑團主', classes: 'bg-amber-500/20 text-amber-300 border-amber-400/50' }
+        : getTimeSlotBadge(player.timeSlot);
 
       return `
         <div onclick="handlePrepSlotClick(${slotIndex})"
@@ -2498,7 +2543,8 @@
       const lvInfo = getLevelBadgeInfo(p.level);
       const tsInfo = getTimeSlotBadge(p.timeSlot);
       const loc = getPlayerLocation(p.id);
-      const eligibleNow = isPlayerEligibleInCurrentHour(p);
+      const isHost = isHostPlayer(p);
+      const eligibleNow = isHost ? true : isPlayerEligibleInCurrentHour(p);
       const isSelectedRoster = selectedSource && selectedSource.type === 'ROSTER' && selectedSource.playerId === p.id;
       const isFinished = !!p.resting;
 
@@ -2518,6 +2564,8 @@
         statusBadge = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">${loc.label}</span>`;
       } else if (loc.status === 'PREP') {
         statusBadge = `<span class="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold">準備區</span>`;
+      } else if (isHost) {
+        statusBadge = `<span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold">僅手動排點</span>`;
       } else if (!eligibleNow) {
         statusBadge = `<span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">非本時段</span>`;
       } else {
@@ -2527,32 +2575,40 @@
       return `
         <div onclick="openHistoryModal('${p.id}')"
              title="點擊查看「${escapeHTML(p.name)}」今日總共跟誰打過"
-             class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : isFinished ? 'border-slate-800/60 hover:border-amber-500/40 bg-slate-950/50' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${(!eligibleNow && !isFinished) ? 'opacity-65' : ''}">
+             class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : isHost ? 'border-amber-500/40 bg-amber-950/10 hover:border-amber-400' : isFinished ? 'border-slate-800/60 hover:border-amber-500/40 bg-slate-950/50' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${(!eligibleNow && !isFinished) ? 'opacity-65' : ''}">
           
           <div class="flex items-center justify-between gap-2">
-            <!-- Left: Player Name + Skill Level + Time Slot -->
+            <!-- Left: Player Name + Skill Level + Time Slot / Host Badge -->
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="font-extrabold text-sm ${isFinished ? 'text-slate-300' : 'text-white'} truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
+                <span class="font-extrabold text-sm ${isFinished ? 'text-slate-300' : isHost ? 'text-amber-200' : 'text-white'} truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
                 <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}" title="台灣推廣 ${lvInfo.label} (${lvInfo.tier})">
                   ${lvInfo.label}・${lvInfo.tier}
                 </span>
-                <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${tsInfo.classes}">
-                  <i class="fa-regular fa-clock mr-0.5"></i>${tsInfo.text}
-                </span>
+                ${isHost
+          ? `<span class="text-[10px] px-1.5 py-0.2 rounded border font-extrabold bg-amber-500/20 text-amber-300 border-amber-400/50">
+                       👑 團主
+                     </span>`
+          : `<span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${tsInfo.classes}">
+                       <i class="fa-regular fa-clock mr-0.5"></i>${tsInfo.text}
+                     </span>`
+        }
                 ${statusBadge}
               </div>
             </div>
 
             <!-- Right: Paid Toggle + Finish/Restore Toggle + Assign to Prep Button -->
             <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
-              <button onclick="togglePlayerPaid('${p.id}')" title="點擊切換繳費狀態"
+              ${!isHost
+          ? `<button onclick="togglePlayerPaid('${p.id}')" title="點擊切換繳費狀態"
                       class="px-2 py-1 rounded-lg border text-[11px] font-bold transition active:scale-95 ${p.paid
-          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
-          : 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30'
-        }">
+            ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/25'
+            : 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30'
+          }">
                 ${p.paid ? '✓已繳' : '$未繳'}
-              </button>
+              </button>`
+          : ''
+        }
 
               ${isFinished
           ? `
@@ -2562,18 +2618,22 @@
                   </button>
                 `
           : `
-                  <button onclick="togglePlayerRest('${p.id}', 'EARLY')" title="時間到或臨時有事提早結束（不再排點，保留今日紀錄）"
-                          class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 font-bold text-[11px] transition active:scale-95">
-                    結束
-                  </button>
+                  ${!isHost ? `
+                    <button onclick="togglePlayerRest('${p.id}', 'EARLY')" title="時間到或臨時有事提早結束（不再排點，保留今日紀錄）"
+                            class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 font-bold text-[11px] transition active:scale-95">
+                      結束
+                    </button>
+                  ` : ''}
                   <button onclick="handleRosterPlayerAssign('${p.id}')"
                           class="px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition active:scale-95 ${loc.status === 'PREP'
             ? 'bg-indigo-600/30 border border-indigo-400 text-indigo-200'
             : loc.status === 'COURT'
               ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-              : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow'
+              : isHost
+                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow'
+                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow'
           }">
-                    ${loc.status === 'PREP' ? '移出準備' : loc.status === 'COURT' ? '場上' : '+排點'}
+                    ${loc.status === 'PREP' ? '移出準備' : loc.status === 'COURT' ? '場上' : isHost ? '+手動排點' : '+排點'}
                   </button>
                 `
         }
@@ -2583,7 +2643,7 @@
           <!-- Bottom Row: Clean Unified Played-With Summary Bar -->
           <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-900">
             <div class="flex items-center gap-2 truncate">
-              <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次${p.timeSlot === '19-21' && getHour1Baseline() > 0 ? ` <span class="text-[10px] text-purple-300/90 font-semibold" title="時段比例加權有效場次（含18-19基準折算 +${getHour1Baseline()} 場，確保與3小時球友每小時場次均等）">(排點權重 ${getPlayerEffectiveGames(p)})</span>` : ''}</span>
+              <span>上場 <strong class="text-amber-300 text-xs">${p.games}</strong> 次${(!isHost && p.timeSlot === '19-21' && getHour1Baseline() > 0) ? ` <span class="text-[10px] text-purple-300/90 font-semibold" title="時段比例加權有效場次（含18-19基準折算 +${getHour1Baseline()} 場，確保與3小時球友每小時場次均等）">(排點權重 ${getPlayerEffectiveGames(p)})</span>` : ''}</span>
               <span class="text-slate-600">|</span>
               <span class="truncate text-slate-300">
                 <i class="fa-solid fa-user-group text-emerald-400 mr-1"></i>打過：${recentPlayedText}
@@ -2598,7 +2658,7 @@
     }
 
     function renderRoster() {
-      ['ALL', 'ACTIVE', 'FINISHED', 'WAIT', '18-20', '19-21', 'UNPAID'].forEach(tab => {
+      ['ALL', 'ACTIVE', 'FINISHED', 'WAIT', '18-21', '18-20', '19-21', 'UNPAID'].forEach(tab => {
         const el = document.getElementById(`roster-tab-${tab}`);
         if (el) {
           const active = state.rosterFilter === tab;
@@ -2609,7 +2669,7 @@
 
       const timeupBtn = document.getElementById('btn-1820-timeup');
       if (timeupBtn) {
-        const active1820Left = state.players.filter(p => p.timeSlot === '18-20' && p.checkedIn && !p.resting).length;
+        const active1820Left = state.players.filter(p => !isHostPlayer(p) && p.timeSlot === '18-20' && p.checkedIn && !p.resting).length;
         if (state.is1820Ended && active1820Left === 0) {
           timeupBtn.className = 'px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap transition active:scale-95';
           timeupBtn.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i>18-20已結束(3:2校準)`;
@@ -2631,7 +2691,16 @@
         unarrivedPill.textContent = unarrivedCount > 0 ? `點名(未到${unarrivedCount}人)` : `報名總表(${state.players.length}人)`;
       }
 
+      // 團主名單 (雷夢、荷玉) 獨立處理：不參與自動排點，僅手動加入並記錄上場次數與同場球友
+      const hostPlayers = arrivedPlayers.filter(p => {
+        if (!isHostPlayer(p)) return false;
+        if (search && !p.name.toLowerCase().includes(search)) return false;
+        return true;
+      });
+
+      // 一般球友篩選（點選 18-21 / 18-20 / 19-21 時只看該時段球友狀況，不混入團主）
       let filtered = arrivedPlayers.filter(p => {
+        if (isHostPlayer(p)) return false;
         if (search && !p.name.toLowerCase().includes(search)) return false;
         const loc = getPlayerLocation(p.id);
         if (state.rosterFilter === 'ACTIVE' && p.resting) return false;
@@ -2655,14 +2724,20 @@
           if (a.games !== b.games) return a.games - b.games;
           return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
         }
+        if (sortMode === 'RAW_GAMES_ASC') {
+          if ((a.games || 0) !== (b.games || 0)) return (a.games || 0) - (b.games || 0);
+          if (locA !== locB) return locA - locB;
+          return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
+        }
         if (sortMode === 'LEVEL_DESC') return b.level - a.level;
         if (sortMode === 'LEVEL_ASC') return a.level - b.level;
         if (sortMode === 'TIMESLOT') return a.timeSlot.localeCompare(b.timeSlot);
         return 0;
       };
 
-      const totalActiveCount = arrivedPlayers.filter(p => !p.resting).length;
-      const totalEndedCount = arrivedPlayers.filter(p => p.resting).length;
+      const regularArrived = arrivedPlayers.filter(p => !isHostPlayer(p));
+      const totalActiveCount = regularArrived.filter(p => !p.resting).length;
+      const totalEndedCount = regularArrived.filter(p => p.resting).length;
       document.getElementById('roster-count-badge').textContent = `繼續排點 ${totalActiveCount}人`;
       const endedBadge = document.getElementById('roster-ended-count-badge');
       if (endedBadge) {
@@ -2670,7 +2745,11 @@
       }
 
       const listEl = document.getElementById('roster-list');
-      if (filtered.length === 0) {
+      const showHostsSection =
+        hostPlayers.length > 0 &&
+        (state.rosterFilter === 'ALL' || state.rosterFilter === 'ACTIVE' || state.rosterFilter === 'WAIT');
+
+      if (filtered.length === 0 && !showHostsSection) {
         listEl.innerHTML = `
           <div class="text-center py-8 text-slate-400 text-xs space-y-2">
             <div>目前沒有符合條件的「已到場」球員</div>
@@ -2685,18 +2764,40 @@
 
       let html = '';
 
+      // 團主專區：雷夢、荷玉（不參與自動排點，僅手動排入並統計場次與同場球友）
+      if (showHostsSection) {
+        html += `
+          <div class="flex items-center justify-between px-1 pt-0.5 pb-1">
+            <span class="text-xs font-extrabold text-amber-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-crown text-amber-400 text-[11px]"></i>
+              團主臨時上場區 (${hostPlayers.length}人・不參與自動配點)
+            </span>
+            <span class="text-[10px] text-slate-400">僅手動加入排點・自動記錄場次與同場球友</span>
+          </div>
+          <div class="space-y-2 mb-2.5 pb-2 border-b border-slate-800/90">${hostPlayers.map(p => renderRosterPlayerCard(p)).join('')}</div>
+        `;
+      }
+
       if (state.rosterFilter !== 'FINISHED') {
+        const sectionTitle =
+          state.rosterFilter === '18-21'
+            ? `18-21 時段・繼續排點 (${activePlayers.length}人)`
+            : state.rosterFilter === '18-20'
+              ? `18-20 時段・繼續排點 (${activePlayers.length}人)`
+              : state.rosterFilter === '19-21'
+                ? `19-21 時段・繼續排點 (${activePlayers.length}人)`
+                : `已到場・繼續排點 (${activePlayers.length}人)`;
         html += `
           <div class="flex items-center justify-between px-1 pt-0.5 pb-1">
             <span class="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              已到場・繼續排點 (${activePlayers.length}人)
+              ${sectionTitle}
             </span>
             <span class="text-[10px] text-slate-400">點「結束」可移至下方休息/離場區</span>
           </div>
         `;
         if (activePlayers.length === 0) {
-          html += `<div class="text-center py-4 bg-slate-950/40 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">目前沒有繼續排點中的到場球員</div>`;
+          html += `<div class="text-center py-4 bg-slate-950/40 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">目前沒有符合條件的繼續排點球員</div>`;
         } else {
           html += `<div class="space-y-2">${activePlayers.map(p => renderRosterPlayerCard(p)).join('')}</div>`;
         }
@@ -2733,14 +2834,16 @@
         }
       });
 
-      const totalCount = state.players.length;
-      const arrivedCount = state.players.filter(p => p.checkedIn).length;
+      const regularPlayers = state.players.filter(p => !isHostPlayer(p));
+      const totalCount = regularPlayers.length;
+      const arrivedCount = regularPlayers.filter(p => p.checkedIn).length;
       const unarrivedCount = totalCount - arrivedCount;
-      const paidCount = state.players.filter(p => p.paid).length;
+      const paidCount = regularPlayers.filter(p => p.paid).length;
 
       const summaryEl = document.getElementById('reg-summary-badges');
       if (summaryEl) {
         summaryEl.innerHTML = `
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">👑 團主 2人 (雷夢、荷玉)</span>
           <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 font-bold">總報名 ${totalCount}人</span>
           <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">✅ 已到場 ${arrivedCount}人</span>
           <span class="text-xs px-2.5 py-0.5 rounded-full ${unarrivedCount > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'} border font-bold">⏳ 尚未到場 ${unarrivedCount}人</span>
@@ -2752,6 +2855,7 @@
       const filter = state.regFilter || 'ALL';
 
       let list = state.players.filter(p => {
+        if (isHostPlayer(p)) return false; // 團主不顯示於一般報名繳費清單，直接常駐於現場排點區
         if (search && !p.name.toLowerCase().includes(search)) return false;
         if (filter === 'UNARRIVED' && p.checkedIn) return false;
         if (filter === 'ARRIVED' && !p.checkedIn) return false;
@@ -2945,7 +3049,7 @@
     }
 
     function markTimeSlotPlayersFinished(targetTimeSlot) {
-      const targets = state.players.filter(p => p.timeSlot === targetTimeSlot && !p.resting);
+      const targets = state.players.filter(p => !isHostPlayer(p) && p.timeSlot === targetTimeSlot && !p.resting);
 
       // 當使用者操作 18-20 時間到結束時，同步給予演算法 20:00 結束 flag (is1820Ended = true) 並校準每小時場次基準
       if (targetTimeSlot === '18-20') {
@@ -3091,10 +3195,16 @@
       badge.className = `w-10 h-10 rounded-xl border flex items-center justify-center font-black text-xs ${lvInfo.classes}`;
       badge.textContent = lvInfo.label;
 
-      document.getElementById('hist-player-name').textContent = `${p.name} 的同場紀錄`;
-      const arrivalText = p.checkedIn ? (p.resting ? '🏁 已到場・已結束排點' : '🟢 已到場・繼續排點中') : '⏳ 尚未到場報到';
-      document.getElementById('hist-player-meta').textContent =
-        `狀態：${arrivalText} ｜ 時段：${p.timeSlot} ｜ 今日已上：${p.games} 場 ｜ ${p.paid ? '已繳費' : '未繳費'}`;
+      const isHost = isHostPlayer(p);
+      document.getElementById('hist-player-name').textContent = `${p.name} ${isHost ? '(👑 團主) ' : ''}的同場紀錄`;
+      const arrivalText = isHost
+        ? '👑 團主身份（僅手動排點・不參與自動配點）'
+        : p.checkedIn
+          ? (p.resting ? '🏁 已到場・已結束排點' : '🟢 已到場・繼續排點中')
+          : '⏳ 尚未到場報到';
+      document.getElementById('hist-player-meta').textContent = isHost
+        ? `狀態：${arrivalText} ｜ 今日已上：${p.games} 場`
+        : `狀態：${arrivalText} ｜ 時段：${p.timeSlot} ｜ 今日已上：${p.games} 場 ｜ ${p.paid ? '已繳費' : '未繳費'}`;
 
       const toggleRestBtn = document.getElementById('hist-toggle-rest-btn');
       if (toggleRestBtn) {
@@ -3220,15 +3330,16 @@
       const feePerPerson = Number(document.getElementById('fin-fee-per-person')?.value) || 0;
       const costPerShuttle = Number(document.getElementById('fin-cost-per-shuttle')?.value) || 0;
 
-      const paidPlayers = state.players.filter(p => p.paid);
-      const unpaidPlayers = state.players.filter(p => !p.paid);
+      const regularPlayers = state.players.filter(p => !isHostPlayer(p));
+      const paidPlayers = regularPlayers.filter(p => p.paid);
+      const unpaidPlayers = regularPlayers.filter(p => !p.paid);
 
       const collected = paidPlayers.length * feePerPerson;
       const shuttleCost = (state.shuttlesUsed || 0) * costPerShuttle;
       const net = collected - shuttleCost;
 
       document.getElementById('fin-collected').textContent = `$${collected.toLocaleString()}`;
-      document.getElementById('fin-paid-count').textContent = `${paidPlayers.length} / ${state.players.length} 人已繳`;
+      document.getElementById('fin-paid-count').textContent = `${paidPlayers.length} / ${regularPlayers.length} 人已繳`;
       document.getElementById('fin-shuttle-cost').textContent = `$${shuttleCost.toLocaleString()}`;
       document.getElementById('fin-shuttle-used').textContent = `共 ${state.shuttlesUsed || 0} 顆`;
       document.getElementById('fin-net-balance').textContent = `${net >= 0 ? '$' : '-$'}${Math.abs(net).toLocaleString()}`;
@@ -3288,14 +3399,20 @@
     }
 
     function resetMatchCountsOnly() {
+      ensureHostPlayersExist();
       state.players.forEach(p => {
         p.games = 0;
         p.playedWith = {};
         p.lastPlayedAt = 0;
-        p.paid = false;
-        p.checkedIn = false;
         p.resting = false;
         p.endReason = null;
+        if (isHostPlayer(p)) {
+          p.paid = true;
+          p.checkedIn = true;
+        } else {
+          p.paid = false;
+          p.checkedIn = false;
+        }
       });
       state.courts.forEach(c => {
         c.slots = [null, null, null, null];
@@ -3309,7 +3426,7 @@
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已開啟新的一天！場次已歸零，球員皆重置為「尚未到場」等待點名報到', 'success');
+      showToast('已開啟新的一天！場次已歸零，團主(雷夢、荷玉)常駐待命，球友重置為「尚未到場」等待點名', 'success');
     }
 
     function loadDemoPlayers() {
@@ -3328,11 +3445,12 @@
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已載入 16 人測試名單（含三場地與對戰紀錄）', 'success');
+      showToast('已載入測試名單（含團主雷夢、荷玉與 16 位球友）', 'success');
     }
 
     function clearAllPlayers() {
       state.players = [];
+      ensureHostPlayersExist();
       state.courts.forEach(c => {
         c.slots = [null, null, null, null];
         c.startTime = null;
@@ -3345,7 +3463,7 @@
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已清空所有球員與場上資料，您可以開始新增球員', 'info');
+      showToast('已清空一般球員資料（保留團主「雷夢」、「荷玉」常駐待命），您可以開始新增球員', 'info');
     }
 
     /********************************************************************
