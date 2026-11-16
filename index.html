@@ -324,7 +324,7 @@
         </div>
       </section>
 
-      <!-- SECTION 2: PREPARATION / STAGING AREA (雙組排點準備區：第1組 & 第2組) -->
+      <!-- SECTION 2: PREPARATION / STAGING AREA (雙組排點準備區：第1組 & 第2組 + 綁定與新手場設定) -->
       <section class="bg-slate-900/90 border-2 border-indigo-500/40 rounded-2xl p-4 shadow-xl relative overflow-hidden">
         <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
           <div class="flex items-center gap-2.5">
@@ -344,18 +344,70 @@
             </div>
           </div>
 
-          <!-- Action Buttons for Both Prep Groups -->
+          <!-- Action Buttons for Both Prep Groups (Dynamically switches between Standard & Novice/Regular dual buttons) -->
           <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="autoFillPrepArea()"
-              class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/60 flex items-center gap-1.5 transition">
-              <i class="fa-solid fa-bolt"></i>
-              智慧自動配點 (填滿兩組)
-            </button>
+            <div id="prep-top-action-buttons" class="flex items-center gap-1.5 flex-wrap">
+              <button onclick="autoFillPrepArea()"
+                class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/60 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-bolt"></i>
+                智慧自動配點 (填滿兩組)
+              </button>
+            </div>
             <button onclick="clearPrepArea()" title="清空全部準備區 (兩組)"
               class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 active:scale-95 text-slate-300 hover:text-rose-300 text-xs transition">
               <i class="fa-solid fa-eraser"></i>
               全清空
             </button>
+          </div>
+        </div>
+
+        <!-- SMART MATCHING SETTINGS BAR: (1) BINDING GROUPS & (2) NOVICE COURT MODE -->
+        <div class="mb-3 bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 flex flex-col gap-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <!-- Left: Binding Settings Control -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button onclick="openBindingModal()"
+                class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-extrabold text-xs flex items-center gap-1.5 transition active:scale-95">
+                <i class="fa-solid fa-link"></i>
+                排點綁定設定 (2-4人同場)
+              </button>
+              <div id="binding-status-bar" class="flex items-center gap-1.5 flex-wrap">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+            <!-- Right: Novice Court Mode Settings -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <button id="novice-mode-toggle-btn" onclick="toggleNoviceMode()"
+                class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs flex items-center gap-1.5 transition active:scale-95">
+                <i class="fa-solid fa-seedling text-emerald-400"></i>
+                <span>新手場分流：未啟用</span>
+              </button>
+              <div id="novice-level-config" class="hidden items-center gap-1.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl px-2.5 py-1">
+                <label for="novice-max-level-select" class="text-[11px] font-bold text-emerald-300 whitespace-nowrap">
+                  新手等級(含)：
+                </label>
+                <select id="novice-max-level-select" onchange="setNoviceMaxLevel(this.value)"
+                  class="bg-slate-950 border border-emerald-500/40 rounded-lg px-2 py-0.5 text-xs font-extrabold text-emerald-200 focus:outline-none">
+                  <option value="1">≤ 1級 (新手)</option>
+                  <option value="2">≤ 2級 (新手)</option>
+                  <option value="3">≤ 3級 (新手)</option>
+                  <option value="4">≤ 4級 (初階)</option>
+                  <option value="5">≤ 5級 (初階)</option>
+                  <option value="6">≤ 6級 (中下)</option>
+                  <option value="7">≤ 7級 (中下)</option>
+                  <option value="8">≤ 8級 (中階)</option>
+                  <option value="9">≤ 9級 (中階)</option>
+                  <option value="10">≤ 10級 (中上)</option>
+                </select>
+                <span id="novice-pool-counts-hint" class="text-[10px] text-slate-400 hidden sm:inline"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Binding Groups Quick Overview Strip -->
+          <div id="binding-groups-strip" class="hidden pt-2 border-t border-slate-800/80 flex-wrap items-center gap-1.5 text-[11px]">
+            <!-- Rendered by JS -->
           </div>
         </div>
 
@@ -374,11 +426,13 @@
                   class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-semibold">尚缺
                   4 人</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <button onclick="autoFillPrepGroup(0)"
-                  class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-[11px] font-bold transition active:scale-95">
-                  <i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>自動配第1組
-                </button>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <div id="prep-group-actions-0" class="flex items-center gap-1">
+                  <button onclick="autoFillPrepGroup(0)"
+                    class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-indigo-200 text-[11px] font-bold transition active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>自動配第1組
+                  </button>
+                </div>
                 <button onclick="clearPrepGroup(0)"
                   class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-300 text-[11px] font-semibold transition">
                   清空
@@ -423,11 +477,13 @@
                   class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-semibold">尚缺
                   4 人</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <button onclick="autoFillPrepGroup(1)"
-                  class="px-2.5 py-1 rounded-lg bg-violet-600/30 hover:bg-violet-600/50 border border-violet-400/40 text-violet-200 text-[11px] font-bold transition active:scale-95">
-                  <i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>自動配第2組
-                </button>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <div id="prep-group-actions-1" class="flex items-center gap-1">
+                  <button onclick="autoFillPrepGroup(1)"
+                    class="px-2.5 py-1 rounded-lg bg-violet-600/30 hover:bg-violet-600/50 border border-violet-400/40 text-violet-200 text-[11px] font-bold transition active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>自動配第2組
+                  </button>
+                </div>
                 <button onclick="clearPrepGroup(1)"
                   class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-300 text-[11px] font-semibold transition">
                   清空
@@ -975,6 +1031,128 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 5B: PLAYER BINDING SETTINGS (排點綁定：單次綁定 / 全時段綁定) ================= -->
+  <div id="binding-modal"
+    class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div
+      class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-2xl w-full p-5 shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+        <div>
+          <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+            <i class="fa-solid fa-link text-amber-400"></i>
+            排點綁定設定（2～4人同場：單次綁定 / 全時段綁定）
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            當輪到某位綁定球友但其他綁定夥伴還在場上時，系統會先讓別人上場，等綁定人都在場下才一起排上場
+          </p>
+        </div>
+        <button onclick="closeBindingModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+        <!-- Master Activation Banner -->
+        <div id="binding-modal-status-banner"
+          class="rounded-xl p-3 border flex flex-wrap items-center justify-between gap-2">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Create New Binding Group Box -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs font-extrabold text-amber-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-user-group"></i> 新增一組同場綁定（請點選 2 ～ 4 位已到場球友）
+            </span>
+            <span id="binding-selected-count-badge"
+              class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">
+              已選 0 / 4 人
+            </span>
+          </div>
+
+          <!-- Mode Selector: ONCE vs FULL -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="binding-mode-radio" value="ONCE" checked class="peer sr-only" />
+              <div
+                class="p-2.5 rounded-xl border border-slate-800 bg-slate-900/70 peer-checked:bg-sky-500/20 peer-checked:border-sky-400 peer-checked:text-sky-200 text-slate-300 transition">
+                <div class="text-xs font-extrabold flex items-center gap-1.5">
+                  <i class="fa-solid fa-1 text-sky-400"></i> 單次綁定（一次性同場）
+                </div>
+                <div class="text-[10px] opacity-80 mt-0.5">
+                  只要這幾人都在場下時一起排上場打過 1 次，即自動完成並解除綁定
+                </div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="binding-mode-radio" value="FULL" class="peer sr-only" />
+              <div
+                class="p-2.5 rounded-xl border border-slate-800 bg-slate-900/70 peer-checked:bg-amber-500/20 peer-checked:border-amber-400 peer-checked:text-amber-200 text-slate-300 transition">
+                <div class="text-xs font-extrabold flex items-center gap-1.5">
+                  <i class="fa-solid fa-infinity text-amber-400"></i> 全時段綁定（整場同進退）
+                </div>
+                <div class="text-[10px] opacity-80 mt-0.5">
+                  整場活動智慧排點皆把他們當成同一組一起上場，絕不拆散
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Arrived Players Multi-Select Grid (2-4 players) -->
+          <div id="binding-player-picker-grid"
+            class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 max-h-44 overflow-y-auto p-1">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-1">
+            <button type="button" onclick="clearBindingDraftSelection()"
+              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+              重選球員
+            </button>
+            <button type="button" onclick="addBindingGroupFromModal()"
+              class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow transition active:scale-95">
+              <i class="fa-solid fa-plus mr-1"></i>加入綁定清單
+            </button>
+          </div>
+        </div>
+
+        <!-- Existing Binding Groups List -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-slate-200">目前已建立的綁定組合清單：</span>
+            <button onclick="clearAllBindingGroups()"
+              class="text-[11px] text-rose-400 hover:text-rose-300 font-bold underline">
+              清空全部綁定
+            </button>
+          </div>
+          <div id="binding-groups-modal-list" class="space-y-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer: Explicit User Confirmation to Activate / Deactivate for Smart Matching -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3.5 mt-3 border-t border-slate-800">
+        <button type="button" onclick="deactivateBindings()"
+          class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 text-slate-300 hover:text-rose-300 text-xs font-bold transition">
+          <i class="fa-solid fa-pause mr-1"></i>暫停綁定（智慧排點暫不參考）
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeBindingModal()"
+            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+            關閉
+          </button>
+          <button type="button" onclick="confirmAndActivateBindings()"
+            class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/60 transition active:scale-95 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check"></i>
+            確認設定生效（讓智慧排點系統參考）
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MODAL 6: CUSTOM CAT ICON PICKER ================= -->
   <div id="icon-modal"
     class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
@@ -1330,10 +1508,15 @@
       regFilter: 'ALL',
       hour1BaselineGames: null,
       is1820Ended: false,
+      bindingGroups: [],
+      bindingSystemActive: false,
+      noviceModeEnabled: false,
+      noviceMaxLevel: 5,
       matchLogs: []
     };
 
     let selectedSource = null;
+    let bindingDraftPlayerIds = [];
 
     function seedSampleMatchHistory() {
       if (state.matchLogs && state.matchLogs.length > 0) return;
@@ -1380,6 +1563,10 @@
           }
           if (!state.regFilter) state.regFilter = 'ALL';
           if (typeof state.is1820Ended !== 'boolean') state.is1820Ended = false;
+          if (!Array.isArray(state.bindingGroups)) state.bindingGroups = [];
+          if (typeof state.bindingSystemActive !== 'boolean') state.bindingSystemActive = false;
+          if (typeof state.noviceModeEnabled !== 'boolean') state.noviceModeEnabled = false;
+          if (!state.noviceMaxLevel || state.noviceMaxLevel < 1) state.noviceMaxLevel = 5;
           if (!Array.isArray(state.prepSlots)) {
             state.prepSlots = [null, null, null, null, null, null, null, null];
           } else {
@@ -1949,92 +2136,575 @@
       };
     }
 
-    function pickBestQuartetFromCandidates(candidates) {
+    /********************************************************************
+     * 4B. BINDING SYSTEM (2-4人同場綁定：單次 / 全時段) & NOVICE COURT MODE (新手場分流)
+     ********************************************************************/
+    // 取得目前已確認生效、且啟用中的綁定組合（需由使用者點擊「確認設定生效」開啟 state.bindingSystemActive 才會被智慧排點參考）
+    function getActiveConfirmedBindingGroups() {
+      if (!state.bindingSystemActive) return [];
+      return (state.bindingGroups || []).filter(bg => {
+        if (!bg || !bg.enabled) return false;
+        const validIds = (bg.playerIds || []).filter(id => !!getPlayerById(id));
+        return validIds.length >= 2 && validIds.length <= 4;
+      });
+    }
+
+    function getPlayerBindingGroup(playerId, onlyActiveConfirmed = false) {
+      if (!playerId) return null;
+      const list = onlyActiveConfirmed ? getActiveConfirmedBindingGroups() : (state.bindingGroups || []);
+      return list.find(bg => bg && bg.enabled && (bg.playerIds || []).includes(playerId)) || null;
+    }
+
+    function areTwoPlayersInSameActiveBinding(idA, idB) {
+      const bg = getPlayerBindingGroup(idA, true);
+      if (!bg) return false;
+      return (bg.playerIds || []).includes(idB);
+    }
+
+    function isPlayerInPoolType(player, poolType) {
+      if (!player) return false;
+      if (!poolType || poolType === 'ALL' || !state.noviceModeEnabled) return true;
+      const maxNoviceLv = Number(state.noviceMaxLevel) || 5;
+      if (poolType === 'NOVICE') {
+        return (player.level || 1) <= maxNoviceLv;
+      }
+      if (poolType === 'REGULAR') {
+        return (player.level || 1) > maxNoviceLv;
+      }
+      return true;
+    }
+
+    function toggleNoviceMode() {
+      state.noviceModeEnabled = !state.noviceModeEnabled;
+      saveState();
+      renderAll();
+      if (state.noviceModeEnabled) {
+        showToast(`🌱 已啟用「新手場分流」模式（新手等級 ≤ ${state.noviceMaxLevel} 級）！請選擇排新手或排普通(熟手)`, 'success');
+      } else {
+        showToast('已關閉「新手場分流」，恢復原版綜合智慧排點模式', 'info');
+      }
+    }
+
+    function setNoviceMaxLevel(val) {
+      const lv = Math.max(1, Math.min(15, parseInt(val, 10) || 5));
+      state.noviceMaxLevel = lv;
+      saveState();
+      renderAll();
+      showToast(`🌱 新手等級上限已設定為「${lv} 級 (含) 以下」`, 'info');
+    }
+
+    function openBindingModal() {
+      bindingDraftPlayerIds = [];
+      renderBindingModalContent();
+      const modal = document.getElementById('binding-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeBindingModal() {
+      const modal = document.getElementById('binding-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function toggleBindingDraftPlayer(playerId) {
+      const idx = bindingDraftPlayerIds.indexOf(playerId);
+      if (idx !== -1) {
+        bindingDraftPlayerIds.splice(idx, 1);
+      } else {
+        if (bindingDraftPlayerIds.length >= 4) {
+          showToast('單組綁定最多可選擇 4 位球員！', 'warn');
+          return;
+        }
+        const existingBg = (state.bindingGroups || []).find(bg => bg.enabled && (bg.playerIds || []).includes(playerId));
+        if (existingBg) {
+          const p = getPlayerById(playerId);
+          showToast(`「${p ? p.name : ''}」已在另一組啟用中的綁定名單內，請先刪除或停用原綁定`, 'warn');
+          return;
+        }
+        bindingDraftPlayerIds.push(playerId);
+      }
+      renderBindingModalContent();
+    }
+
+    function clearBindingDraftSelection() {
+      bindingDraftPlayerIds = [];
+      renderBindingModalContent();
+    }
+
+    function addBindingGroupFromModal() {
+      if (bindingDraftPlayerIds.length < 2 || bindingDraftPlayerIds.length > 4) {
+        showToast('請點選 2 ～ 4 位想要一起同場打球的球員！', 'warn');
+        return;
+      }
+      const radios = document.getElementsByName('binding-mode-radio');
+      let mode = 'ONCE';
+      radios.forEach(r => { if (r.checked) mode = r.value; });
+
+      const newGroup = {
+        id: 'bind_' + Date.now(),
+        playerIds: [...bindingDraftPlayerIds],
+        mode, // 'ONCE' or 'FULL'
+        enabled: true,
+        completedOnce: false
+      };
+
+      if (!Array.isArray(state.bindingGroups)) state.bindingGroups = [];
+      state.bindingGroups.push(newGroup);
+      // 新增或修改綁定後，需由使用者點選「確認設定生效」才會讓智慧排點系統正式參考
+      bindingDraftPlayerIds = [];
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+      const names = newGroup.playerIds.map(id => getPlayerById(id)?.name || '').filter(Boolean).join('、');
+      showToast(
+        `已加入綁定「${names}」（${mode === 'FULL' ? '全時段綁定' : '單次綁定'}）！請點右下角「確認設定生效」套用`,
+        'info'
+      );
+    }
+
+    function toggleBindingGroupEnabled(groupId) {
+      const bg = (state.bindingGroups || []).find(g => g.id === groupId);
+      if (!bg) return;
+      bg.enabled = !bg.enabled;
+      if (bg.enabled) {
+        bg.completedOnce = false;
+      }
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+    }
+
+    function toggleBindingGroupMode(groupId) {
+      const bg = (state.bindingGroups || []).find(g => g.id === groupId);
+      if (!bg) return;
+      bg.mode = bg.mode === 'FULL' ? 'ONCE' : 'FULL';
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+    }
+
+    function deleteBindingGroup(groupId) {
+      state.bindingGroups = (state.bindingGroups || []).filter(g => g.id !== groupId);
+      if (state.bindingGroups.length === 0) {
+        state.bindingSystemActive = false;
+      }
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+      showToast('已刪除該組綁定設定', 'info');
+    }
+
+    function clearAllBindingGroups() {
+      state.bindingGroups = [];
+      state.bindingSystemActive = false;
+      bindingDraftPlayerIds = [];
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+      showToast('已清空所有排點綁定設定', 'info');
+    }
+
+    function confirmAndActivateBindings() {
+      const activeCount = (state.bindingGroups || []).filter(g => g.enabled && (g.playerIds || []).length >= 2).length;
+      if (activeCount === 0) {
+        showToast('目前尚無啟用中的綁定組合！請先點選 2~4 人並點「＋加入綁定清單」', 'warn');
+        return;
+      }
+      state.bindingSystemActive = true;
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+      closeBindingModal();
+      showToast(`✅ 已確認生效！智慧排點系統現在會參考這 ${activeCount} 組綁定設定`, 'success');
+    }
+
+    function deactivateBindings() {
+      state.bindingSystemActive = false;
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+      showToast('⏸ 已暫停排點綁定參考，智慧排點暫時以一般個人模式運作', 'info');
+    }
+
+    function renderBindingModalContent() {
+      const bannerEl = document.getElementById('binding-modal-status-banner');
+      const countBadge = document.getElementById('binding-selected-count-badge');
+      const pickerGrid = document.getElementById('binding-player-picker-grid');
+      const listEl = document.getElementById('binding-groups-modal-list');
+      if (!pickerGrid || !listEl) return;
+
+      const enabledGroups = (state.bindingGroups || []).filter(g => g.enabled);
+
+      if (bannerEl) {
+        if (state.bindingSystemActive && enabledGroups.length > 0) {
+          bannerEl.className = 'rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/40 flex flex-wrap items-center justify-between gap-2';
+          bannerEl.innerHTML = `
+            <div class="flex items-center gap-2 text-xs font-extrabold text-emerald-300">
+              <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+              <span>目前狀態：【已確認生效】智慧排點正在參考 ${enabledGroups.length} 組綁定設定</span>
+            </div>
+            <span class="text-[11px] text-emerald-200/80">若綁定成員有人在場上，會先讓別人上場，等全員在場下才一起上</span>
+          `;
+        } else {
+          bannerEl.className = 'rounded-xl p-3 border bg-amber-950/30 border-amber-500/40 flex flex-wrap items-center justify-between gap-2';
+          bannerEl.innerHTML = `
+            <div class="flex items-center gap-2 text-xs font-extrabold text-amber-300">
+              <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
+              <span>目前狀態：【尚未生效 / 已暫停】設定好綁定組合後，請按右下角「確認設定生效」才會讓智慧排點參考！</span>
+            </div>
+          `;
+        }
+      }
+
+      if (countBadge) {
+        countBadge.textContent = `已選 ${bindingDraftPlayerIds.length} / 4 人 (最少2人)`;
+        countBadge.className = `text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${
+          bindingDraftPlayerIds.length >= 2
+            ? 'bg-amber-500/20 text-amber-300 border-amber-400/50'
+            : 'bg-slate-800 text-slate-300 border-slate-700'
+        }`;
+      }
+
+      const eligiblePlayers = state.players.filter(p => !isHostPlayer(p) && p.checkedIn && !p.resting);
+      if (eligiblePlayers.length === 0) {
+        pickerGrid.innerHTML = `<div class="col-span-full text-center py-4 text-xs text-slate-500">目前沒有已到場的一般球員可供綁定</div>`;
+      } else {
+        pickerGrid.innerHTML = eligiblePlayers.map(p => {
+          const isPicked = bindingDraftPlayerIds.includes(p.id);
+          const existingBg = (state.bindingGroups || []).find(bg => bg.enabled && (bg.playerIds || []).includes(p.id));
+          const lvInfo = getLevelBadgeInfo(p.level);
+          return `
+            <button type="button" onclick="toggleBindingDraftPlayer('${p.id}')"
+                    class="p-2 rounded-xl border text-left flex items-center justify-between gap-1 transition ${
+                      isPicked
+                        ? 'bg-amber-500/25 border-amber-400 text-white shadow'
+                        : existingBg
+                          ? 'bg-slate-900/40 border-slate-800 text-slate-500 opacity-60 cursor-not-allowed'
+                          : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
+                    }">
+              <div class="truncate">
+                <div class="text-xs font-extrabold truncate">${isPicked ? '✓ ' : ''}${escapeHTML(p.name)}</div>
+                <div class="text-[10px] text-slate-400">${p.timeSlot}・已上${p.games}場</div>
+              </div>
+              <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      if (!state.bindingGroups || state.bindingGroups.length === 0) {
+        listEl.innerHTML = `<div class="text-center py-5 bg-slate-950/50 border border-dashed border-slate-800 rounded-xl text-xs text-slate-500">尚未建立任何排點綁定組合</div>`;
+      } else {
+        listEl.innerHTML = state.bindingGroups.map((bg, idx) => {
+          const members = (bg.playerIds || []).map(id => getPlayerById(id)).filter(Boolean);
+          const memberTags = members.map(m => {
+            const loc = getPlayerLocation(m.id);
+            const locText = loc.status === 'COURT' ? `(${loc.label})` : loc.status === 'PREP' ? `(${loc.label})` : '(場下等待)';
+            const lv = getLevelBadgeInfo(m.level);
+            return `<span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-700 text-xs font-bold text-white inline-flex items-center gap-1">
+              ${escapeHTML(m.name)} <span class="text-[10px] px-1 rounded border ${lv.classes}">${lv.label}</span>
+              <span class="text-[10px] ${loc.status === 'WAIT' ? 'text-emerald-300' : 'text-amber-300'}">${locText}</span>
+            </span>`;
+          }).join('');
+
+          const allWaiting = members.every(m => getPlayerLocation(m.id).status === 'WAIT');
+          const modeBadge = bg.mode === 'FULL'
+            ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-extrabold"><i class="fa-solid fa-infinity mr-1"></i>全時段綁定 (${members.length}人)</span>`
+            : `<span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[11px] font-extrabold"><i class="fa-solid fa-1 mr-1"></i>單次綁定 (${members.length}人)</span>`;
+
+          return `
+            <div class="bg-slate-950 border ${bg.enabled ? 'border-amber-500/40' : 'border-slate-800 opacity-60'} rounded-xl p-3 flex flex-col gap-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-black text-slate-400">#${idx + 1}</span>
+                  ${modeBadge}
+                  ${bg.completedOnce
+                    ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">✓ 已完成單次同場 (已解除)</span>`
+                    : bg.enabled
+                      ? `<span class="text-[11px] ${allWaiting ? 'text-emerald-400' : 'text-amber-300'} font-semibold">${allWaiting ? '🟢 全員在場下，輪到時可一起排入' : '⏳ 尚有成員在場上/準備區，暫緩等待全員到齊'}</span>`
+                      : `<span class="text-[11px] text-slate-500">已停用</span>`
+                  }
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="toggleBindingGroupMode('${bg.id}')" title="切換單次綁定 / 全時段綁定"
+                          class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-bold transition">
+                    切換為${bg.mode === 'FULL' ? '單次' : '全時段'}
+                  </button>
+                  <button type="button" onclick="toggleBindingGroupEnabled('${bg.id}')"
+                          class="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition ${
+                            bg.enabled
+                              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30'
+                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+                          }">
+                    ${bg.enabled ? '✓ 啟用中' : '已停用 (點此重新啟用)'}
+                  </button>
+                  <button type="button" onclick="deleteBindingGroup('${bg.id}')" title="刪除此綁定"
+                          class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700 flex items-center justify-center text-xs transition">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5">${memberTags}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function pickBestQuartetFromCandidates(candidates, readyBindGroups = []) {
       if (!candidates || candidates.length < 4) return null;
 
-      const sortedCandidates = [...candidates].sort((a, b) => {
-        const effA = getPlayerEffectiveGames(a);
-        const effB = getPlayerEffectiveGames(b);
-        if (Math.abs(effA - effB) > 0.05) return effA - effB;
-        return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
+      // 建立球員 -> 就緒綁定組的映射；同綁定組球員以「群組平均有效場次」與「群組平均最後上場時間」同步排序，確保一起進入候選池
+      const playerBindMap = new Map();
+      const bindStatsMap = new Map();
+      readyBindGroups.forEach(bg => {
+        const members = candidates.filter(c => bg.playerIds.includes(c.id));
+        if (members.length === bg.playerIds.length) {
+          const avgEff = members.reduce((s, m) => s + getPlayerEffectiveGames(m), 0) / members.length;
+          const minLast = Math.min(...members.map(m => m.lastPlayedAt || 0));
+          bindStatsMap.set(bg.id, { avgEff, minLast });
+          members.forEach(m => playerBindMap.set(m.id, bg));
+        }
       });
 
-      const poolSize = Math.min(sortedCandidates.length, 10);
-      const pool = sortedCandidates.slice(0, poolSize);
+      const getSortEff = (p) => {
+        const bg = playerBindMap.get(p.id);
+        return bg ? bindStatsMap.get(bg.id).avgEff : getPlayerEffectiveGames(p);
+      };
+      const getSortLast = (p) => {
+        const bg = playerBindMap.get(p.id);
+        return bg ? bindStatsMap.get(bg.id).minLast : (p.lastPlayedAt || 0);
+      };
 
-      let bestQuartet = null;
-      let bestBalanceInfo = null;
-      let bestScore = Infinity;
+      const sortedCandidates = [...candidates].sort((a, b) => {
+        const effA = getSortEff(a);
+        const effB = getSortEff(b);
+        if (Math.abs(effA - effB) > 0.05) return effA - effB;
+        const bgA = playerBindMap.get(a.id)?.id || '';
+        const bgB = playerBindMap.get(b.id)?.id || '';
+        if (bgA !== bgB) return bgA.localeCompare(bgB);
+        return getSortLast(a) - getSortLast(b);
+      });
 
-      for (let i = 0; i < pool.length - 3; i++) {
-        for (let j = i + 1; j < pool.length - 2; j++) {
-          for (let k = j + 1; k < pool.length - 1; k++) {
-            for (let l = k + 1; l < pool.length; l++) {
-              const four = [pool[i], pool[j], pool[k], pool[l]];
-              const effSum =
-                getPlayerEffectiveGames(four[0]) +
-                getPlayerEffectiveGames(four[1]) +
-                getPlayerEffectiveGames(four[2]) +
-                getPlayerEffectiveGames(four[3]);
-              const gamesPenalty = effSum * 45;
-
-              let togetherRepeats = 0;
-              for (let a = 0; a < 4; a++) {
-                for (let b = a + 1; b < 4; b++) {
-                  togetherRepeats += getPlayedTogetherCount(four[a].id, four[b].id);
+      // 建構原子候選池（確保同一個綁定組不會在 pool 邊界被切斷成只有部分人進 pool）
+      const buildAtomicPool = (maxLimit) => {
+        const pool = [];
+        const addedIds = new Set();
+        for (let i = 0; i < sortedCandidates.length; i++) {
+          const cand = sortedCandidates[i];
+          if (addedIds.has(cand.id)) continue;
+          const bg = playerBindMap.get(cand.id);
+          if (bg) {
+            const members = sortedCandidates.filter(c => bg.playerIds.includes(c.id));
+            if (pool.length + members.length <= maxLimit || pool.length < 4) {
+              members.forEach(m => {
+                if (!addedIds.has(m.id)) {
+                  pool.push(m);
+                  addedIds.add(m.id);
                 }
-              }
-              const repeatPenalty = togetherRepeats * 85;
+              });
+            }
+          } else {
+            if (pool.length < maxLimit) {
+              pool.push(cand);
+              addedIds.add(cand.id);
+            }
+          }
+        }
+        return pool;
+      };
 
-              const balanceInfo = evaluateQuartetSkillBalance(four);
-              const totalScore = gamesPenalty + repeatPenalty + balanceInfo.skillPenalty + (Math.random() * 2);
+      const searchInPool = (pool) => {
+        let bestQuartet = null;
+        let bestBalanceInfo = null;
+        let bestScore = Infinity;
 
-              if (totalScore < bestScore) {
-                bestScore = totalScore;
-                bestQuartet = balanceInfo.orderedIds;
-                bestBalanceInfo = balanceInfo;
+        for (let i = 0; i < pool.length - 3; i++) {
+          for (let j = i + 1; j < pool.length - 2; j++) {
+            for (let k = j + 1; k < pool.length - 1; k++) {
+              for (let l = k + 1; l < pool.length; l++) {
+                const four = [pool[i], pool[j], pool[k], pool[l]];
+                const fourIds = [four[0].id, four[1].id, four[2].id, four[3].id];
+
+                // 硬性檢查排點綁定：每個就緒綁定組要嘛「全組都在這 4 人內」，要嘛「全組都不在這 4 人內」，絕不拆散！
+                let violatesBinding = false;
+                for (let bIdx = 0; bIdx < readyBindGroups.length; bIdx++) {
+                  const bg = readyBindGroups[bIdx];
+                  let countInFour = 0;
+                  for (let mIdx = 0; mIdx < bg.playerIds.length; mIdx++) {
+                    if (fourIds.includes(bg.playerIds[mIdx])) countInFour++;
+                  }
+                  if (countInFour > 0 && countInFour < bg.playerIds.length) {
+                    violatesBinding = true;
+                    break;
+                  }
+                }
+                if (violatesBinding) continue;
+
+                const effSum =
+                  getSortEff(four[0]) +
+                  getSortEff(four[1]) +
+                  getSortEff(four[2]) +
+                  getSortEff(four[3]);
+                const gamesPenalty = effSum * 45;
+
+                // 同場重疊扣分（若兩人屬於同一組生效綁定，不扣同場重複分，因為他們指定要一起打！）
+                let togetherRepeats = 0;
+                for (let a = 0; a < 4; a++) {
+                  for (let b = a + 1; b < 4; b++) {
+                    if (!areTwoPlayersInSameActiveBinding(four[a].id, four[b].id)) {
+                      togetherRepeats += getPlayedTogetherCount(four[a].id, four[b].id);
+                    }
+                  }
+                }
+                const repeatPenalty = togetherRepeats * 85;
+
+                const balanceInfo = evaluateQuartetSkillBalance(four);
+                const totalScore = gamesPenalty + repeatPenalty + balanceInfo.skillPenalty + (Math.random() * 2);
+
+                if (totalScore < bestScore) {
+                  bestScore = totalScore;
+                  bestQuartet = balanceInfo.orderedIds;
+                  bestBalanceInfo = balanceInfo;
+                }
               }
             }
           }
         }
-      }
 
-      if (!bestQuartet) return null;
-      return { orderedIds: bestQuartet, balanceInfo: bestBalanceInfo };
+        if (!bestQuartet) return null;
+        return { orderedIds: bestQuartet, balanceInfo: bestBalanceInfo };
+      };
+
+      // 先在精選前 11 人原子池搜尋，若因多組綁定人數組合限制找不到，自動擴大至全體候選池搜尋
+      let found = searchInPool(buildAtomicPool(11));
+      if (!found && sortedCandidates.length > 11) {
+        found = searchInPool(sortedCandidates);
+      }
+      return found;
     }
 
-    function autoFillPrepGroup(groupIndex, silent = false) {
+    function autoFillPrepGroup(groupIndex, silent = false, poolType = 'ALL') {
       const base = groupIndex === 1 ? 4 : 0;
-      const available = state.players.filter(p => {
+
+      // 1. 先篩選出符合基本條件與新手/普通分流的候選球友
+      const baseAvailable = state.players.filter(p => {
         if (isHostPlayer(p)) return false;
         if (!p.checkedIn) return false;
         if (p.resting) return false;
         if (!isPlayerEligibleInCurrentHour(p)) return false;
+        if (!isPlayerInPoolType(p, poolType)) return false;
         const loc = getPlayerLocation(p.id);
         return loc.status === 'WAIT' || (loc.status === 'PREP' && loc.groupIndex === groupIndex);
       });
 
+      const baseIdSet = new Set(baseAvailable.map(p => p.id));
+
+      // 2. 處理已確認生效的排點綁定：
+      //    - 若某綁定組有任一成員「正在場上比賽 / 在另一準備組 / 不在本次分流池」，則該綁定組全員暫緩上場，先讓其他人上場！
+      //    - 若某綁定組「全員都在 baseAvailable 場下等待」，則標記為 readyBindGroups，確保一起排入同場！
+      const activeBinds = getActiveConfirmedBindingGroups();
+      const heldBackPlayerIds = new Set();
+      const readyBindGroups = [];
+
+      activeBinds.forEach(bg => {
+        const allReady = bg.playerIds.every(pid => baseIdSet.has(pid));
+        if (allReady) {
+          readyBindGroups.push(bg);
+        } else {
+          bg.playerIds.forEach(pid => heldBackPlayerIds.add(pid));
+        }
+      });
+
+      const available = baseAvailable.filter(p => !heldBackPlayerIds.has(p.id));
+
+      const poolLabel = poolType === 'NOVICE'
+        ? `【🌱新手場 ≤${state.noviceMaxLevel}級】`
+        : poolType === 'REGULAR'
+          ? `【🔥普通/熟手場 >${state.noviceMaxLevel}級】`
+          : '';
+
       if (available.length < 4) {
         if (!silent) {
-          showToast(`目前可排入「準備區第 ${groupIndex + 1} 組」的等待球友不足 4 人！`, 'warn');
+          const holdHint = heldBackPlayerIds.size > 0
+            ? '（部分綁定球友因夥伴尚在場上或不同分流池，暫緩等待全員到齊）'
+            : '';
+          showToast(`目前可排入「準備區第 ${groupIndex + 1} 組」${poolLabel}的球友不足 4 人！${holdHint}`, 'warn');
         }
         return null;
       }
 
-      const result = pickBestQuartetFromCandidates(available);
-      if (result) {
-        for (let i = 0; i < 4; i++) {
-          state.prepSlots[base + i] = result.orderedIds[i];
-        }
+      const result = pickBestQuartetFromCandidates(available, readyBindGroups);
+      if (!result) {
         if (!silent) {
-          clearSelection();
-          saveState();
-          renderAll();
-          const b = result.balanceInfo;
-          showToast(`已自動配好「準備區第 ${groupIndex + 1} 組」（${b.balanceType}：${b.teamASum}級 vs ${b.teamBSum}級）！`, 'success');
+          showToast(`無法湊出符合綁定人數限制的 4 人組合${poolLabel}，請檢查綁定設定或等待更多球友下場`, 'warn');
         }
+        return null;
+      }
+
+      for (let i = 0; i < 4; i++) {
+        state.prepSlots[base + i] = result.orderedIds[i];
+      }
+      if (!silent) {
+        clearSelection();
+        saveState();
+        renderAll();
+        const b = result.balanceInfo;
+        showToast(`已自動配好「準備區第 ${groupIndex + 1} 組」${poolLabel}（${b.balanceType}：${b.teamASum}級 vs ${b.teamBSum}級）！`, 'success');
       }
       return result;
+    }
+
+    // 當啟用新手場時，提供「排新手到準備區」與「排普通(熟手)到準備區」兩個按鈕直接呼叫
+    function autoFillPrepByPool(poolType) {
+      const g0Full = state.prepSlots.slice(0, 4).filter(Boolean).length === 4;
+      const g1Full = state.prepSlots.slice(4, 8).filter(Boolean).length === 4;
+      const poolLabel = poolType === 'NOVICE'
+        ? `🌱 新手場 (≤${state.noviceMaxLevel}級)`
+        : `🔥 普通/熟手場 (>${state.noviceMaxLevel}級)`;
+
+      if (!g0Full) {
+        const res0 = autoFillPrepGroup(0, true, poolType);
+        if (!res0) {
+          autoFillPrepGroup(0, false, poolType);
+          return;
+        }
+        clearSelection();
+        saveState();
+        renderAll();
+        showToast(`已依「${poolLabel}」自動配好【準備區第 1 組】（${res0.balanceInfo.balanceType}）！`, 'success');
+        return;
+      }
+
+      if (!g1Full) {
+        const res1 = autoFillPrepGroup(1, true, poolType);
+        if (!res1) {
+          autoFillPrepGroup(1, false, poolType);
+          return;
+        }
+        clearSelection();
+        saveState();
+        renderAll();
+        showToast(`第 1 組已滿，已依「${poolLabel}」自動配好【準備區第 2 組】（${res1.balanceInfo.balanceType}）！`, 'success');
+        return;
+      }
+
+      // 若第 1 組與第 2 組皆已滿，預設更新第 1 組
+      state.prepSlots.splice(0, 4, null, null, null, null);
+      const res0 = autoFillPrepGroup(0, true, poolType);
+      if (!res0) {
+        autoFillPrepGroup(0, false, poolType);
+        return;
+      }
+      clearSelection();
+      saveState();
+      renderAll();
+      showToast(`已重新依「${poolLabel}」配好【準備區第 1 組】（${res0.balanceInfo.balanceType}）！`, 'success');
     }
 
     function autoFillPrepArea() {
@@ -2043,7 +2713,7 @@
 
       // 若第 1 組已滿且第 2 組未滿，優先保留第 1 組並自動配滿第 2 組
       if (g0Full && !g1Full) {
-        const res2 = autoFillPrepGroup(1, true);
+        const res2 = autoFillPrepGroup(1, true, 'ALL');
         if (!res2) {
           showToast('第 1 組已排滿，但等待區剩餘球友不足 4 人無法再配第 2 組', 'warn');
           return;
@@ -2060,12 +2730,12 @@
         state.prepSlots = [null, null, null, null, null, null, null, null];
       }
 
-      const res1 = autoFillPrepGroup(0, true);
+      const res1 = autoFillPrepGroup(0, true, 'ALL');
       if (!res1) {
         showToast('目前「已到場」且符合時段、在等待區的球員不足 4 人！請先確認球員已報到', 'warn');
         return;
       }
-      const res2 = autoFillPrepGroup(1, true);
+      const res2 = autoFillPrepGroup(1, true, 'ALL');
 
       clearSelection();
       saveState();
@@ -2243,6 +2913,22 @@
         }
       }
 
+      // 檢查是否有已生效的「單次綁定 (ONCE)」組合在此場完成同場比賽，若有則自動完成並解除該單次綁定
+      let completedOnceLabels = [];
+      if (state.bindingSystemActive && Array.isArray(state.bindingGroups)) {
+        state.bindingGroups.forEach(bg => {
+          if (bg && bg.enabled && bg.mode === 'ONCE' && Array.isArray(bg.playerIds) && bg.playerIds.length >= 2) {
+            const allInMatch = bg.playerIds.every(pid => four.includes(pid));
+            if (allInMatch) {
+              bg.enabled = false;
+              bg.completedOnce = true;
+              const names = bg.playerIds.map(pid => getPlayerById(pid)?.name || '').filter(Boolean).join('、');
+              completedOnceLabels.push(names);
+            }
+          }
+        });
+      }
+
       state.matchLogs.unshift({
         id: 'm_' + now,
         courtName: court.name,
@@ -2256,7 +2942,11 @@
       clearSelection();
       saveState();
       renderAll();
-      showToast(`${court.name} 完賽結算！4位球員上場 +1 並已記錄同場球友`, 'success');
+      if (completedOnceLabels.length > 0) {
+        showToast(`${court.name} 完賽結算！單次綁定「${completedOnceLabels.join(' / ')}」已同場完賽並自動解除綁定`, 'success');
+      } else {
+        showToast(`${court.name} 完賽結算！4位球員上場 +1 並已記錄同場球友`, 'success');
+      }
     }
 
     function cancelCourtMatch(courtIndex) {
@@ -2744,6 +3434,33 @@
         gridContainer.innerHTML = slotIndices.map(idx => renderPrepSlotCard(idx)).join('');
       }
 
+      const actionsEl = document.getElementById(`prep-group-actions-${groupIndex}`);
+      if (actionsEl) {
+        if (state.noviceModeEnabled) {
+          const maxLv = Number(state.noviceMaxLevel) || 5;
+          actionsEl.innerHTML = `
+            <button onclick="autoFillPrepGroup(${groupIndex}, false, 'NOVICE')" title="只排 ≤${maxLv}級 的新手球友進入第 ${groupIndex + 1} 組"
+              class="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/50 text-emerald-300 text-[11px] font-extrabold transition active:scale-95">
+              🌱 排新手(≤${maxLv}級)
+            </button>
+            <button onclick="autoFillPrepGroup(${groupIndex}, false, 'REGULAR')" title="只排 >${maxLv}級 的普通/熟手球友進入第 ${groupIndex + 1} 組"
+              class="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-300 text-[11px] font-extrabold transition active:scale-95">
+              🔥 排普通(>${maxLv}級)
+            </button>
+          `;
+        } else {
+          const btnColor = groupIndex === 0
+            ? 'bg-indigo-600/30 hover:bg-indigo-600/50 border-indigo-400/40 text-indigo-200'
+            : 'bg-violet-600/30 hover:bg-violet-600/50 border-violet-400/40 text-violet-200';
+          actionsEl.innerHTML = `
+            <button onclick="autoFillPrepGroup(${groupIndex})"
+              class="px-2.5 py-1 rounded-lg ${btnColor} border text-[11px] font-bold transition active:scale-95">
+              <i class="fa-solid fa-wand-magic-sparkles mr-0.5"></i>自動配第${groupIndex + 1}組
+            </button>
+          `;
+        }
+      }
+
       const groupPlayerIds = state.prepSlots.slice(base, base + 4);
       const activePlayers = groupPlayerIds.map(id => getPlayerById(id)).filter(Boolean);
       const filledCount = activePlayers.length;
@@ -2796,7 +3513,7 @@
         }
         if (hintEl) {
           hintEl.textContent = groupIndex === 0
-            ? '💡 點擊任一位置即可與等待區或第 2 組互換，或點「自動配第1組」'
+            ? '💡 點擊任一位置即可與等待區或第 2 組互換'
             : '💡 第 1 組上場後第 2 組自動遞補為第 1 組；也可直接指定派往任一球場';
         }
       }
@@ -2828,6 +3545,124 @@
           topBadge.textContent = `準備區 (${f0 + f1}/8人)`;
         }
       }
+
+      // 1. 動態切換頂部「智慧排點按鈕」（未啟用新手場：單一綜合按鈕；已啟用新手場：排新手 & 排普通(熟手) 雙按鈕）
+      const topActionsEl = document.getElementById('prep-top-action-buttons');
+      const maxLv = Number(state.noviceMaxLevel) || 5;
+      if (topActionsEl) {
+        if (state.noviceModeEnabled) {
+          topActionsEl.innerHTML = `
+            <button onclick="autoFillPrepByPool('NOVICE')"
+              class="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/60 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-seedling"></i>
+              排【新手場】(≤${maxLv}級) 到準備區
+            </button>
+            <button onclick="autoFillPrepByPool('REGULAR')"
+              class="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-950/60 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-fire"></i>
+              排【普通/熟手】(>${maxLv}級) 到準備區
+            </button>
+          `;
+        } else {
+          topActionsEl.innerHTML = `
+            <button onclick="autoFillPrepArea()"
+              class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-950/60 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-bolt"></i>
+              智慧自動配點 (填滿兩組)
+            </button>
+          `;
+        }
+      }
+
+      // 2. 更新新手場控制列狀態與人數提示
+      const noviceBtn = document.getElementById('novice-mode-toggle-btn');
+      const noviceConfigEl = document.getElementById('novice-level-config');
+      const noviceSelectEl = document.getElementById('novice-max-level-select');
+      const noviceCountsEl = document.getElementById('novice-pool-counts-hint');
+
+      if (noviceBtn) {
+        if (state.noviceModeEnabled) {
+          noviceBtn.className = 'px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 transition active:scale-95';
+          noviceBtn.innerHTML = `<i class="fa-solid fa-toggle-on text-emerald-400 text-sm"></i><span>新手場分流：已啟用</span>`;
+        } else {
+          noviceBtn.className = 'px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs flex items-center gap-1.5 transition active:scale-95';
+          noviceBtn.innerHTML = `<i class="fa-solid fa-toggle-off text-slate-500 text-sm"></i><span>新手場分流：未啟用</span>`;
+        }
+      }
+      if (noviceConfigEl) {
+        if (state.noviceModeEnabled) {
+          noviceConfigEl.classList.remove('hidden');
+          noviceConfigEl.classList.add('flex');
+        } else {
+          noviceConfigEl.classList.add('hidden');
+          noviceConfigEl.classList.remove('flex');
+        }
+      }
+      if (noviceSelectEl) {
+        noviceSelectEl.value = String(maxLv);
+      }
+      if (noviceCountsEl && state.noviceModeEnabled) {
+        const activeNonHost = state.players.filter(p => !isHostPlayer(p) && p.checkedIn && !p.resting);
+        const novCnt = activeNonHost.filter(p => (p.level || 1) <= maxLv).length;
+        const regCnt = activeNonHost.filter(p => (p.level || 1) > maxLv).length;
+        noviceCountsEl.textContent = `(在場新手${novCnt}人 / 普通${regCnt}人)`;
+      }
+
+      // 3. 更新排點綁定狀態列與快捷確認按鈕
+      const bindStatusBar = document.getElementById('binding-status-bar');
+      const bindStrip = document.getElementById('binding-groups-strip');
+      const enabledBinds = (state.bindingGroups || []).filter(g => g.enabled && (g.playerIds || []).length >= 2);
+
+      if (bindStatusBar) {
+        if (enabledBinds.length === 0) {
+          bindStatusBar.innerHTML = `<span class="text-[11px] text-slate-500">尚未設定綁定</span>`;
+        } else if (state.bindingSystemActive) {
+          bindStatusBar.innerHTML = `
+            <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-extrabold flex items-center gap-1">
+              <i class="fa-solid fa-circle-check"></i> 已生效參考中 (${enabledBinds.length}組)
+            </span>
+            <button onclick="deactivateBindings()" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-300 text-[10px] font-bold transition">
+              暫停參考
+            </button>
+          `;
+        } else {
+          bindStatusBar.innerHTML = `
+            <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-extrabold flex items-center gap-1">
+              <i class="fa-solid fa-clock"></i> 待確認生效 (${enabledBinds.length}組)
+            </span>
+            <button onclick="confirmAndActivateBindings()" class="px-2.5 py-0.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-black shadow transition active:scale-95">
+              ✓ 點此確認生效
+            </button>
+          `;
+        }
+      }
+
+      if (bindStrip) {
+        if (enabledBinds.length === 0) {
+          bindStrip.classList.add('hidden');
+          bindStrip.classList.remove('flex');
+        } else {
+          bindStrip.classList.remove('hidden');
+          bindStrip.classList.add('flex');
+          bindStrip.innerHTML = enabledBinds.map(bg => {
+            const members = bg.playerIds.map(id => getPlayerById(id)).filter(Boolean);
+            const names = members.map(m => escapeHTML(m.name)).join('＋');
+            const allWaiting = members.every(m => getPlayerLocation(m.id).status === 'WAIT');
+            const modeText = bg.mode === 'FULL' ? '全場綁定' : '單次綁定';
+            const modeCls = bg.mode === 'FULL'
+              ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+              : 'bg-sky-500/15 border-sky-500/40 text-sky-300';
+            return `
+              <span onclick="openBindingModal()" title="點擊管理綁定設定"
+                    class="px-2 py-0.5 rounded-lg border ${modeCls} font-bold cursor-pointer flex items-center gap-1">
+                <i class="fa-solid fa-link text-[10px]"></i>
+                <span>[${modeText}] ${names}</span>
+                <span class="text-[10px] ${allWaiting ? 'text-emerald-300' : 'text-rose-300'}">(${allWaiting ? '全員場下待命' : '等待成員下場'})</span>
+              </span>
+            `;
+          }).join('');
+        }
+      }
     }
 
     function renderPrepSlotCard(slotIndex) {
@@ -2850,10 +3685,11 @@
       const tsInfo = isHostPlayer(player)
         ? { text: '👑團主', classes: 'bg-amber-500/20 text-amber-300 border-amber-400/50' }
         : getTimeSlotBadge(player.timeSlot);
+      const activeBg = getPlayerBindingGroup(player.id, true);
 
       return `
         <div onclick="handlePrepSlotClick(${slotIndex})"
-             class="h-20 rounded-xl bg-slate-900 hover:bg-slate-800/90 border border-slate-700 p-2.5 flex flex-col justify-between cursor-pointer transition relative group ${isSelected ? 'selected-slot' : ''}">
+             class="h-20 rounded-xl bg-slate-900 hover:bg-slate-800/90 border ${activeBg ? 'border-amber-400/60' : 'border-slate-700'} p-2.5 flex flex-col justify-between cursor-pointer transition relative group ${isSelected ? 'selected-slot' : ''}">
           <button onclick="removePrepSlotPlayer(event, ${slotIndex})" title="移出準備區"
                   class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white border border-slate-600 flex items-center justify-center text-[10px] shadow">
             <i class="fa-solid fa-xmark"></i>
@@ -2863,7 +3699,10 @@
             <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
           </div>
           <div class="flex items-center justify-between text-[11px] text-slate-400">
-            <span class="px-1.5 py-0.2 rounded border text-[10px] font-semibold ${tsInfo.classes}">${tsInfo.text}</span>
+            <div class="flex items-center gap-1">
+              <span class="px-1.5 py-0.2 rounded border text-[10px] font-semibold ${tsInfo.classes}">${tsInfo.text}</span>
+              ${activeBg ? `<span class="text-[10px] text-amber-300 font-bold" title="已生效排點綁定">🔗${activeBg.mode === 'FULL' ? '全' : '單'}</span>` : ''}
+            </div>
             <button onclick="event.stopPropagation(); openHistoryModal('${player.id}')" class="font-bold text-slate-300 hover:text-amber-300 underline decoration-dotted" title="查看與誰打過">
               已上 <strong class="text-emerald-400">${player.games}</strong> 場 🔍
             </button>
@@ -2880,6 +3719,7 @@
       const eligibleNow = isHost ? true : isPlayerEligibleInCurrentHour(p);
       const isSelectedRoster = selectedSource && selectedSource.type === 'ROSTER' && selectedSource.playerId === p.id;
       const isFinished = !!p.resting;
+      const activeBg = getPlayerBindingGroup(p.id, true);
 
       const playedWithEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
       const recentPlayedText = playedWithEntries.length > 0
@@ -2903,6 +3743,10 @@
         statusBadge = `<span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-300 border border-rose-500/30 text-[10px] font-bold">非本時段</span>`;
       } else {
         statusBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-semibold">等待中</span>`;
+      }
+      if (activeBg) {
+        const mates = activeBg.playerIds.filter(id => id !== p.id).map(id => getPlayerById(id)?.name || '').filter(Boolean).join('、');
+        statusBadge += ` <span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-400/50 text-[10px] font-extrabold" title="與 ${escapeHTML(mates)} 綁定同場">🔗${activeBg.mode === 'FULL' ? '全場綁定' : '單次綁定'}(${escapeHTML(mates)})</span>`;
       }
 
       return `
@@ -3755,11 +4599,13 @@
       state.shuttlesUsed = 0;
       state.hour1BaselineGames = null;
       state.is1820Ended = false;
+      state.bindingGroups = [];
+      state.bindingSystemActive = false;
       state.matchLogs = [];
       closeSettingsModal();
       saveState();
       renderAll();
-      showToast('已開啟新的一天！場次已歸零，團主(雷夢、荷玉)常駐待命，球友重置為「尚未到場」等待點名', 'success');
+      showToast('已開啟新的一天！場次與綁定已歸零，團主(雷夢、荷玉)常駐待命，球友重置為「尚未到場」等待點名', 'success');
     }
 
     function loadDemoPlayers() {
@@ -3773,6 +4619,8 @@
       state.shuttlesUsed = 6;
       state.hour1BaselineGames = null;
       state.is1820Ended = false;
+      state.bindingGroups = [];
+      state.bindingSystemActive = false;
       state.matchLogs = [];
       seedSampleMatchHistory();
       closeSettingsModal();
@@ -3792,6 +4640,8 @@
       state.shuttlesUsed = 0;
       state.hour1BaselineGames = null;
       state.is1820Ended = false;
+      state.bindingGroups = [];
+      state.bindingSystemActive = false;
       state.matchLogs = [];
       closeSettingsModal();
       saveState();
