@@ -383,7 +383,8 @@
                 <i class="fa-solid fa-seedling text-emerald-400"></i>
                 <span>新手場分流：未啟用</span>
               </button>
-              <div id="novice-level-config" class="hidden items-center gap-1.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl px-2.5 py-1">
+              <div id="novice-level-config"
+                class="hidden items-center gap-1.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl px-2.5 py-1">
                 <label for="novice-max-level-select" class="text-[11px] font-bold text-emerald-300 whitespace-nowrap">
                   新手等級(含)：
                 </label>
@@ -406,7 +407,8 @@
           </div>
 
           <!-- Active Binding Groups Quick Overview Strip -->
-          <div id="binding-groups-strip" class="hidden pt-2 border-t border-slate-800/80 flex-wrap items-center gap-1.5 text-[11px]">
+          <div id="binding-groups-strip"
+            class="hidden pt-2 border-t border-slate-800/80 flex-wrap items-center gap-1.5 text-[11px]">
             <!-- Rendered by JS -->
           </div>
         </div>
@@ -1441,14 +1443,16 @@
 
     function ensureHostPlayersExist() {
       const defaultHosts = [
-        { id: 'host_leimeng', name: '雷夢', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
-        { id: 'host_heyu', name: '荷玉', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true }
+        { id: 'host_leimeng', name: '雷夢', level: 9, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_heyu', name: '荷玉', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true }
       ];
       defaultHosts.forEach(defHost => {
         const existing = state.players.find(p => p.id === defHost.id || p.name === defHost.name);
         if (existing) {
           existing.isHost = true;
           existing.paid = true;
+          if (defHost.name === '雷夢' && existing.level === 8) existing.level = 9;
+          if (defHost.name === '荷玉' && existing.level === 7) existing.level = 6;
           if (typeof existing.checkedIn !== 'boolean') existing.checkedIn = true;
           if (!existing.playedWith) existing.playedWith = {};
         } else {
@@ -1463,8 +1467,8 @@
 
     function getInitialDemoPlayers() {
       const sample = [
-        { id: 'host_leimeng', name: '雷夢', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
-        { id: 'host_heyu', name: '荷玉', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_leimeng', name: '雷夢', level: 9, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_heyu', name: '荷玉', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
         { id: 'p1', name: '阿凱', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p2', name: '小傑', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p3', name: '瑋哥', level: 9, timeSlot: '18-20', paid: true, checkedIn: true, games: 0, resting: false },
@@ -2363,11 +2367,10 @@
 
       if (countBadge) {
         countBadge.textContent = `已選 ${bindingDraftPlayerIds.length} / 4 人 (最少2人)`;
-        countBadge.className = `text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${
-          bindingDraftPlayerIds.length >= 2
-            ? 'bg-amber-500/20 text-amber-300 border-amber-400/50'
-            : 'bg-slate-800 text-slate-300 border-slate-700'
-        }`;
+        countBadge.className = `text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${bindingDraftPlayerIds.length >= 2
+          ? 'bg-amber-500/20 text-amber-300 border-amber-400/50'
+          : 'bg-slate-800 text-slate-300 border-slate-700'
+          }`;
       }
 
       const eligiblePlayers = state.players.filter(p => !isHostPlayer(p) && p.checkedIn && !p.resting);
@@ -2380,13 +2383,12 @@
           const lvInfo = getLevelBadgeInfo(p.level);
           return `
             <button type="button" onclick="toggleBindingDraftPlayer('${p.id}')"
-                    class="p-2 rounded-xl border text-left flex items-center justify-between gap-1 transition ${
-                      isPicked
-                        ? 'bg-amber-500/25 border-amber-400 text-white shadow'
-                        : existingBg
-                          ? 'bg-slate-900/40 border-slate-800 text-slate-500 opacity-60 cursor-not-allowed'
-                          : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
-                    }">
+                    class="p-2 rounded-xl border text-left flex items-center justify-between gap-1 transition ${isPicked
+              ? 'bg-amber-500/25 border-amber-400 text-white shadow'
+              : existingBg
+                ? 'bg-slate-900/40 border-slate-800 text-slate-500 opacity-60 cursor-not-allowed'
+                : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
+            }">
               <div class="truncate">
                 <div class="text-xs font-extrabold truncate">${isPicked ? '✓ ' : ''}${escapeHTML(p.name)}</div>
                 <div class="text-[10px] text-slate-400">${p.timeSlot}・已上${p.games}場</div>
@@ -2424,11 +2426,11 @@
                   <span class="text-xs font-black text-slate-400">#${idx + 1}</span>
                   ${modeBadge}
                   ${bg.completedOnce
-                    ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">✓ 已完成單次同場 (已解除)</span>`
-                    : bg.enabled
-                      ? `<span class="text-[11px] ${allWaiting ? 'text-emerald-400' : 'text-amber-300'} font-semibold">${allWaiting ? '🟢 全員在場下，輪到時可一起排入' : '⏳ 尚有成員在場上/準備區，暫緩等待全員到齊'}</span>`
-                      : `<span class="text-[11px] text-slate-500">已停用</span>`
-                  }
+              ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">✓ 已完成單次同場 (已解除)</span>`
+              : bg.enabled
+                ? `<span class="text-[11px] ${allWaiting ? 'text-emerald-400' : 'text-amber-300'} font-semibold">${allWaiting ? '🟢 全員在場下，輪到時可一起排入' : '⏳ 尚有成員在場上/準備區，暫緩等待全員到齊'}</span>`
+                : `<span class="text-[11px] text-slate-500">已停用</span>`
+            }
                 </div>
                 <div class="flex items-center gap-1.5">
                   <button type="button" onclick="toggleBindingGroupMode('${bg.id}')" title="切換單次綁定 / 全時段綁定"
@@ -2436,11 +2438,10 @@
                     切換為${bg.mode === 'FULL' ? '單次' : '全時段'}
                   </button>
                   <button type="button" onclick="toggleBindingGroupEnabled('${bg.id}')"
-                          class="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition ${
-                            bg.enabled
-                              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30'
-                              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
-                          }">
+                          class="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition ${bg.enabled
+              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30'
+              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+            }">
                     ${bg.enabled ? '✓ 啟用中' : '已停用 (點此重新啟用)'}
                   </button>
                   <button type="button" onclick="deleteBindingGroup('${bg.id}')" title="刪除此綁定"
@@ -4093,10 +4094,16 @@
                 </div>
               </div>
 
-              <button onclick="event.stopPropagation(); openEditPlayerModal('${p.id}')" title="編輯報名資料"
-                      class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs shrink-0">
-                <i class="fa-solid fa-pen"></i>
-              </button>
+              <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+                <button onclick="openEditPlayerModal('${p.id}')" title="編輯報名資料"
+                        class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition active:scale-95">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button onclick="deletePlayerDirectly('${p.id}')" title="直接刪除此球員"
+                        class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-rose-600 border border-slate-700 hover:border-rose-500 text-slate-400 hover:text-white flex items-center justify-center text-xs transition active:scale-95">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
             </div>
 
             <!-- Action Bar: Check-In Toggle + Paid Toggle -->
@@ -4140,6 +4147,24 @@
     /********************************************************************
      * 9. PLAYER CRUD & INDIVIDUAL PARTNER/OPPONENT HISTORY MODAL
      ********************************************************************/
+    function deletePlayerDirectly(playerId) {
+      const p = getPlayerById(playerId);
+      if (!p) return;
+      removePlayerFromEverywhere(playerId);
+      state.players = state.players.filter(item => item.id !== playerId);
+      if (Array.isArray(state.bindingGroups)) {
+        state.bindingGroups.forEach(bg => {
+          if (Array.isArray(bg.playerIds)) {
+            bg.playerIds = bg.playerIds.filter(id => id !== playerId);
+          }
+        });
+        state.bindingGroups = state.bindingGroups.filter(bg => (bg.playerIds || []).length >= 2);
+      }
+      clearSelection();
+      saveState();
+      renderAll();
+      showToast(`🗑️ 已刪除球員「${p.name}」`, 'warn');
+    }
     function togglePlayerCheckIn(playerId) {
       const p = getPlayerById(playerId);
       if (!p) return;
