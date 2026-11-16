@@ -908,11 +908,11 @@
   <!-- ================= MODAL 3: FINANCE & SHUTTLECOCK COST CALCULATOR ================= -->
   <div id="finance-modal"
     class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
         <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-calculator text-emerald-400"></i>
-          繳費統計與獨立用球成本試算
+          分時段繳費統計與用球成本試算
         </h3>
         <button onclick="closeFinanceModal()"
           class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
@@ -921,24 +921,53 @@
       </div>
 
       <div class="space-y-4">
-        <!-- Unit Price Settings -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-            <label class="block text-[11px] text-slate-400 mb-1">每人零打收費 (元)</label>
-            <input type="number" id="fin-fee-per-person" value="200" oninput="updateFinanceCalc()"
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-emerald-300" />
+        <!-- 3 Time-Slot Price Settings + Shuttle Cost -->
+        <div>
+          <div class="text-xs font-bold text-slate-300 mb-2 flex items-center justify-between">
+            <span><i class="fa-regular fa-clock text-emerald-400 mr-1"></i>各時段每人收費金額設定 (元)</span>
+            <span class="text-[11px] text-slate-400 font-normal">依各時段已繳費人數分別計算後加總</span>
           </div>
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-            <label class="block text-[11px] text-slate-400 mb-1">單顆羽球成本 (元/顆)</label>
-            <input type="number" id="fin-cost-per-shuttle" value="45" oninput="updateFinanceCalc()"
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-300" />
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <!-- 18-21 Fee -->
+            <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-3">
+              <label class="block text-[11px] font-bold text-emerald-300 mb-1">18-21 時段 (3小時)</label>
+              <input type="number" id="fin-fee-1821" value="310" oninput="updateFinanceCalc(true)"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-emerald-300 focus:outline-none focus:border-emerald-400" />
+              <div id="fin-sub-1821" class="text-[11px] text-slate-400 mt-1.5 font-semibold">已繳 0/0 人 ＝ $0</div>
+            </div>
+
+            <!-- 18-20 Fee -->
+            <div class="bg-slate-950 border border-sky-500/30 rounded-xl p-3">
+              <label class="block text-[11px] font-bold text-sky-300 mb-1">18-20 時段 (2小時)</label>
+              <input type="number" id="fin-fee-1820" value="220" oninput="updateFinanceCalc(true)"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-sky-300 focus:outline-none focus:border-sky-400" />
+              <div id="fin-sub-1820" class="text-[11px] text-slate-400 mt-1.5 font-semibold">已繳 0/0 人 ＝ $0</div>
+            </div>
+
+            <!-- 19-21 Fee -->
+            <div class="bg-slate-950 border border-purple-500/30 rounded-xl p-3">
+              <label class="block text-[11px] font-bold text-purple-300 mb-1">19-21 時段 (2小時)</label>
+              <input type="number" id="fin-fee-1921" value="220" oninput="updateFinanceCalc(true)"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-purple-300 focus:outline-none focus:border-purple-400" />
+              <div id="fin-sub-1921" class="text-[11px] text-slate-400 mt-1.5 font-semibold">已繳 0/0 人 ＝ $0</div>
+            </div>
           </div>
+        </div>
+
+        <!-- Shuttle Cost Setting -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <label for="fin-cost-per-shuttle" class="block text-xs font-bold text-amber-300">🪶 單顆羽球成本 (元/顆)</label>
+            <span class="text-[11px] text-slate-400">今日已使用羽球顆數會自動乘以此單價</span>
+          </div>
+          <input type="number" id="fin-cost-per-shuttle" value="85" oninput="updateFinanceCalc(true)"
+            class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-amber-300 text-right focus:outline-none focus:border-amber-400" />
         </div>
 
         <!-- Summary Cards -->
         <div class="grid grid-cols-3 gap-2.5 text-center">
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
-            <div class="text-[11px] text-slate-400">已收球費</div>
+            <div class="text-[11px] text-slate-400">三時段已收總和</div>
             <div id="fin-collected" class="text-base font-black text-emerald-400 mt-0.5">$0</div>
             <div id="fin-paid-count" class="text-[10px] text-slate-500">0人已繳</div>
           </div>
@@ -1522,6 +1551,11 @@
       noviceModeEnabled: false,
       noviceMaxLevel: 4,
       noviceLevelUserChanged: false,
+      fee1821: 310,
+      fee1820: 220,
+      fee1921: 220,
+      costPerShuttle: 85,
+      financeUserChanged: false,
       matchLogs: []
     };
 
@@ -1582,6 +1616,12 @@
           } else if (!state.noviceMaxLevel || state.noviceMaxLevel < 1) {
             state.noviceMaxLevel = 4;
           }
+          if (!state.financeUserChanged) {
+            state.fee1821 = 310;
+            state.fee1820 = 220;
+            state.fee1921 = 220;
+            state.costPerShuttle = 85;
+          }
           if (!Array.isArray(state.prepSlots)) {
             state.prepSlots = [null, null, null, null, null, null, null, null];
           } else {
@@ -1592,6 +1632,7 @@
           state.players.forEach(p => {
             if (!p.playedWith) p.playedWith = {};
             if (typeof p.checkedIn !== 'boolean') p.checkedIn = true;
+            if (typeof p.tempBreak !== 'boolean') p.tempBreak = false;
             if (HOST_NAMES.includes(p.name)) p.isHost = true;
           });
           ensureHostPlayersExist();
@@ -2195,7 +2236,46 @@
       };
     }
 
-    // 取得某個綁定群組在新手場分流模式下的歸屬區域 ('NOVICE' 或 'REGULAR')
+    // 計算綁定群組目前的場地/準備區/場下待命狀態：
+    // 1. 只有當綁定群組有人在球場上 (COURT) -> 顯示「等待人員下場」
+    // 2. 如果全部都進到準備區了 (PREP) -> 顯示「全員準備區待命」
+    // 3. 如果沒在場上、也沒在準備區 -> 顯示「全員場下待命」
+    function getBindingGroupLocationStatus(members) {
+      if (!members || members.length === 0) {
+        return { shortText: '全員場下待命', detailText: '🟢 全員場下待命', colorClass: 'text-emerald-300' };
+      }
+      const locs = members.map(m => getPlayerLocation(m.id).status);
+      const anyOnCourt = locs.some(st => st === 'COURT');
+      const allInPrep = locs.every(st => st === 'PREP');
+      const anyInPrep = locs.some(st => st === 'PREP');
+
+      if (anyOnCourt) {
+        return {
+          shortText: '等待人員下場',
+          detailText: '⏳ 等待人員下場（尚有綁定成員在球場上比賽）',
+          colorClass: 'text-rose-300'
+        };
+      }
+      if (allInPrep) {
+        return {
+          shortText: '全員準備區待命',
+          detailText: '🟣 全員準備區待命（已排入準備區候命上場）',
+          colorClass: 'text-indigo-300'
+        };
+      }
+      if (anyInPrep) {
+        return {
+          shortText: '部分準備區待命',
+          detailText: '🟣 部分準備區待命（沒人在場上，部分成員已在準備區）',
+          colorClass: 'text-indigo-300'
+        };
+      }
+      return {
+        shortText: '全員場下待命',
+        detailText: '🟢 全員場下待命（輪到時可一起排入準備區）',
+        colorClass: 'text-emerald-300'
+      };
+    }
     function getBindingGroupEffectivePool(bg) {
       if (!bg) return 'REGULAR';
       if (bg.targetPool === 'NOVICE' || bg.targetPool === 'REGULAR') {
@@ -2579,7 +2659,7 @@
             </span>`;
           }).join('');
 
-          const allWaiting = members.every(m => getPlayerLocation(m.id).status === 'WAIT');
+          const locStatus = getBindingGroupLocationStatus(members);
           const modeBadge = bg.mode === 'FULL'
             ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-extrabold"><i class="fa-solid fa-infinity mr-1"></i>全時段綁定 (${members.length}人)</span>`
             : `<span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[11px] font-extrabold"><i class="fa-solid fa-1 mr-1"></i>單次綁定 (${members.length}人)</span>`;
@@ -2604,7 +2684,7 @@
                   ${bg.completedOnce
               ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">✓ 已完成單次同場 (已解除)</span>`
               : bg.enabled
-                ? `<span class="text-[11px] ${allWaiting ? 'text-emerald-400' : 'text-amber-300'} font-semibold">${allWaiting ? '🟢 全員在場下，輪到時可一起排入' : '⏳ 尚有成員在場上/準備區，暫緩等待全員到齊'}</span>`
+                ? `<span class="text-[11px] ${locStatus.colorClass} font-semibold">${locStatus.detailText}</span>`
                 : `<span class="text-[11px] text-slate-500">已停用</span>`
             }
                 </div>
@@ -2775,11 +2855,12 @@
     function autoFillPrepGroup(groupIndex, silent = false, poolType = 'ALL') {
       const base = groupIndex === 1 ? 4 : 0;
 
-      // 1. 先篩選出符合基本條件與新手/普通分流的候選球友
+      // 1. 先篩選出符合基本條件與新手/普通分流的候選球友（排除暫時休息 tempBreak 的球友）
       const baseAvailable = state.players.filter(p => {
         if (isHostPlayer(p)) return false;
         if (!p.checkedIn) return false;
         if (p.resting) return false;
+        if (p.tempBreak) return false;
         if (!isPlayerEligibleInCurrentHour(p)) return false;
         if (!isPlayerInPoolType(p, poolType)) return false;
         const loc = getPlayerLocation(p.id);
@@ -3830,7 +3911,7 @@
           bindStrip.innerHTML = enabledBinds.map(bg => {
             const members = bg.playerIds.map(id => getPlayerById(id)).filter(Boolean);
             const names = members.map(m => escapeHTML(m.name)).join('＋');
-            const allWaiting = members.every(m => getPlayerLocation(m.id).status === 'WAIT');
+            const locStatus = getBindingGroupLocationStatus(members);
             const modeText = bg.mode === 'FULL' ? '全場綁定' : '單次綁定';
             const effPool = getBindingGroupEffectivePool(bg);
             const poolTag = state.noviceModeEnabled
@@ -3844,7 +3925,7 @@
                     class="px-2 py-0.5 rounded-lg border ${modeCls} font-bold cursor-pointer flex items-center gap-1">
                 <i class="fa-solid fa-link text-[10px]"></i>
                 <span>[${modeText}${poolTag}] ${names}</span>
-                <span class="text-[10px] ${allWaiting ? 'text-emerald-300' : 'text-rose-300'}">(${allWaiting ? '全員場下待命' : '等待成員下場'})</span>
+                <span class="text-[10px] ${locStatus.colorClass}">(${locStatus.shortText})</span>
               </span>
             `;
           }).join('');
@@ -3906,6 +3987,7 @@
       const eligibleNow = isHost ? true : isPlayerEligibleInCurrentHour(p);
       const isSelectedRoster = selectedSource && selectedSource.type === 'ROSTER' && selectedSource.playerId === p.id;
       const isFinished = !!p.resting;
+      const isTempBreak = !isFinished && !!p.tempBreak;
       const activeBg = getPlayerBindingGroup(p.id, true);
 
       const playedWithEntries = Object.entries(p.playedWith || {}).sort((a, b) => b[1] - a[1]);
@@ -3920,6 +4002,8 @@
       if (isFinished) {
         const reasonLabel = p.endReason === 'TIME_UP' ? '⏰ 時間到結束' : '🏁 已結束/離場';
         statusBadge = `<span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold">${reasonLabel}${loc.status === 'COURT' ? ' (場上最後一場)' : ''}</span>`;
+      } else if (isTempBreak) {
+        statusBadge = `<span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/50 text-[10px] font-extrabold">☕ 暫時休息(排點略過)${loc.status === 'COURT' ? '・此場後生效' : ''}</span>`;
       } else if (loc.status === 'COURT') {
         statusBadge = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">${loc.label}</span>`;
       } else if (loc.status === 'PREP') {
@@ -3939,13 +4023,13 @@
       return `
         <div onclick="openHistoryModal('${p.id}')"
              title="點擊查看「${escapeHTML(p.name)}」今日總共跟誰打過"
-             class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : isHost ? 'border-amber-500/40 bg-amber-950/10 hover:border-amber-400' : isFinished ? 'border-slate-800/60 hover:border-amber-500/40 bg-slate-950/50' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${(!eligibleNow && !isFinished) ? 'opacity-65' : ''}">
+             class="bg-slate-950/90 hover:bg-slate-900 border ${isSelectedRoster ? 'selected-slot' : isHost ? 'border-amber-500/40 bg-amber-950/10 hover:border-amber-400' : isFinished ? 'border-slate-800/60 hover:border-amber-500/40 bg-slate-950/50' : isTempBreak ? 'border-sky-500/40 bg-sky-950/15 hover:border-sky-400/60' : 'border-slate-800/90 hover:border-amber-500/40'} rounded-xl p-2.5 flex flex-col gap-1.5 transition cursor-pointer ${(!eligibleNow && !isFinished) ? 'opacity-65' : ''}">
           
           <div class="flex items-center justify-between gap-2">
             <!-- Left: Player Name + Skill Level + Time Slot / Host Badge -->
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="font-extrabold text-sm ${isFinished ? 'text-slate-300' : isHost ? 'text-amber-200' : 'text-white'} truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
+                <span class="font-extrabold text-sm ${isFinished ? 'text-slate-300' : isHost ? 'text-amber-200' : isTempBreak ? 'text-sky-200' : 'text-white'} truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
                 <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}" title="台灣推廣 ${lvInfo.label} (${lvInfo.tier})">
                   ${lvInfo.label}・${lvInfo.tier}
                 </span>
@@ -3961,7 +4045,7 @@
               </div>
             </div>
 
-            <!-- Right: Paid Toggle + Finish/Restore Toggle + Assign to Prep Button -->
+            <!-- Right: Paid Toggle + TempBreak Toggle + Finish/Restore Toggle + Assign to Prep Button -->
             <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
               ${!isHost
           ? `<button onclick="togglePlayerPaid('${p.id}')" title="點擊切換繳費狀態"
@@ -3983,6 +4067,13 @@
                 `
           : `
                   ${!isHost ? `
+                    <button onclick="togglePlayerTempBreak('${p.id}')" title="${isTempBreak ? '點擊恢復參與智慧排點' : '暫時休息/離開（智慧排點將暫時略過此人，隨時可點恢復）'}"
+                            class="px-2 py-1.5 rounded-xl border font-extrabold text-[11px] transition active:scale-95 ${isTempBreak
+              ? 'bg-sky-500 hover:bg-sky-400 border-sky-400 text-slate-950 shadow'
+              : 'bg-slate-800 hover:bg-sky-500/20 border-slate-700 hover:border-sky-500/40 text-slate-300 hover:text-sky-300'
+            }">
+                      ${isTempBreak ? '▶恢復' : '☕暫休'}
+                    </button>
                     <button onclick="togglePlayerRest('${p.id}', 'EARLY')" title="時間到或臨時有事提早結束（不再排點，保留今日紀錄）"
                             class="px-2 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 font-bold text-[11px] transition active:scale-95">
                       結束
@@ -4361,11 +4452,13 @@
           return;
         }
         p.checkedIn = false;
+        p.tempBreak = false;
         state.prepSlots = state.prepSlots.map(id => (id === playerId ? null : id));
         showToast(`已將「${p.name}」設為尚未到場（移出現場排點區）`, 'info');
       } else {
         p.checkedIn = true;
         p.resting = false;
+        p.tempBreak = false;
         p.endReason = null;
         showToast(`✅「${p.name}」已報到到場！現在可進入現場排點區排點`, 'success');
       }
@@ -4379,6 +4472,7 @@
       p.checkedIn = true;
       p.paid = true;
       p.resting = false;
+      p.tempBreak = false;
       p.endReason = null;
       saveState();
       renderAll();
@@ -4414,10 +4508,32 @@
       showToast(`${p.name} 已標記為「${p.paid ? '已繳費' : '未繳費'}」`, p.paid ? 'success' : 'warn');
     }
 
+    function togglePlayerTempBreak(playerId) {
+      const p = getPlayerById(playerId);
+      if (!p) return;
+      p.tempBreak = !p.tempBreak;
+      if (p.tempBreak) {
+        const loc = getPlayerLocation(playerId);
+        if (loc.status === 'PREP') {
+          state.prepSlots = state.prepSlots.map(id => (id === playerId ? null : id));
+          showToast(`☕「${p.name}」已設為暫時休息（已自動移出準備區，排點將暫時略過）`, 'info');
+        } else if (loc.status === 'COURT') {
+          showToast(`☕「${p.name}」已設為暫時休息（此場打完後排點將暫時略過，隨時可點恢復）`, 'info');
+        } else {
+          showToast(`☕「${p.name}」已設為暫時休息，智慧排點將暫時略過此人`, 'info');
+        }
+      } else {
+        showToast(`▶「${p.name}」已結束暫休，恢復參與智慧排點！`, 'success');
+      }
+      saveState();
+      renderAll();
+    }
+
     function togglePlayerRest(playerId, reason = 'EARLY') {
       const p = getPlayerById(playerId);
       if (!p) return;
       p.resting = !p.resting;
+      p.tempBreak = false;
       if (p.resting) {
         p.endReason = reason;
         // 若該球員原本在準備區，自動從準備區移出避免誤派上場
@@ -4704,7 +4820,16 @@
      * 10. FINANCE, MATCH LOG & SETTINGS MODALS
      ********************************************************************/
     function openFinanceModal() {
-      updateFinanceCalc();
+      const el1821 = document.getElementById('fin-fee-1821');
+      const el1820 = document.getElementById('fin-fee-1820');
+      const el1921 = document.getElementById('fin-fee-1921');
+      const elCost = document.getElementById('fin-cost-per-shuttle');
+      if (el1821) el1821.value = typeof state.fee1821 === 'number' ? state.fee1821 : 310;
+      if (el1820) el1820.value = typeof state.fee1820 === 'number' ? state.fee1820 : 220;
+      if (el1921) el1921.value = typeof state.fee1921 === 'number' ? state.fee1921 : 220;
+      if (elCost) elCost.value = typeof state.costPerShuttle === 'number' ? state.costPerShuttle : 85;
+
+      updateFinanceCalc(false);
       document.getElementById('finance-modal').classList.remove('hidden');
       document.getElementById('finance-modal').classList.add('flex');
     }
@@ -4714,15 +4839,51 @@
       document.getElementById('finance-modal').classList.remove('flex');
     }
 
-    function updateFinanceCalc() {
-      const feePerPerson = Number(document.getElementById('fin-fee-per-person')?.value) || 0;
-      const costPerShuttle = Number(document.getElementById('fin-cost-per-shuttle')?.value) || 0;
+    function getFeeByTimeSlot(timeSlot, fee1821, fee1820, fee1921) {
+      if (timeSlot === '18-20') return fee1820;
+      if (timeSlot === '19-21') return fee1921;
+      return fee1821; // '18-21'
+    }
+
+    function updateFinanceCalc(userEdited = false) {
+      const fee1821 = Math.max(0, Number(document.getElementById('fin-fee-1821')?.value) || 0);
+      const fee1820 = Math.max(0, Number(document.getElementById('fin-fee-1820')?.value) || 0);
+      const fee1921 = Math.max(0, Number(document.getElementById('fin-fee-1921')?.value) || 0);
+      const costPerShuttle = Math.max(0, Number(document.getElementById('fin-cost-per-shuttle')?.value) || 0);
+
+      state.fee1821 = fee1821;
+      state.fee1820 = fee1820;
+      state.fee1921 = fee1921;
+      state.costPerShuttle = costPerShuttle;
+      if (userEdited) {
+        state.financeUserChanged = true;
+      }
+      saveState();
 
       const regularPlayers = state.players.filter(p => !isHostPlayer(p));
       const paidPlayers = regularPlayers.filter(p => p.paid);
       const unpaidPlayers = regularPlayers.filter(p => !p.paid);
 
-      const collected = paidPlayers.length * feePerPerson;
+      const p1821All = regularPlayers.filter(p => p.timeSlot === '18-21');
+      const p1821Paid = p1821All.filter(p => p.paid);
+      const sub1821 = p1821Paid.length * fee1821;
+
+      const p1820All = regularPlayers.filter(p => p.timeSlot === '18-20');
+      const p1820Paid = p1820All.filter(p => p.paid);
+      const sub1820 = p1820Paid.length * fee1820;
+
+      const p1921All = regularPlayers.filter(p => p.timeSlot === '19-21');
+      const p1921Paid = p1921All.filter(p => p.paid);
+      const sub1921 = p1921Paid.length * fee1921;
+
+      const subEl1821 = document.getElementById('fin-sub-1821');
+      const subEl1820 = document.getElementById('fin-sub-1820');
+      const subEl1921 = document.getElementById('fin-sub-1921');
+      if (subEl1821) subEl1821.textContent = `已繳 ${p1821Paid.length}/${p1821All.length} 人 ＝ $${sub1821.toLocaleString()}`;
+      if (subEl1820) subEl1820.textContent = `已繳 ${p1820Paid.length}/${p1820All.length} 人 ＝ $${sub1820.toLocaleString()}`;
+      if (subEl1921) subEl1921.textContent = `已繳 ${p1921Paid.length}/${p1921All.length} 人 ＝ $${sub1921.toLocaleString()}`;
+
+      const collected = sub1821 + sub1820 + sub1921;
       const shuttleCost = (state.shuttlesUsed || 0) * costPerShuttle;
       const net = collected - shuttleCost;
 
@@ -4736,12 +4897,15 @@
       if (unpaidPlayers.length === 0) {
         unpaidContainer.innerHTML = `<span class="text-xs text-emerald-400 font-bold">🎉 全員皆已繳費完畢！</span>`;
       } else {
-        unpaidContainer.innerHTML = unpaidPlayers.map(p => `
-          <button onclick="togglePlayerPaid('${p.id}'); updateFinanceCalc();"
-                  class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-emerald-500/20 border border-rose-500/40 text-rose-200 hover:text-emerald-300 text-xs font-bold transition">
-            ${escapeHTML(p.name)} (${p.timeSlot}) - 點擊標記已繳
-          </button>
-        `).join('');
+        unpaidContainer.innerHTML = unpaidPlayers.map(p => {
+          const pFee = getFeeByTimeSlot(p.timeSlot, fee1821, fee1820, fee1921);
+          return `
+            <button onclick="togglePlayerPaid('${p.id}'); updateFinanceCalc();"
+                    class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-emerald-500/20 border border-rose-500/40 text-rose-200 hover:text-emerald-300 text-xs font-bold transition">
+              ${escapeHTML(p.name)} (${p.timeSlot}・$${pFee}) - 點擊標記已繳
+            </button>
+          `;
+        }).join('');
       }
     }
 
@@ -4793,6 +4957,7 @@
         p.playedWith = {};
         p.lastPlayedAt = 0;
         p.resting = false;
+        p.tempBreak = false;
         p.endReason = null;
         if (isHostPlayer(p)) {
           p.paid = true;
