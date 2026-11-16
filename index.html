@@ -1096,7 +1096,7 @@
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <span class="text-xs font-extrabold text-amber-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-user-group"></i> 新增一組同場綁定（請點選 2 ～ 4 位已到場球友）
+              <i class="fa-solid fa-user-group"></i> 新增一組同場綁定（請點選 2 ～ 4 位已到場球友・依程度強→弱排列）
             </span>
             <span id="binding-selected-count-badge"
               class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold">
@@ -2579,7 +2579,13 @@
           }`;
       }
 
-      const eligiblePlayers = state.players.filter(p => !isHostPlayer(p) && p.checkedIn && !p.resting);
+      const eligiblePlayers = state.players
+        .filter(p => !isHostPlayer(p) && p.checkedIn && !p.resting)
+        .slice()
+        .sort((a, b) => {
+          if ((b.level || 0) !== (a.level || 0)) return (b.level || 0) - (a.level || 0);
+          return (a.name || '').localeCompare(b.name || '', 'zh-Hant');
+        });
       if (eligiblePlayers.length === 0) {
         pickerGrid.innerHTML = `<div class="col-span-full text-center py-4 text-xs text-slate-500">目前沒有已到場的一般球員可供綁定</div>`;
       } else {
