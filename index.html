@@ -1107,6 +1107,11 @@
             <!-- Rendered by JS -->
           </div>
 
+          <!-- Novice vs Regular Pool Selector when Novice Mode is Enabled & Mixed Levels Selected -->
+          <div id="binding-draft-pool-selector-box" class="hidden">
+            <!-- Rendered dynamically by JS -->
+          </div>
+
           <div class="flex items-center justify-end gap-2 pt-1">
             <button type="button" onclick="clearBindingDraftSelection()"
               class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
@@ -1515,12 +1520,14 @@
       bindingGroups: [],
       bindingSystemActive: false,
       noviceModeEnabled: false,
-      noviceMaxLevel: 5,
+      noviceMaxLevel: 4,
+      noviceLevelUserChanged: false,
       matchLogs: []
     };
 
     let selectedSource = null;
     let bindingDraftPlayerIds = [];
+    let bindingDraftTargetPool = null; // 'NOVICE' | 'REGULAR' | null
 
     function seedSampleMatchHistory() {
       if (state.matchLogs && state.matchLogs.length > 0) return;
@@ -1570,7 +1577,11 @@
           if (!Array.isArray(state.bindingGroups)) state.bindingGroups = [];
           if (typeof state.bindingSystemActive !== 'boolean') state.bindingSystemActive = false;
           if (typeof state.noviceModeEnabled !== 'boolean') state.noviceModeEnabled = false;
-          if (!state.noviceMaxLevel || state.noviceMaxLevel < 1) state.noviceMaxLevel = 5;
+          if (!state.noviceLevelUserChanged) {
+            state.noviceMaxLevel = 4;
+          } else if (!state.noviceMaxLevel || state.noviceMaxLevel < 1) {
+            state.noviceMaxLevel = 4;
+          }
           if (!Array.isArray(state.prepSlots)) {
             state.prepSlots = [null, null, null, null, null, null, null, null];
           } else {
@@ -2165,10 +2176,45 @@
       return (bg.playerIds || []).includes(idB);
     }
 
+    // 檢查一組球員 ID 清單在新手場分流設定下，是否同時包含「新手組 (≤noviceMaxLevel)」與「普通組 (>noviceMaxLevel)」
+    function analyzePlayerIdsNovicePool(playerIds) {
+      const maxLv = Number(state.noviceMaxLevel) || 4;
+      const members = (playerIds || []).map(id => getPlayerById(id)).filter(Boolean);
+      const noviceMembers = members.filter(m => (m.level || 1) <= maxLv);
+      const regularMembers = members.filter(m => (m.level || 1) > maxLv);
+      const hasNovice = noviceMembers.length > 0;
+      const hasRegular = regularMembers.length > 0;
+      const isMixed = hasNovice && hasRegular;
+      return {
+        maxLv,
+        noviceMembers,
+        regularMembers,
+        hasNovice,
+        hasRegular,
+        isMixed
+      };
+    }
+
+    // 取得某個綁定群組在新手場分流模式下的歸屬區域 ('NOVICE' 或 'REGULAR')
+    function getBindingGroupEffectivePool(bg) {
+      if (!bg) return 'REGULAR';
+      if (bg.targetPool === 'NOVICE' || bg.targetPool === 'REGULAR') {
+        return bg.targetPool;
+      }
+      const info = analyzePlayerIdsNovicePool(bg.playerIds);
+      if (info.hasNovice && !info.hasRegular) return 'NOVICE';
+      return 'REGULAR';
+    }
+
     function isPlayerInPoolType(player, poolType) {
       if (!player) return false;
       if (!poolType || poolType === 'ALL' || !state.noviceModeEnabled) return true;
-      const maxNoviceLv = Number(state.noviceMaxLevel) || 5;
+      // 若該球員屬於已生效的綁定組合，則全組統一依照該綁定組指定的區域 (NOVICE 或 REGULAR) 一起排點
+      const activeBg = getPlayerBindingGroup(player.id, true);
+      if (activeBg) {
+        return getBindingGroupEffectivePool(activeBg) === poolType;
+      }
+      const maxNoviceLv = Number(state.noviceMaxLevel) || 4;
       if (poolType === 'NOVICE') {
         return (player.level || 1) <= maxNoviceLv;
       }
@@ -2183,15 +2229,16 @@
       saveState();
       renderAll();
       if (state.noviceModeEnabled) {
-        showToast(`🌱 已啟用「新手場分流」模式（新手等級 ≤ ${state.noviceMaxLevel} 級）！請選擇排新手或排普通(熟手)`, 'success');
+        showToast(`🌱 已啟用「新手場分流」模式（預設新手等級 ≤ ${state.noviceMaxLevel} 級）！請選擇排新手或排普通(熟手)`, 'success');
       } else {
         showToast('已關閉「新手場分流」，恢復原版綜合智慧排點模式', 'info');
       }
     }
 
     function setNoviceMaxLevel(val) {
-      const lv = Math.max(1, Math.min(15, parseInt(val, 10) || 5));
+      const lv = Math.max(1, Math.min(15, parseInt(val, 10) || 4));
       state.noviceMaxLevel = lv;
+      state.noviceLevelUserChanged = true;
       saveState();
       renderAll();
       showToast(`🌱 新手等級上限已設定為「${lv} 級 (含) 以下」`, 'info');
@@ -2199,6 +2246,7 @@
 
     function openBindingModal() {
       bindingDraftPlayerIds = [];
+      bindingDraftTargetPool = null;
       renderBindingModalContent();
       const modal = document.getElementById('binding-modal');
       if (modal) {
@@ -2213,6 +2261,11 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
       }
+    }
+
+    function setBindingDraftTargetPool(pool) {
+      bindingDraftTargetPool = pool;
+      renderBindingModalContent();
     }
 
     function toggleBindingDraftPlayer(playerId) {
@@ -2232,11 +2285,17 @@
         }
         bindingDraftPlayerIds.push(playerId);
       }
+      // 當重選球員時，若不再是跨級組合則重置預選分流，讓跨級時必須明確選擇或確認
+      const poolInfo = analyzePlayerIdsNovicePool(bindingDraftPlayerIds);
+      if (!poolInfo.isMixed) {
+        bindingDraftTargetPool = null;
+      }
       renderBindingModalContent();
     }
 
     function clearBindingDraftSelection() {
       bindingDraftPlayerIds = [];
+      bindingDraftTargetPool = null;
       renderBindingModalContent();
     }
 
@@ -2249,10 +2308,29 @@
       let mode = 'ONCE';
       radios.forEach(r => { if (r.checked) mode = r.value; });
 
+      const poolInfo = analyzePlayerIdsNovicePool(bindingDraftPlayerIds);
+      let targetPool = bindingDraftTargetPool;
+
+      // 若目前啟用了「新手場分流」，且這群綁定的人同時有「新手組 (≤noviceMaxLevel)」與「普通組 (>noviceMaxLevel)」，強制要求使用者選擇要排在新手組還是普通組
+      if (state.noviceModeEnabled && poolInfo.isMixed && !targetPool) {
+        showToast(
+          `⚠️ 此綁定群組同時包含「新手組(≤${poolInfo.maxLv}級)」與「普通組(>${poolInfo.maxLv}級)」球員！請先點選下方按鈕選擇要排在【新手組】還是【普通組】`,
+          'warn'
+        );
+        const box = document.getElementById('binding-draft-pool-selector-box');
+        if (box) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      if (!targetPool) {
+        targetPool = (poolInfo.hasNovice && !poolInfo.hasRegular) ? 'NOVICE' : 'REGULAR';
+      }
+
       const newGroup = {
         id: 'bind_' + Date.now(),
         playerIds: [...bindingDraftPlayerIds],
         mode, // 'ONCE' or 'FULL'
+        targetPool, // 'NOVICE' or 'REGULAR'
         enabled: true,
         completedOnce: false
       };
@@ -2261,14 +2339,30 @@
       state.bindingGroups.push(newGroup);
       // 新增或修改綁定後，需由使用者點選「確認設定生效」才會讓智慧排點系統正式參考
       bindingDraftPlayerIds = [];
+      bindingDraftTargetPool = null;
       saveState();
       renderBindingModalContent();
       renderAll();
       const names = newGroup.playerIds.map(id => getPlayerById(id)?.name || '').filter(Boolean).join('、');
+      const poolText = state.noviceModeEnabled
+        ? `・歸類於【${targetPool === 'NOVICE' ? '🌱新手組' : '🔥普通組'}】`
+        : '';
       showToast(
-        `已加入綁定「${names}」（${mode === 'FULL' ? '全時段綁定' : '單次綁定'}）！請點右下角「確認設定生效」套用`,
+        `已加入綁定「${names}」（${mode === 'FULL' ? '全時段綁定' : '單次綁定'}${poolText}）！請點右下角「確認設定生效」套用`,
         'info'
       );
+    }
+
+    function toggleBindingGroupTargetPool(groupId) {
+      const bg = (state.bindingGroups || []).find(g => g.id === groupId);
+      if (!bg) return;
+      const current = getBindingGroupEffectivePool(bg);
+      bg.targetPool = current === 'NOVICE' ? 'REGULAR' : 'NOVICE';
+      saveState();
+      renderBindingModalContent();
+      renderAll();
+      const names = (bg.playerIds || []).map(id => getPlayerById(id)?.name || '').filter(Boolean).join('、');
+      showToast(`已將綁定組「${names}」切換為排在【${bg.targetPool === 'NOVICE' ? '🌱 新手組區域' : '🔥 普通組區域'}】`, 'info');
     }
 
     function toggleBindingGroupEnabled(groupId) {
@@ -2307,6 +2401,7 @@
       state.bindingGroups = [];
       state.bindingSystemActive = false;
       bindingDraftPlayerIds = [];
+      bindingDraftTargetPool = null;
       saveState();
       renderBindingModalContent();
       renderAll();
@@ -2339,10 +2434,12 @@
       const bannerEl = document.getElementById('binding-modal-status-banner');
       const countBadge = document.getElementById('binding-selected-count-badge');
       const pickerGrid = document.getElementById('binding-player-picker-grid');
+      const poolSelectorBox = document.getElementById('binding-draft-pool-selector-box');
       const listEl = document.getElementById('binding-groups-modal-list');
       if (!pickerGrid || !listEl) return;
 
       const enabledGroups = (state.bindingGroups || []).filter(g => g.enabled);
+      const maxNoviceLv = Number(state.noviceMaxLevel) || 4;
 
       if (bannerEl) {
         if (state.bindingSystemActive && enabledGroups.length > 0) {
@@ -2381,6 +2478,10 @@
           const isPicked = bindingDraftPlayerIds.includes(p.id);
           const existingBg = (state.bindingGroups || []).find(bg => bg.enabled && (bg.playerIds || []).includes(p.id));
           const lvInfo = getLevelBadgeInfo(p.level);
+          const isNovice = (p.level || 1) <= maxNoviceLv;
+          const poolTag = state.noviceModeEnabled
+            ? `<span class="text-[9px] px-1 rounded ${isNovice ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${isNovice ? '新手組' : '普通組'}</span>`
+            : '';
           return `
             <button type="button" onclick="toggleBindingDraftPlayer('${p.id}')"
                     class="p-2 rounded-xl border text-left flex items-center justify-between gap-1 transition ${isPicked
@@ -2391,12 +2492,76 @@
             }">
               <div class="truncate">
                 <div class="text-xs font-extrabold truncate">${isPicked ? '✓ ' : ''}${escapeHTML(p.name)}</div>
-                <div class="text-[10px] text-slate-400">${p.timeSlot}・已上${p.games}場</div>
+                <div class="text-[10px] text-slate-400 flex items-center gap-1">${p.timeSlot}・上${p.games}場 ${poolTag}</div>
               </div>
               <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
             </button>
           `;
         }).join('');
+      }
+
+      // 若目前啟用了「新手場分流」，檢查已選的綁定球員是否同時有「新手組」與「普通組」
+      if (poolSelectorBox) {
+        if (state.noviceModeEnabled && bindingDraftPlayerIds.length >= 2) {
+          const draftPoolInfo = analyzePlayerIdsNovicePool(bindingDraftPlayerIds);
+          poolSelectorBox.classList.remove('hidden');
+
+          if (draftPoolInfo.isMixed) {
+            const novNames = draftPoolInfo.noviceMembers.map(m => `${escapeHTML(m.name)}(${m.level}級)`).join('、');
+            const regNames = draftPoolInfo.regularMembers.map(m => `${escapeHTML(m.name)}(${m.level}級)`).join('、');
+            poolSelectorBox.className = 'rounded-xl p-3 border-2 border-amber-400/70 bg-amber-950/30 space-y-2';
+            poolSelectorBox.innerHTML = `
+              <div class="text-xs font-extrabold text-amber-300 flex items-start gap-1.5">
+                <i class="fa-solid fa-code-branch text-amber-400 mt-0.5"></i>
+                <div>
+                  <div>⚠️ 跨組別綁定確認（目前已啟用新手場分流 ≤${maxNoviceLv}級）：</div>
+                  <div class="text-[11px] text-slate-300 font-normal mt-0.5">
+                    此群組同時包含 <strong class="text-emerald-300">新手組：${novNames}</strong> 與 <strong class="text-amber-300">普通組：${regNames}</strong>，請選擇這群綁定球友要排在哪個區域：
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="setBindingDraftTargetPool('NOVICE')"
+                        class="py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${
+                          bindingDraftTargetPool === 'NOVICE'
+                            ? 'bg-emerald-500 text-slate-950 border-emerald-300 shadow-lg'
+                            : 'bg-slate-900 hover:bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
+                        }">
+                  <i class="fa-solid fa-seedling"></i>
+                  ${bindingDraftTargetPool === 'NOVICE' ? '✓ 已選：排在【新手場區域】' : '排在【新手場區域】(≤' + maxNoviceLv + '級)'}
+                </button>
+                <button type="button" onclick="setBindingDraftTargetPool('REGULAR')"
+                        class="py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${
+                          bindingDraftTargetPool === 'REGULAR'
+                            ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-lg'
+                            : 'bg-slate-900 hover:bg-amber-950/60 border-amber-500/40 text-amber-300'
+                        }">
+                  <i class="fa-solid fa-fire"></i>
+                  ${bindingDraftTargetPool === 'REGULAR' ? '✓ 已選：排在【普通場區域】' : '排在【普通場區域】(>' + maxNoviceLv + '級)'}
+                </button>
+              </div>
+            `;
+          } else {
+            const autoPool = draftPoolInfo.hasNovice ? 'NOVICE' : 'REGULAR';
+            const effectivePool = bindingDraftTargetPool || autoPool;
+            poolSelectorBox.className = 'rounded-xl p-2.5 border border-slate-800 bg-slate-900/60 flex flex-wrap items-center justify-between gap-2';
+            poolSelectorBox.innerHTML = `
+              <span class="text-[11px] text-slate-300">
+                🌱 新手場分流已啟用：所選球員皆為${autoPool === 'NOVICE' ? `新手組(≤${maxNoviceLv}級)` : `普通組(>${maxNoviceLv}級)`}，將排入
+                <strong class="${effectivePool === 'NOVICE' ? 'text-emerald-300' : 'text-amber-300'}">【${effectivePool === 'NOVICE' ? '新手場區域' : '普通場區域'}】</strong>
+              </span>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="setBindingDraftTargetPool('${effectivePool === 'NOVICE' ? 'REGULAR' : 'NOVICE'}')"
+                        class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] text-slate-300 font-bold">
+                  ⇄ 改排${effectivePool === 'NOVICE' ? '普通場' : '新手場'}
+                </button>
+              </div>
+            `;
+          }
+        } else {
+          poolSelectorBox.classList.add('hidden');
+          poolSelectorBox.innerHTML = '';
+        }
       }
 
       if (!state.bindingGroups || state.bindingGroups.length === 0) {
@@ -2419,12 +2584,23 @@
             ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-extrabold"><i class="fa-solid fa-infinity mr-1"></i>全時段綁定 (${members.length}人)</span>`
             : `<span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[11px] font-extrabold"><i class="fa-solid fa-1 mr-1"></i>單次綁定 (${members.length}人)</span>`;
 
+          const effPool = getBindingGroupEffectivePool(bg);
+          const poolInfo = analyzePlayerIdsNovicePool(bg.playerIds);
+          const poolBadgeHTML = (state.noviceModeEnabled || poolInfo.isMixed)
+            ? `<span class="px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${
+                effPool === 'NOVICE'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  : 'bg-orange-500/20 text-orange-300 border-orange-500/40'
+              }">${effPool === 'NOVICE' ? '🌱 排入：新手組區域' : '🔥 排入：普通組區域'}</span>`
+            : '';
+
           return `
             <div class="bg-slate-950 border ${bg.enabled ? 'border-amber-500/40' : 'border-slate-800 opacity-60'} rounded-xl p-3 flex flex-col gap-2">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-xs font-black text-slate-400">#${idx + 1}</span>
                   ${modeBadge}
+                  ${poolBadgeHTML}
                   ${bg.completedOnce
               ? `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">✓ 已完成單次同場 (已解除)</span>`
               : bg.enabled
@@ -2432,7 +2608,13 @@
                 : `<span class="text-[11px] text-slate-500">已停用</span>`
             }
                 </div>
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${(state.noviceModeEnabled || poolInfo.isMixed) ? `
+                    <button type="button" onclick="toggleBindingGroupTargetPool('${bg.id}')" title="切換此綁定組在新手場分流模式下要排在新手組還是普通組"
+                            class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-200 text-[11px] font-bold transition">
+                      ⇄ 改排${effPool === 'NOVICE' ? '普通組' : '新手組'}
+                    </button>
+                  ` : ''}
                   <button type="button" onclick="toggleBindingGroupMode('${bg.id}')" title="切換單次綁定 / 全時段綁定"
                           class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-bold transition">
                     切換為${bg.mode === 'FULL' ? '單次' : '全時段'}
@@ -3438,7 +3620,7 @@
       const actionsEl = document.getElementById(`prep-group-actions-${groupIndex}`);
       if (actionsEl) {
         if (state.noviceModeEnabled) {
-          const maxLv = Number(state.noviceMaxLevel) || 5;
+          const maxLv = Number(state.noviceMaxLevel) || 4;
           actionsEl.innerHTML = `
             <button onclick="autoFillPrepGroup(${groupIndex}, false, 'NOVICE')" title="只排 ≤${maxLv}級 的新手球友進入第 ${groupIndex + 1} 組"
               class="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-400/50 text-emerald-300 text-[11px] font-extrabold transition active:scale-95">
@@ -3549,7 +3731,7 @@
 
       // 1. 動態切換頂部「智慧排點按鈕」（未啟用新手場：單一綜合按鈕；已啟用新手場：排新手 & 排普通(熟手) 雙按鈕）
       const topActionsEl = document.getElementById('prep-top-action-buttons');
-      const maxLv = Number(state.noviceMaxLevel) || 5;
+      const maxLv = Number(state.noviceMaxLevel) || 4;
       if (topActionsEl) {
         if (state.noviceModeEnabled) {
           topActionsEl.innerHTML = `
@@ -3604,8 +3786,8 @@
       }
       if (noviceCountsEl && state.noviceModeEnabled) {
         const activeNonHost = state.players.filter(p => !isHostPlayer(p) && p.checkedIn && !p.resting);
-        const novCnt = activeNonHost.filter(p => (p.level || 1) <= maxLv).length;
-        const regCnt = activeNonHost.filter(p => (p.level || 1) > maxLv).length;
+        const novCnt = activeNonHost.filter(p => isPlayerInPoolType(p, 'NOVICE')).length;
+        const regCnt = activeNonHost.filter(p => isPlayerInPoolType(p, 'REGULAR')).length;
         noviceCountsEl.textContent = `(在場新手${novCnt}人 / 普通${regCnt}人)`;
       }
 
@@ -3650,6 +3832,10 @@
             const names = members.map(m => escapeHTML(m.name)).join('＋');
             const allWaiting = members.every(m => getPlayerLocation(m.id).status === 'WAIT');
             const modeText = bg.mode === 'FULL' ? '全場綁定' : '單次綁定';
+            const effPool = getBindingGroupEffectivePool(bg);
+            const poolTag = state.noviceModeEnabled
+              ? `・${effPool === 'NOVICE' ? '🌱新手組' : '🔥普通組'}`
+              : '';
             const modeCls = bg.mode === 'FULL'
               ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
               : 'bg-sky-500/15 border-sky-500/40 text-sky-300';
@@ -3657,7 +3843,7 @@
               <span onclick="openBindingModal()" title="點擊管理綁定設定"
                     class="px-2 py-0.5 rounded-lg border ${modeCls} font-bold cursor-pointer flex items-center gap-1">
                 <i class="fa-solid fa-link text-[10px]"></i>
-                <span>[${modeText}] ${names}</span>
+                <span>[${modeText}${poolTag}] ${names}</span>
                 <span class="text-[10px] ${allWaiting ? 'text-emerald-300' : 'text-rose-300'}">(${allWaiting ? '全員場下待命' : '等待成員下場'})</span>
               </span>
             `;
