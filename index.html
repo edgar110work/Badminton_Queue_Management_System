@@ -908,7 +908,8 @@
   <!-- ================= MODAL 3: FINANCE & SHUTTLECOCK COST CALCULATOR ================= -->
   <div id="finance-modal"
     class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div
+      class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
         <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-calculator text-emerald-400"></i>
@@ -955,7 +956,8 @@
         </div>
 
         <!-- Shuttle Cost Setting -->
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+        <div
+          class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
           <div>
             <label for="fin-cost-per-shuttle" class="block text-xs font-bold text-amber-300">🪶 單顆羽球成本 (元/顆)</label>
             <span class="text-[11px] text-slate-400">今日已使用羽球顆數會自動乘以此單價</span>
@@ -1356,6 +1358,33 @@
         <button onclick="closeQrModal()"
           class="px-5 py-2 rounded-xl bg-[#06C755] hover:bg-[#05b34c] text-white font-extrabold text-xs shadow">
           完成關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 8: CONFIRM DELETE PLAYER MODAL ================= -->
+  <div id="delete-confirm-modal"
+    class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+    onclick="closeDeleteConfirmModal()">
+    <div class="bg-slate-900 border border-rose-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center relative"
+      onclick="event.stopPropagation()">
+      <div
+        class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center mx-auto mb-3 text-xl">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-lg font-black text-white">是否確認刪除球員資料？</h3>
+      <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+        您即將刪除球員「<span id="delete-confirm-player-name" class="font-extrabold text-amber-300">-</span>」的報名與紀錄資料，刪除後將無法復原。
+      </p>
+      <div class="flex items-center justify-center gap-2.5 mt-5 pt-3.5 border-t border-slate-800">
+        <button type="button" onclick="closeDeleteConfirmModal()"
+          class="flex-1 py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs transition active:scale-95">
+          取消
+        </button>
+        <button type="button" onclick="confirmDeletePlayer()"
+          class="flex-1 py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs shadow-lg shadow-rose-950/60 transition active:scale-95 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-trash-can"></i> 確認刪除
         </button>
       </div>
     </div>
@@ -2602,20 +2631,18 @@
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                 <button type="button" onclick="setBindingDraftTargetPool('NOVICE')"
-                        class="py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${
-                          bindingDraftTargetPool === 'NOVICE'
-                            ? 'bg-emerald-500 text-slate-950 border-emerald-300 shadow-lg'
-                            : 'bg-slate-900 hover:bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
-                        }">
+                        class="py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${bindingDraftTargetPool === 'NOVICE'
+                ? 'bg-emerald-500 text-slate-950 border-emerald-300 shadow-lg'
+                : 'bg-slate-900 hover:bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
+              }">
                   <i class="fa-solid fa-seedling"></i>
                   ${bindingDraftTargetPool === 'NOVICE' ? '✓ 已選：排在【新手場區域】' : '排在【新手場區域】(≤' + maxNoviceLv + '級)'}
                 </button>
                 <button type="button" onclick="setBindingDraftTargetPool('REGULAR')"
-                        class="py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${
-                          bindingDraftTargetPool === 'REGULAR'
-                            ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-lg'
-                            : 'bg-slate-900 hover:bg-amber-950/60 border-amber-500/40 text-amber-300'
-                        }">
+                        class="py-2 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-center gap-1.5 transition ${bindingDraftTargetPool === 'REGULAR'
+                ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-lg'
+                : 'bg-slate-900 hover:bg-amber-950/60 border-amber-500/40 text-amber-300'
+              }">
                   <i class="fa-solid fa-fire"></i>
                   ${bindingDraftTargetPool === 'REGULAR' ? '✓ 已選：排在【普通場區域】' : '排在【普通場區域】(>' + maxNoviceLv + '級)'}
                 </button>
@@ -2667,11 +2694,10 @@
           const effPool = getBindingGroupEffectivePool(bg);
           const poolInfo = analyzePlayerIdsNovicePool(bg.playerIds);
           const poolBadgeHTML = (state.noviceModeEnabled || poolInfo.isMixed)
-            ? `<span class="px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${
-                effPool === 'NOVICE'
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                  : 'bg-orange-500/20 text-orange-300 border-orange-500/40'
-              }">${effPool === 'NOVICE' ? '🌱 排入：新手組區域' : '🔥 排入：普通組區域'}</span>`
+            ? `<span class="px-2 py-0.5 rounded-md border text-[11px] font-extrabold ${effPool === 'NOVICE'
+              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+              : 'bg-orange-500/20 text-orange-300 border-orange-500/40'
+            }">${effPool === 'NOVICE' ? '🌱 排入：新手組區域' : '🔥 排入：普通組區域'}</span>`
             : '';
 
           return `
@@ -4424,9 +4450,41 @@
     /********************************************************************
      * 9. PLAYER CRUD & INDIVIDUAL PARTNER/OPPONENT HISTORY MODAL
      ********************************************************************/
+    let pendingDeletePlayerId = null;
+
     function deletePlayerDirectly(playerId) {
       const p = getPlayerById(playerId);
       if (!p) return;
+      pendingDeletePlayerId = playerId;
+      const nameEl = document.getElementById('delete-confirm-player-name');
+      if (nameEl) nameEl.textContent = p.name;
+      const modal = document.getElementById('delete-confirm-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeDeleteConfirmModal() {
+      pendingDeletePlayerId = null;
+      const modal = document.getElementById('delete-confirm-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function confirmDeletePlayer() {
+      if (!pendingDeletePlayerId) {
+        closeDeleteConfirmModal();
+        return;
+      }
+      const playerId = pendingDeletePlayerId;
+      const p = getPlayerById(playerId);
+      closeDeleteConfirmModal();
+      closeHistoryModal();
+      if (!p) return;
+
       removePlayerFromEverywhere(playerId);
       state.players = state.players.filter(item => item.id !== playerId);
       if (Array.isArray(state.bindingGroups)) {
@@ -4799,12 +4857,7 @@
       };
 
       document.getElementById('hist-delete-btn').onclick = () => {
-        removePlayerFromEverywhere(playerId);
-        state.players = state.players.filter(item => item.id !== playerId);
-        closeHistoryModal();
-        saveState();
-        renderAll();
-        showToast(`已刪除球員「${p.name}」`, 'warn');
+        deletePlayerDirectly(playerId);
       };
 
       document.getElementById('history-modal').classList.remove('hidden');
