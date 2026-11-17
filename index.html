@@ -2281,29 +2281,40 @@
     }
 
     // 計算綁定群組目前的場地/準備區/場下待命狀態：
-    // 1. 只有當綁定群組有人在球場上 (COURT) -> 顯示「等待人員下場」
-    // 2. 如果全部都進到準備區了 (PREP) -> 顯示「全員準備區待命」
-    // 3. 如果沒在場上、也沒在準備區 -> 顯示「全員場下待命」
+    // 1. 若綁定成員全員已經在同一座球場上 (COURT 且同為同一場地) -> 顯示「全員已在場上」
+    // 2. 若綁定成員在不同場地、或只有部分人在場上 -> 顯示「等待人員下場」
+    // 3. 若全部都進到準備區同一組了 (PREP) -> 顯示「全員準備區待命」
+    // 4. 若沒在場上、也沒在準備區 -> 顯示「全員場下待命」
     function getBindingGroupLocationStatus(members) {
       if (!members || members.length === 0) {
         return { shortText: '全員場下待命', detailText: '🟢 全員場下待命', colorClass: 'text-emerald-300' };
       }
-      const locs = members.map(m => getPlayerLocation(m.id).status);
-      const anyOnCourt = locs.some(st => st === 'COURT');
-      const allInPrep = locs.every(st => st === 'PREP');
-      const anyInPrep = locs.some(st => st === 'PREP');
+      const locInfos = members.map(m => getPlayerLocation(m.id));
+      const anyOnCourt = locInfos.some(loc => loc.status === 'COURT');
+      const allOnSameCourt = locInfos.every(loc => loc.status === 'COURT' && loc.courtIndex === locInfos[0].courtIndex);
+      const allInSamePrep = locInfos.every(loc => loc.status === 'PREP' && loc.groupIndex === locInfos[0].groupIndex);
+      const anyInPrep = locInfos.some(loc => loc.status === 'PREP');
 
+      if (allOnSameCourt) {
+        const courtName = state.courts[locInfos[0].courtIndex]?.name || '球場';
+        return {
+          shortText: '全員已在場上',
+          detailText: `🏸 全員已在場上（同在 ${courtName} 比賽中）`,
+          colorClass: 'text-cyan-300'
+        };
+      }
       if (anyOnCourt) {
         return {
           shortText: '等待人員下場',
-          detailText: '⏳ 等待人員下場（尚有綁定成員在球場上比賽）',
+          detailText: '⏳ 等待人員下場（綁定成員在不同場地或僅部分人在場上）',
           colorClass: 'text-rose-300'
         };
       }
-      if (allInPrep) {
+      if (allInSamePrep) {
+        const prepGroupNum = (locInfos[0].groupIndex || 0) + 1;
         return {
           shortText: '全員準備區待命',
-          detailText: '🟣 全員準備區待命（已排入準備區候命上場）',
+          detailText: `🟣 全員準備區待命（同在準備區第 ${prepGroupNum} 組候命上場）`,
           colorClass: 'text-indigo-300'
         };
       }
