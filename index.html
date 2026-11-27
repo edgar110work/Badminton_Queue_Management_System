@@ -192,10 +192,6 @@
               連線
             </button>
           </div>
-          <button type="button" onclick="openAdminUnlockModal()"
-            class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-extrabold transition active:scale-95 flex items-center gap-1.5">
-            <i class="fa-solid fa-key"></i> 管理員解鎖
-          </button>
         </div>
       </div>
     </header>
@@ -245,7 +241,7 @@
               <i class="fa-solid fa-magnifying-glass text-cyan-400"></i>
               個人已打場次查詢
             </h2>
-            <p class="text-[11px] text-slate-400 mt-0.5">輸入姓名可快速查看自己今日已打幾場、目前在場上／準備區／場下待命，點擊可看同場球友</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">請輸入您的姓名查詢個人今日已打場次與目前狀態（不公開顯示全員場次）</p>
           </div>
           <div class="relative w-full sm:w-64">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
@@ -362,14 +358,14 @@
             class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded-md font-bold">0</span>
         </button>
 
-        <!-- Live Board QR Code + Room Code Button -->
+        <!-- Live Board QR Code + Cloud Status Button -->
         <button onclick="openLiveBoardQrModal()" id="live-board-qr-btn"
-          class="flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 rounded-xl px-3 py-2 text-xs font-extrabold shadow transition active:scale-95"
-          title="開啟場邊即時看板 QR Code 與 4 碼開團代碼">
+          class="flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-xl px-3 py-2 text-xs font-extrabold shadow transition active:scale-95"
+          title="開啟雲端即時看板 QR Code、開團碼與清理管理">
           <i class="fa-solid fa-qrcode text-cyan-300 text-sm"></i>
-          <span>即時看板 QR</span>
+          <span id="header-cloud-status-text">雲端看板</span>
           <span id="header-room-code-badge"
-            class="px-1.5 py-0.2 rounded bg-cyan-500/30 text-cyan-100 font-black tracking-wider">----</span>
+            class="px-1.5 py-0.2 rounded bg-slate-700 text-slate-300 font-black tracking-wider">未開啟</span>
         </button>
 
         <!-- LINE Group QR Code Invite Button -->
@@ -1623,16 +1619,23 @@
         <!-- Cloud Sync Status & Room Code Bar -->
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <span id="live-sync-status-badge" class="text-xs font-bold text-cyan-300">⏳ 準備連線 Firebase...</span>
-            <button type="button" id="live-sync-toggle-btn" onclick="toggleCloudSync()"
-              class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 transition">
-              切換雲端同步
-            </button>
+            <span id="live-sync-status-badge" class="text-xs font-bold text-slate-400">⏸ 雲端即時看板尚未開啟</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button type="button" id="live-sync-toggle-btn" onclick="toggleCloudSync()"
+                class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black shadow transition active:scale-95">
+                ▶ 開啟雲端即時看板
+              </button>
+              <button type="button" onclick="endSessionAndDeleteCloudRoom()"
+                title="打完球後點擊此按鈕，將此開團房間從 Firebase 資料庫刪除並關閉雲端看板"
+                class="px-2.5 py-1.5 rounded-xl bg-rose-950/70 hover:bg-rose-600 border border-rose-500/40 text-rose-300 hover:text-white text-xs font-bold transition active:scale-95">
+                🗑️ 結束開團並刪除雲端房間
+              </button>
+            </div>
           </div>
 
           <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
             <div>
-              <div class="text-[11px] text-slate-400">目前 4 碼開團代碼（球友輸入即可連線此場次）</div>
+              <div class="text-[11px] text-slate-400">目前 4 碼開團代碼（開啟雲端看板後，球友輸入即可連線此場次）</div>
               <div id="live-room-code-display" class="text-3xl font-black tracking-[0.25em] text-cyan-300 mt-0.5">0000</div>
             </div>
             <button type="button" onclick="generateNewRoomCode()"
@@ -1641,19 +1644,23 @@
             </button>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80">
-            <input id="live-custom-room-input" type="text" maxlength="4" inputmode="numeric" placeholder="自訂4碼數字"
-              class="w-28 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white text-center tracking-widest focus:outline-none focus:border-cyan-400" />
-            <button type="button" onclick="applyCustomRoomCode()"
-              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition">
-              套用此房間碼
-            </button>
-            <div class="flex items-center gap-1.5 ml-auto">
-              <span class="text-[11px] text-slate-400">解鎖密碼:</span>
-              <input id="live-admin-pin-input" type="text" maxlength="12" value="8888" onchange="updateAdminPin(this.value)"
-                class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-amber-300 text-center focus:outline-none focus:border-amber-400" />
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <input id="live-custom-room-input" type="text" maxlength="4" inputmode="numeric" placeholder="自訂4碼數字"
+                class="w-28 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white text-center tracking-widest focus:outline-none focus:border-cyan-400" />
+              <button type="button" onclick="applyCustomRoomCode()"
+                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition">
+                套用此房間碼
+              </button>
             </div>
+            <span class="text-[10px] text-slate-500">✨ 系統於開啟同步時會自動清理超過 24 小時未更新的過期房間</span>
           </div>
+        </div>
+
+        <div id="live-sync-off-hint"
+          class="hidden rounded-xl border border-amber-500/40 bg-amber-950/30 p-3 text-xs text-amber-200 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-amber-400 shrink-0"></i>
+          <span>目前尚未開啟雲端即時看板（僅本機運作，不佔用 Firebase 空間）。請點擊上方 <strong>「▶ 開啟雲端即時看板」</strong> 才會建立雲端房間讓球友掃碼同步！</span>
         </div>
 
         <!-- QR Code Container -->
@@ -1687,38 +1694,6 @@
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MODAL 11: ADMIN UNLOCK MODAL (FOR VIEWER MODE) ================= -->
-  <div id="admin-unlock-modal"
-    class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
-    onclick="closeAdminUnlockModal()">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl relative"
-      onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
-        <h3 class="text-base font-black text-white flex items-center gap-2">
-          <i class="fa-solid fa-key text-amber-400"></i> 管理員解鎖（切換為主控端）
-        </h3>
-        <button type="button" onclick="closeAdminUnlockModal()"
-          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <p class="text-xs text-slate-400 mb-3">請輸入管理員解鎖密碼（預設為 <code class="text-amber-300 font-bold">8888</code>），解鎖後此設備將開放完整排點控制權。</p>
-      <input id="admin-unlock-pin-input" type="password" inputmode="numeric" placeholder="輸入管理員密碼..."
-        onkeydown="if(event.key==='Enter') submitAdminUnlock();"
-        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white text-center tracking-widest focus:outline-none focus:border-amber-400 mb-4" />
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="closeAdminUnlockModal()"
-          class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
-          取消
-        </button>
-        <button type="button" onclick="submitAdminUnlock()"
-          class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition active:scale-95">
-          確認解鎖主控端
-        </button>
       </div>
     </div>
   </div>
@@ -1940,8 +1915,8 @@
       costPerShuttle: 85,
       financeUserChanged: false,
       roomCode: '',
-      cloudSyncEnabled: true,
-      adminPin: '8888',
+      cloudSyncEnabled: false,
+      cloudSyncUserChanged: false,
       matchLogs: []
     };
 
@@ -2015,8 +1990,11 @@
             state.fee1921 = 220;
             state.costPerShuttle = 85;
           }
-          if (typeof state.cloudSyncEnabled !== 'boolean') state.cloudSyncEnabled = true;
-          if (!state.adminPin || !String(state.adminPin).trim()) state.adminPin = '8888';
+          if (!state.cloudSyncUserChanged) {
+            state.cloudSyncEnabled = false;
+          } else if (typeof state.cloudSyncEnabled !== 'boolean') {
+            state.cloudSyncEnabled = false;
+          }
           if (typeof state.roomCode !== 'string') state.roomCode = '';
           if (!Array.isArray(state.prepSlots)) {
             state.prepSlots = [null, null, null, null, null, null, null, null];
@@ -2077,22 +2055,78 @@
     }
 
     function updateHeaderRoomCodeBadge() {
+      const btn = document.getElementById('live-board-qr-btn');
+      const statusText = document.getElementById('header-cloud-status-text');
       const badge = document.getElementById('header-room-code-badge');
-      if (badge) {
-        badge.textContent = activeRoomCode || '----';
+
+      if (!state.cloudSyncEnabled) {
+        if (btn) {
+          btn.className = 'flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 rounded-xl px-3 py-2 text-xs font-extrabold shadow transition active:scale-95';
+        }
+        if (statusText) statusText.textContent = '雲端看板';
+        if (badge) {
+          badge.className = 'px-1.5 py-0.2 rounded bg-slate-700 text-slate-300 font-black tracking-wider';
+          badge.textContent = '未開啟';
+        }
+        return;
+      }
+
+      if (firebaseSyncState === 'ERROR') {
+        if (btn) {
+          btn.className = 'flex items-center gap-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/50 text-rose-200 rounded-xl px-3 py-2 text-xs font-extrabold shadow transition active:scale-95';
+        }
+        if (statusText) statusText.textContent = '⚠️ 同步異常';
+        if (badge) {
+          badge.className = 'px-1.5 py-0.2 rounded bg-rose-500/30 text-rose-100 font-black tracking-wider';
+          badge.textContent = activeRoomCode || '----';
+        }
+      } else if (firebaseSyncState === 'OK') {
+        if (btn) {
+          btn.className = 'flex items-center gap-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-200 rounded-xl px-3 py-2 text-xs font-extrabold shadow transition active:scale-95';
+        }
+        if (statusText) statusText.textContent = '🟢 雲端看板';
+        if (badge) {
+          badge.className = 'px-1.5 py-0.2 rounded bg-emerald-500/30 text-emerald-100 font-black tracking-wider';
+          badge.textContent = activeRoomCode || '----';
+        }
+      } else {
+        if (btn) {
+          btn.className = 'flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 rounded-xl px-3 py-2 text-xs font-extrabold shadow transition active:scale-95';
+        }
+        if (statusText) statusText.textContent = '🔄 雲端看板';
+        if (badge) {
+          badge.className = 'px-1.5 py-0.2 rounded bg-cyan-500/30 text-cyan-100 font-black tracking-wider';
+          badge.textContent = activeRoomCode || '----';
+        }
       }
     }
 
     function updateCloudSyncStatusUI() {
+      updateHeaderRoomCodeBadge();
       const badge = document.getElementById('live-sync-status-badge');
       const toggleBtn = document.getElementById('live-sync-toggle-btn');
+      const offHint = document.getElementById('live-sync-off-hint');
+
       if (toggleBtn) {
-        toggleBtn.textContent = state.cloudSyncEnabled ? '⏸ 暫停雲端同步' : '▶ 開啟雲端同步';
+        if (state.cloudSyncEnabled) {
+          toggleBtn.className = 'px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 text-xs font-extrabold transition active:scale-95';
+          toggleBtn.textContent = '⏸ 暫停雲端同步';
+        } else {
+          toggleBtn.className = 'px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black shadow transition active:scale-95';
+          toggleBtn.textContent = '▶ 開啟雲端即時看板';
+        }
+      }
+      if (offHint) {
+        if (state.cloudSyncEnabled) {
+          offHint.classList.add('hidden');
+        } else {
+          offHint.classList.remove('hidden');
+        }
       }
       if (badge) {
         if (!state.cloudSyncEnabled) {
           badge.className = 'text-xs font-bold text-slate-400';
-          badge.textContent = '⏸ 雲端即時同步已暫停（僅本機運作）';
+          badge.textContent = '⏸ 雲端即時看板未開啟（僅本機運作，未建立雲端房間）';
         } else if (firebaseSyncState === 'SYNCING') {
           badge.className = 'text-xs font-bold text-amber-300';
           badge.textContent = '🔄 正在同步最新排點至 Firebase...';
@@ -2101,10 +2135,10 @@
           badge.textContent = '⚠️ Firebase 連線失敗（請檢查網路或 Database 讀寫規則）';
         } else if (firebaseSyncState === 'OK') {
           badge.className = 'text-xs font-extrabold text-emerald-300';
-          badge.textContent = `✅ Firebase 即時同步中（開團碼 ${activeRoomCode}）`;
+          badge.textContent = `✅ 雲端看板同步中（房號 ${activeRoomCode}）`;
         } else {
           badge.className = 'text-xs font-bold text-cyan-300';
-          badge.textContent = `⏳ 準備同步（開團碼 ${activeRoomCode}）`;
+          badge.textContent = `⏳ 準備同步（房號 ${activeRoomCode}）`;
         }
       }
     }
@@ -2113,7 +2147,6 @@
       return {
         roomCode: activeRoomCode,
         updatedAt: Date.now(),
-        adminPin: String(state.adminPin || '8888'),
         noviceModeEnabled: !!state.noviceModeEnabled,
         noviceMaxLevel: Number(state.noviceMaxLevel) || 4,
         currentHourFilter: state.currentHourFilter || 'ALL',
@@ -2181,7 +2214,6 @@
       if (typeof data.noviceModeEnabled === 'boolean') state.noviceModeEnabled = data.noviceModeEnabled;
       if (typeof data.noviceMaxLevel === 'number') state.noviceMaxLevel = data.noviceMaxLevel;
       if (typeof data.currentHourFilter === 'string') state.currentHourFilter = data.currentHourFilter;
-      if (typeof data.adminPin === 'string' && data.adminPin.trim()) state.adminPin = data.adminPin.trim();
       if (Array.isArray(data.matchLogs)) state.matchLogs = data.matchLogs;
     }
 
@@ -2222,16 +2254,78 @@
       updateCloudSyncStatusUI();
     }
 
+    async function cleanupExpiredCloudRooms(maxAgeHours = 24) {
+      if (isViewerMode) return;
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/rooms.json`);
+        if (!res.ok) return;
+        const allRooms = await res.json();
+        if (!allRooms || typeof allRooms !== 'object') return;
+        const cutoff = Date.now() - (maxAgeHours * 3600 * 1000);
+        const expiredCodes = Object.entries(allRooms)
+          .filter(([code, roomData]) => {
+            if (code === activeRoomCode) return false;
+            const ts = roomData && typeof roomData.updatedAt === 'number' ? roomData.updatedAt : 0;
+            return ts === 0 || ts < cutoff;
+          })
+          .map(([code]) => code);
+
+        if (expiredCodes.length === 0) return;
+        await Promise.all(
+          expiredCodes.map(code =>
+            fetch(`${FIREBASE_DB_URL}/rooms/${code}.json`, { method: 'DELETE' }).catch(() => null)
+          )
+        );
+        console.log(`Cleaned up ${expiredCodes.length} expired Firebase room(s):`, expiredCodes);
+      } catch (e) {
+        // 若 Firebase Rules 未開放讀取 /rooms 根節點則靜默略過
+      }
+    }
+
     function toggleCloudSync() {
       state.cloudSyncEnabled = !state.cloudSyncEnabled;
-      firebaseSyncState = state.cloudSyncEnabled ? 'IDLE' : 'OFF';
-      saveState();
+      state.cloudSyncUserChanged = true;
       if (state.cloudSyncEnabled) {
-        scheduleCloudSync(true);
-        showToast('✅ 已開啟 Firebase 雲端即時同步', 'success');
-      } else {
+        if (!activeRoomCode) {
+          activeRoomCode = generateRandom4DigitCode();
+          state.roomCode = activeRoomCode;
+          localStorage.setItem(ROOM_CODE_STORAGE_KEY, activeRoomCode);
+        }
+        firebaseSyncState = 'IDLE';
+        saveState();
         updateCloudSyncStatusUI();
-        showToast('⏸ 已暫停雲端同步（目前僅在本機儲存）', 'info');
+        scheduleCloudSync(true);
+        cleanupExpiredCloudRooms(24);
+        showToast(`✅ 已開啟雲端即時看板（房號 ${activeRoomCode}），球友可掃碼同步！`, 'success');
+      } else {
+        firebaseSyncState = 'OFF';
+        saveState();
+        updateCloudSyncStatusUI();
+        showToast('⏸ 已暫停雲端同步（目前僅在本機運作）', 'info');
+      }
+    }
+
+    async function endSessionAndDeleteCloudRoom() {
+      const targetCode = activeRoomCode;
+      if (!targetCode) {
+        showToast('目前尚無開團代碼', 'info');
+        return;
+      }
+      state.cloudSyncEnabled = false;
+      state.cloudSyncUserChanged = true;
+      firebaseSyncState = 'OFF';
+      saveState();
+      updateCloudSyncStatusUI();
+
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/rooms/${targetCode}.json`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        renderLiveBoardQrModal();
+        showToast(`🗑️ 已結束開團並從 Firebase 刪除房間【${targetCode}】！`, 'success');
+      } catch (err) {
+        console.warn('Delete cloud room failed:', err);
+        renderLiveBoardQrModal();
+        showToast(`⚠️ 雲端看板已關閉，但刪除雲端房間【${targetCode}】失敗（請檢查網路或資料庫規則）`, 'warn');
       }
     }
 
@@ -2243,11 +2337,18 @@
       activeRoomCode = nextCode;
       state.roomCode = nextCode;
       localStorage.setItem(ROOM_CODE_STORAGE_KEY, nextCode);
-      updateHeaderRoomCodeBadge();
+      updateCloudSyncStatusUI();
       saveState();
-      scheduleCloudSync(true);
+      if (state.cloudSyncEnabled) {
+        scheduleCloudSync(true);
+      }
       renderLiveBoardQrModal();
-      showToast(`🎲 已產生新開團碼【${nextCode}】並同步至雲端獨立空間！`, 'success');
+      showToast(
+        state.cloudSyncEnabled
+          ? `🎲 已產生新開團碼【${nextCode}】並同步至雲端獨立空間！`
+          : `🎲 已設定新開團碼【${nextCode}】（請點「▶ 開啟雲端即時看板」才會上傳至 Firebase）`,
+        'success'
+      );
     }
 
     function applyCustomRoomCode() {
@@ -2260,30 +2361,30 @@
       activeRoomCode = code;
       state.roomCode = code;
       localStorage.setItem(ROOM_CODE_STORAGE_KEY, code);
-      updateHeaderRoomCodeBadge();
       if (inputEl) inputEl.value = '';
+      updateCloudSyncStatusUI();
       saveState();
-      scheduleCloudSync(true);
+      if (state.cloudSyncEnabled) {
+        scheduleCloudSync(true);
+      }
       renderLiveBoardQrModal();
-      showToast(`已切換至開團碼【${code}】並立即同步資料！`, 'success');
-    }
-
-    function updateAdminPin(val) {
-      const pin = String(val || '').trim() || '8888';
-      state.adminPin = pin;
-      saveState();
-      scheduleCloudSync(true);
-      showToast(`已更新管理員解鎖密碼為「${pin}」`, 'success');
+      showToast(
+        state.cloudSyncEnabled
+          ? `已切換至開團碼【${code}】並立即同步資料！`
+          : `已切換至開團碼【${code}】（開啟雲端看板後將同步至此房號）`,
+        'success'
+      );
     }
 
     function openLiveBoardQrModal() {
       if (!activeRoomCode) {
         activeRoomCode = generateRandom4DigitCode();
         state.roomCode = activeRoomCode;
-        updateHeaderRoomCodeBadge();
         saveState();
       }
-      scheduleCloudSync(true);
+      if (state.cloudSyncEnabled) {
+        scheduleCloudSync(true);
+      }
       renderLiveBoardQrModal();
       const modal = document.getElementById('live-board-qr-modal');
       if (modal) {
@@ -2303,14 +2404,12 @@
     function renderLiveBoardQrModal() {
       const codeEl = document.getElementById('live-room-code-display');
       const urlEl = document.getElementById('live-viewer-url-text');
-      const pinEl = document.getElementById('live-admin-pin-input');
       const qrBox = document.getElementById('live-board-qr-canvas');
       const fileHint = document.getElementById('live-file-protocol-hint');
       const viewerUrl = getViewerShareUrl(activeRoomCode);
 
       if (codeEl) codeEl.textContent = activeRoomCode || '----';
       if (urlEl) urlEl.textContent = viewerUrl;
-      if (pinEl) pinEl.value = state.adminPin || '8888';
       if (fileHint) {
         if (window.location.protocol === 'file:') {
           fileHint.classList.remove('hidden');
@@ -2500,66 +2599,6 @@
       }
     }
 
-    function openAdminUnlockModal() {
-      const input = document.getElementById('admin-unlock-pin-input');
-      if (input) input.value = '';
-      const modal = document.getElementById('admin-unlock-modal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => { if (input) input.focus(); }, 60);
-      }
-    }
-
-    function closeAdminUnlockModal() {
-      const modal = document.getElementById('admin-unlock-modal');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    }
-
-    function submitAdminUnlock() {
-      const input = document.getElementById('admin-unlock-pin-input');
-      const entered = String(input ? input.value : '').trim();
-      const expected = String(state.adminPin || '8888').trim();
-      if (entered !== expected) {
-        showToast('❌ 管理員密碼錯誤！請聯繫團主確認密碼', 'warn');
-        return;
-      }
-
-      closeAdminUnlockModal();
-      stopViewerSync();
-      isViewerMode = false;
-
-      const masterHeader = document.getElementById('master-header');
-      const masterMain = document.getElementById('master-main');
-      const viewerShell = document.getElementById('viewer-mode-shell');
-      if (viewerShell) {
-        viewerShell.classList.add('hidden');
-        viewerShell.classList.remove('flex');
-      }
-      if (masterHeader) masterHeader.classList.remove('hidden');
-      if (masterMain) masterMain.classList.remove('hidden');
-
-      if (!activeRoomCode) {
-        loadState();
-        activeRoomCode = normalizeRoomCode(state.roomCode) || generateRandom4DigitCode();
-      }
-      state.roomCode = activeRoomCode;
-      localStorage.setItem(ROOM_CODE_STORAGE_KEY, activeRoomCode);
-      updateHeaderRoomCodeBadge();
-
-      try {
-        const cleanUrl = window.location.href.split('?')[0].split('#')[0] + (activeRoomCode ? `?room=${activeRoomCode}` : '');
-        window.history.replaceState(null, '', cleanUrl);
-      } catch (e) {}
-
-      saveState();
-      renderAll();
-      showToast(`🔓 解鎖成功！此設備已切換為「主控端」管理房號 ${activeRoomCode}`, 'success');
-    }
-
     function renderViewerMode() {
       const emptyBanner = document.getElementById('viewer-empty-room-banner');
       const courtsGrid = document.getElementById('viewer-courts-grid');
@@ -2611,15 +2650,14 @@
             }
             const lvInfo = getLevelBadgeInfo(p.level);
             return `
-              <div onclick="openHistoryModal('${p.id}')"
-                   class="h-14 rounded-lg bg-slate-950/90 border ${isNoviceCourt ? 'border-lime-300/60' : 'border-emerald-400/30'} p-1.5 flex flex-col justify-between cursor-pointer hover:bg-slate-900 transition">
+              <div class="h-14 rounded-lg bg-slate-950/90 border ${isNoviceCourt ? 'border-lime-300/60' : 'border-emerald-400/30'} p-1.5 flex flex-col justify-between">
                 <div class="flex items-center justify-between gap-1">
                   <span class="font-extrabold text-xs text-white truncate">${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</span>
                   <span class="text-[10px] px-1 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
                 </div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400">
                   <span>${isHostPlayer(p) ? '👑團主' : p.timeSlot}</span>
-                  <span class="text-emerald-300 font-bold">已打 ${p.games || 0} 場</span>
+                  <span class="text-emerald-300/80 font-semibold">比賽中</span>
                 </div>
               </div>
             `;
@@ -2703,15 +2741,14 @@
                   }
                   const lvInfo = getLevelBadgeInfo(p.level);
                   return `
-                    <div onclick="openHistoryModal('${p.id}')"
-                         class="h-14 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400/60 p-2 flex flex-col justify-between cursor-pointer transition">
+                    <div class="h-14 rounded-lg bg-slate-900 border border-slate-700 p-2 flex flex-col justify-between">
                       <div class="flex items-center justify-between gap-1">
                         <span class="font-extrabold text-xs text-white truncate">${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</span>
                         <span class="text-[10px] px-1 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
                       </div>
                       <div class="text-[10px] text-slate-400 flex items-center justify-between">
                         <span>${idx < 2 ? '上隊' : '下隊'}</span>
-                        <span class="text-emerald-300 font-bold">已打 ${p.games || 0} 場</span>
+                        <span class="text-indigo-300 font-semibold">${isHostPlayer(p) ? '👑團主' : p.timeSlot}</span>
                       </div>
                     </div>
                   `;
@@ -2722,26 +2759,26 @@
         }).join('');
       }
 
-      // 3. Read-Only Personal Games Played Lookup
+      // 3. Read-Only Personal Games Played Lookup (Require Name Search — Hide Full Roster Game Counts)
       if (playersGrid) {
         const searchVal = (document.getElementById('viewer-player-search')?.value || '').trim().toLowerCase();
+        if (!searchVal) {
+          playersGrid.innerHTML = `
+            <div class="col-span-full text-center py-6 px-4 bg-slate-950/60 border border-dashed border-slate-800 rounded-xl space-y-1">
+              <div class="text-xs font-bold text-cyan-300"><i class="fa-solid fa-magnifying-glass mr-1.5"></i>請在上方輸入您的姓名查詢個人場次</div>
+              <p class="text-[11px] text-slate-400">為保護球友隱私，看板預設不公開所有人已打場次列表；輸入姓名後僅顯示符合球友的個人場次與目前狀態。</p>
+            </div>
+          `;
+          return;
+        }
+
         const visiblePlayers = (state.players || []).filter(p => {
           if (!p.checkedIn) return false;
-          if (searchVal && !(p.name || '').toLowerCase().includes(searchVal)) return false;
-          return true;
-        });
-
-        const statusOrder = { COURT: 0, PREP: 1, WAIT: 2 };
-        visiblePlayers.sort((a, b) => {
-          if (!!a.resting !== !!b.resting) return a.resting ? 1 : -1;
-          const lA = getPlayerLocation(a.id).status;
-          const lB = getPlayerLocation(b.id).status;
-          if ((statusOrder[lA] ?? 9) !== (statusOrder[lB] ?? 9)) return (statusOrder[lA] ?? 9) - (statusOrder[lB] ?? 9);
-          return (a.games || 0) - (b.games || 0);
+          return (p.name || '').toLowerCase().includes(searchVal);
         });
 
         if (visiblePlayers.length === 0) {
-          playersGrid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-slate-500">找不到符合的到場球友資料</div>`;
+          playersGrid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-slate-500">找不到姓名包含「${escapeHTML(searchVal)}」的已報到球友</div>`;
         } else {
           playersGrid.innerHTML = visiblePlayers.map(p => {
             const loc = getPlayerLocation(p.id);
@@ -6743,7 +6780,7 @@
           const other = getPlayerById(otherId);
           const oLv = other ? getLevelBadgeInfo(other.level) : null;
           return `
-            <div onclick="openHistoryModal('${otherId}')" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer transition">
+            <div ${isViewerMode ? '' : `onclick="openHistoryModal('${otherId}')"`} class="bg-slate-900 ${isViewerMode ? '' : 'hover:bg-slate-800 cursor-pointer'} border border-slate-800 rounded-lg px-3 py-2 flex items-center justify-between transition">
               <div class="flex items-center gap-1.5 truncate">
                 <span class="text-xs font-bold text-slate-200 truncate">${other ? escapeHTML(other.name) : '已刪除球員'}</span>
                 ${oLv ? `<span class="text-[10px] px-1 rounded border ${oLv.classes}">${oLv.label}</span>` : ''}
@@ -7103,9 +7140,12 @@
         activeRoomCode = roomParam || normalizeRoomCode(state.roomCode) || normalizeRoomCode(localStorage.getItem(ROOM_CODE_STORAGE_KEY)) || generateRandom4DigitCode();
         state.roomCode = activeRoomCode;
         localStorage.setItem(ROOM_CODE_STORAGE_KEY, activeRoomCode);
-        updateHeaderRoomCodeBadge();
+        updateCloudSyncStatusUI();
         renderAll();
-        scheduleCloudSync(true);
+        if (state.cloudSyncEnabled) {
+          scheduleCloudSync(true);
+          cleanupExpiredCloudRooms(24);
+        }
       }
 
       const dropzone = document.getElementById('icon-dropzone');
