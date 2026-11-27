@@ -24,6 +24,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- QR Code Generator Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Google Fonts: Inter & Noto Sans TC -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
@@ -152,8 +154,114 @@
 
 <body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
 
+  <!-- ================= READ-ONLY VIEWER MODE SHELL (?mode=viewer) ================= -->
+  <div id="viewer-mode-shell" class="hidden min-h-screen flex-col bg-slate-950 text-slate-100">
+    <!-- Viewer Top Header -->
+    <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-cyan-500/30 px-3 sm:px-5 py-2.5 shadow-lg">
+      <div class="max-w-[1400px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2.5">
+          <div id="viewer-brand-icon"
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center overflow-hidden border border-amber-300/60 shadow shrink-0">
+            <img src="./6796.jpg" alt="貓貓羽球" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='🐱';" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="font-black text-base sm:text-lg text-white">貓貓羽球・場邊即時看板</h1>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 text-[11px] font-extrabold">
+                👀 球友唯讀模式
+              </span>
+              <span id="viewer-sync-status" class="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-bold">
+                ⏳ 準備連線...
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 flex items-center gap-2 flex-wrap">
+              <span>只顯示場上名單、下一場準備預告與個人場次查詢（唯讀無法誤改排點）</span>
+              <span id="viewer-last-updated" class="text-cyan-300/80 font-semibold"></span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center bg-slate-950 border border-slate-700 rounded-xl p-1 gap-1">
+            <span class="text-[11px] text-slate-400 pl-2 font-bold">開團碼</span>
+            <input id="viewer-room-input" type="text" maxlength="4" inputmode="numeric" placeholder="4碼"
+              onkeydown="if(event.key==='Enter') connectViewerRoomFromInput();"
+              class="w-16 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-black tracking-widest text-center text-cyan-300 focus:outline-none focus:border-cyan-400" />
+            <button type="button" onclick="connectViewerRoomFromInput()"
+              class="px-2.5 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-black transition active:scale-95">
+              連線
+            </button>
+          </div>
+          <button type="button" onclick="openAdminUnlockModal()"
+            class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-extrabold transition active:scale-95 flex items-center gap-1.5">
+            <i class="fa-solid fa-key"></i> 管理員解鎖
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Viewer Main Content -->
+    <div class="flex-1 max-w-[1400px] w-full mx-auto p-3 sm:p-5 space-y-5">
+      <!-- Empty / Room Not Found Banner -->
+      <div id="viewer-empty-room-banner" class="hidden rounded-2xl border border-amber-500/40 bg-amber-950/20 p-5 text-center space-y-2">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Viewer Section 1: 3 Live Courts (Read-Only + Timers) -->
+      <section>
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <h2 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+            <i class="fa-solid fa-table-tennis-paddle-ball text-emerald-400"></i>
+            目前各場地比賽中名單（含即時打球計時器）
+          </h2>
+          <span class="text-xs text-slate-400">系統自動即時同步</span>
+        </div>
+        <div id="viewer-courts-grid" class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- Viewer Section 2: Next Up Prep Groups 1 & 2 (Read-Only Warmup Preview) -->
+      <section class="bg-slate-900/90 border border-indigo-500/40 rounded-2xl p-4 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-800">
+          <h2 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+            <i class="fa-solid fa-fire-flame-curved text-amber-400"></i>
+            下一場準備區預告（第 1、2 組・請快上場的球友提前熱身）
+          </h2>
+          <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">
+            依序遞補上場
+          </span>
+        </div>
+        <div id="viewer-prep-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- Viewer Section 3: Personal Games Played Lookup (Read-Only) -->
+      <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
+          <div>
+            <h2 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+              <i class="fa-solid fa-magnifying-glass text-cyan-400"></i>
+              個人已打場次查詢
+            </h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">輸入姓名可快速查看自己今日已打幾場、目前在場上／準備區／場下待命，點擊可看同場球友</p>
+          </div>
+          <div class="relative w-full sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input id="viewer-player-search" type="text" oninput="renderViewerMode()" placeholder="輸入姓名查詢場次..."
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400" />
+          </div>
+        </div>
+        <div id="viewer-players-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+    </div>
+  </div>
+
   <!-- ================= TOP NAVIGATION & DASHBOARD HEADER ================= -->
-  <header
+  <header id="master-header"
     class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 sm:px-5 py-2.5 shadow-lg">
     <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
 
@@ -254,6 +362,16 @@
             class="px-1.5 py-0.2 bg-sky-500/20 text-sky-300 rounded-md font-bold">0</span>
         </button>
 
+        <!-- Live Board QR Code + Room Code Button -->
+        <button onclick="openLiveBoardQrModal()" id="live-board-qr-btn"
+          class="flex items-center gap-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 rounded-xl px-3 py-2 text-xs font-extrabold shadow transition active:scale-95"
+          title="開啟場邊即時看板 QR Code 與 4 碼開團代碼">
+          <i class="fa-solid fa-qrcode text-cyan-300 text-sm"></i>
+          <span>即時看板 QR</span>
+          <span id="header-room-code-badge"
+            class="px-1.5 py-0.2 rounded bg-cyan-500/30 text-cyan-100 font-black tracking-wider">----</span>
+        </button>
+
         <!-- LINE Group QR Code Invite Button -->
         <button onclick="openQrModal()"
           class="flex items-center gap-1.5 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl px-3 py-2 text-xs font-extrabold shadow-lg shadow-emerald-950/50 transition active:scale-95"
@@ -299,7 +417,7 @@
   </div>
 
   <!-- ================= MAIN WORKSPACE (IPAD PRO LANDSCAPE 12-COL GRID) ================= -->
-  <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+  <main id="master-main" class="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
     <!-- LEFT / CENTER AREA (7 COLUMNS ON IPAD LANDSCAPE): 3 COURTS + PREPARATION QUEUE -->
     <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
@@ -1481,6 +1599,130 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 10: LIVE BOARD QR CODE & ROOM CODE ================= -->
+  <div id="live-board-qr-modal"
+    class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+    onclick="closeLiveBoardQrModal()">
+    <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[92vh] overflow-y-auto"
+      onclick="event.stopPropagation()">
+      <div class="flex items-start justify-between gap-2 pb-3 border-b border-slate-800 mb-3">
+        <div>
+          <h3 class="text-lg font-black text-white flex items-center gap-2">
+            <i class="fa-solid fa-qrcode text-cyan-400"></i>
+            場邊即時看板 QR Code & 開團碼
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">球友用手機相機或 LINE 掃描下方條碼，即可開啟唯讀即時看板（各開團碼資料完全隔離）</p>
+        </div>
+        <button type="button" onclick="closeLiveBoardQrModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Cloud Sync Status & Room Code Bar -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span id="live-sync-status-badge" class="text-xs font-bold text-cyan-300">⏳ 準備連線 Firebase...</span>
+            <button type="button" id="live-sync-toggle-btn" onclick="toggleCloudSync()"
+              class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 transition">
+              切換雲端同步
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+            <div>
+              <div class="text-[11px] text-slate-400">目前 4 碼開團代碼（球友輸入即可連線此場次）</div>
+              <div id="live-room-code-display" class="text-3xl font-black tracking-[0.25em] text-cyan-300 mt-0.5">0000</div>
+            </div>
+            <button type="button" onclick="generateNewRoomCode()"
+              class="px-3 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 text-xs font-extrabold transition active:scale-95">
+              <i class="fa-solid fa-dice mr-1"></i>產生新開團碼
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80">
+            <input id="live-custom-room-input" type="text" maxlength="4" inputmode="numeric" placeholder="自訂4碼數字"
+              class="w-28 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-bold text-white text-center tracking-widest focus:outline-none focus:border-cyan-400" />
+            <button type="button" onclick="applyCustomRoomCode()"
+              class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition">
+              套用此房間碼
+            </button>
+            <div class="flex items-center gap-1.5 ml-auto">
+              <span class="text-[11px] text-slate-400">解鎖密碼:</span>
+              <input id="live-admin-pin-input" type="text" maxlength="12" value="8888" onchange="updateAdminPin(this.value)"
+                class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-amber-300 text-center focus:outline-none focus:border-amber-400" />
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Code Container -->
+        <div class="flex flex-col items-center">
+          <div class="bg-white p-3.5 rounded-2xl shadow-inner inline-flex items-center justify-center">
+            <div id="live-board-qr-canvas" class="w-[210px] h-[210px] flex items-center justify-center"></div>
+          </div>
+          <div id="live-viewer-url-text"
+            class="mt-2.5 w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-[11px] text-cyan-300 font-mono break-all text-center">
+          </div>
+          <div id="live-file-protocol-hint"
+            class="hidden mt-2 w-full bg-amber-950/40 border border-amber-500/40 rounded-xl p-2.5 text-[11px] text-amber-200">
+            ⚠️ 您目前以本機檔案（<code>file://</code>）開啟，手機掃碼無法讀取電腦本機路徑。部署到 GitHub Pages 或網頁伺服器後，QR Code 就會自動帶入可掃描的線上網址！
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="copyViewerUrl()"
+            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition active:scale-95">
+            <i class="fa-regular fa-copy mr-1"></i>複製看板網址
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openViewerPreviewTab()"
+              class="px-3.5 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-200 text-xs font-extrabold transition active:scale-95">
+              <i class="fa-solid fa-eye mr-1"></i>開啟球友看板預覽
+            </button>
+            <button type="button" onclick="closeLiveBoardQrModal()"
+              class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition">
+              完成關閉
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 11: ADMIN UNLOCK MODAL (FOR VIEWER MODE) ================= -->
+  <div id="admin-unlock-modal"
+    class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+    onclick="closeAdminUnlockModal()">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl relative"
+      onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+        <h3 class="text-base font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-key text-amber-400"></i> 管理員解鎖（切換為主控端）
+        </h3>
+        <button type="button" onclick="closeAdminUnlockModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-400 mb-3">請輸入管理員解鎖密碼（預設為 <code class="text-amber-300 font-bold">8888</code>），解鎖後此設備將開放完整排點控制權。</p>
+      <input id="admin-unlock-pin-input" type="password" inputmode="numeric" placeholder="輸入管理員密碼..."
+        onkeydown="if(event.key==='Enter') submitAdminUnlock();"
+        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-bold text-white text-center tracking-widest focus:outline-none focus:border-amber-400 mb-4" />
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="closeAdminUnlockModal()"
+          class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          取消
+        </button>
+        <button type="button" onclick="submitAdminUnlock()"
+          class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition active:scale-95">
+          確認解鎖主控端
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= TOAST NOTIFICATION ================= -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1490,6 +1732,17 @@
      * 1. STATE ARCHITECTURE & DEFAULT SAMPLE DATA
      ********************************************************************/
     const STORAGE_KEY = 'MEOW_BADMINTON_PRO_STATE_V3';
+    const FIREBASE_DB_URL = 'https://badmintonqueuemanagementsystem-default-rtdb.asia-southeast1.firebasedatabase.app';
+    const ROOM_CODE_STORAGE_KEY = 'MEOW_BADMINTON_ROOM_CODE_V1';
+
+    let isViewerMode = false;
+    let activeRoomCode = '';
+    let viewerPollTimer = null;
+    let viewerEventSource = null;
+    let firebasePushTimer = null;
+    let firebaseSyncState = 'IDLE'; // 'IDLE' | 'SYNCING' | 'OK' | 'ERROR' | 'OFF'
+    let viewerLastSyncTime = null;
+    let viewerRoomNotFound = false;
 
     const DEFAULT_CAT_SVG = `
       <svg viewBox="0 0 64 64" class="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1686,6 +1939,9 @@
       fee1921: 220,
       costPerShuttle: 85,
       financeUserChanged: false,
+      roomCode: '',
+      cloudSyncEnabled: true,
+      adminPin: '8888',
       matchLogs: []
     };
 
@@ -1759,6 +2015,9 @@
             state.fee1921 = 220;
             state.costPerShuttle = 85;
           }
+          if (typeof state.cloudSyncEnabled !== 'boolean') state.cloudSyncEnabled = true;
+          if (!state.adminPin || !String(state.adminPin).trim()) state.adminPin = '8888';
+          if (typeof state.roomCode !== 'string') state.roomCode = '';
           if (!Array.isArray(state.prepSlots)) {
             state.prepSlots = [null, null, null, null, null, null, null, null];
           } else {
@@ -1791,10 +2050,734 @@
     }
 
     function saveState() {
+      if (isViewerMode) return;
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch (e) {
         console.error('Failed to save state:', e);
+      }
+      scheduleCloudSync(false);
+    }
+
+    /********************************************************************
+     * 1B. FIREBASE REALTIME DATABASE, ROOM ISOLATION & VIEWER MODE
+     ********************************************************************/
+    function generateRandom4DigitCode() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
+
+    function normalizeRoomCode(raw) {
+      const digits = String(raw || '').replace(/\D/g, '');
+      return /^\d{4}$/.test(digits) ? digits : '';
+    }
+
+    function getViewerShareUrl(roomCode) {
+      const base = window.location.href.split('?')[0].split('#')[0];
+      return `${base}?mode=viewer&room=${roomCode || activeRoomCode}`;
+    }
+
+    function updateHeaderRoomCodeBadge() {
+      const badge = document.getElementById('header-room-code-badge');
+      if (badge) {
+        badge.textContent = activeRoomCode || '----';
+      }
+    }
+
+    function updateCloudSyncStatusUI() {
+      const badge = document.getElementById('live-sync-status-badge');
+      const toggleBtn = document.getElementById('live-sync-toggle-btn');
+      if (toggleBtn) {
+        toggleBtn.textContent = state.cloudSyncEnabled ? '⏸ 暫停雲端同步' : '▶ 開啟雲端同步';
+      }
+      if (badge) {
+        if (!state.cloudSyncEnabled) {
+          badge.className = 'text-xs font-bold text-slate-400';
+          badge.textContent = '⏸ 雲端即時同步已暫停（僅本機運作）';
+        } else if (firebaseSyncState === 'SYNCING') {
+          badge.className = 'text-xs font-bold text-amber-300';
+          badge.textContent = '🔄 正在同步最新排點至 Firebase...';
+        } else if (firebaseSyncState === 'ERROR') {
+          badge.className = 'text-xs font-bold text-rose-300';
+          badge.textContent = '⚠️ Firebase 連線失敗（請檢查網路或 Database 讀寫規則）';
+        } else if (firebaseSyncState === 'OK') {
+          badge.className = 'text-xs font-extrabold text-emerald-300';
+          badge.textContent = `✅ Firebase 即時同步中（開團碼 ${activeRoomCode}）`;
+        } else {
+          badge.className = 'text-xs font-bold text-cyan-300';
+          badge.textContent = `⏳ 準備同步（開團碼 ${activeRoomCode}）`;
+        }
+      }
+    }
+
+    function buildCloudPayload() {
+      return {
+        roomCode: activeRoomCode,
+        updatedAt: Date.now(),
+        adminPin: String(state.adminPin || '8888'),
+        noviceModeEnabled: !!state.noviceModeEnabled,
+        noviceMaxLevel: Number(state.noviceMaxLevel) || 4,
+        currentHourFilter: state.currentHourFilter || 'ALL',
+        shuttlesUsed: Number(state.shuttlesUsed) || 0,
+        players: (state.players || []).map(p => ({
+          id: p.id,
+          name: p.name,
+          level: Number(p.level) || 1,
+          gender: p.gender === 'F' ? 'F' : 'M',
+          timeSlot: p.timeSlot || '18-21',
+          checkedIn: !!p.checkedIn,
+          resting: !!p.resting,
+          tempBreak: !!p.tempBreak,
+          endReason: p.endReason || null,
+          isHost: !!p.isHost,
+          paid: !!p.paid,
+          games: Number(p.games) || 0,
+          playedWith: p.playedWith || {},
+          lastPlayedAt: p.lastPlayedAt || 0
+        })),
+        courts: (state.courts || []).map((c, idx) => ({
+          id: c.id || (idx + 1),
+          name: c.name || `${idx + 1}號場`,
+          startTime: c.startTime || null,
+          slots: [0, 1, 2, 3].map(sIdx => (c.slots && c.slots[sIdx]) ? c.slots[sIdx] : '')
+        })),
+        prepSlots: [0, 1, 2, 3, 4, 5, 6, 7].map(sIdx => (state.prepSlots && state.prepSlots[sIdx]) ? state.prepSlots[sIdx] : ''),
+        matchLogs: (state.matchLogs || []).slice(0, 80)
+      };
+    }
+
+    function applyCloudSnapshotToState(data) {
+      if (!data || typeof data !== 'object') return;
+      if (Array.isArray(data.players)) {
+        state.players = data.players.map(p => ({
+          ...p,
+          gender: p.gender === 'F' ? 'F' : 'M',
+          playedWith: p.playedWith || {},
+          games: Number(p.games) || 0,
+          checkedIn: typeof p.checkedIn === 'boolean' ? p.checkedIn : true,
+          resting: !!p.resting,
+          tempBreak: !!p.tempBreak
+        }));
+      }
+      if (Array.isArray(data.courts)) {
+        state.courts = [0, 1, 2].map(idx => {
+          const c = data.courts[idx] || {};
+          const rawSlots = Array.isArray(c.slots) ? c.slots : [];
+          return {
+            id: c.id || (idx + 1),
+            name: c.name || `${idx + 1}號場`,
+            startTime: c.startTime || null,
+            slots: [0, 1, 2, 3].map(sIdx => (rawSlots[sIdx] && typeof rawSlots[sIdx] === 'string') ? rawSlots[sIdx] : null)
+          };
+        });
+      }
+      if (Array.isArray(data.prepSlots)) {
+        state.prepSlots = [0, 1, 2, 3, 4, 5, 6, 7].map(sIdx =>
+          (data.prepSlots[sIdx] && typeof data.prepSlots[sIdx] === 'string') ? data.prepSlots[sIdx] : null
+        );
+      } else {
+        state.prepSlots = [null, null, null, null, null, null, null, null];
+      }
+      if (typeof data.shuttlesUsed === 'number') state.shuttlesUsed = data.shuttlesUsed;
+      if (typeof data.noviceModeEnabled === 'boolean') state.noviceModeEnabled = data.noviceModeEnabled;
+      if (typeof data.noviceMaxLevel === 'number') state.noviceMaxLevel = data.noviceMaxLevel;
+      if (typeof data.currentHourFilter === 'string') state.currentHourFilter = data.currentHourFilter;
+      if (typeof data.adminPin === 'string' && data.adminPin.trim()) state.adminPin = data.adminPin.trim();
+      if (Array.isArray(data.matchLogs)) state.matchLogs = data.matchLogs;
+    }
+
+    function scheduleCloudSync(immediate = false) {
+      if (isViewerMode || !state.cloudSyncEnabled || !activeRoomCode) return;
+      if (firebasePushTimer) {
+        clearTimeout(firebasePushTimer);
+        firebasePushTimer = null;
+      }
+      if (immediate) {
+        pushStateToFirebase();
+      } else {
+        firebasePushTimer = setTimeout(() => {
+          firebasePushTimer = null;
+          pushStateToFirebase();
+        }, 250);
+      }
+    }
+
+    async function pushStateToFirebase() {
+      if (isViewerMode || !state.cloudSyncEnabled || !activeRoomCode) return;
+      firebaseSyncState = 'SYNCING';
+      updateCloudSyncStatusUI();
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/rooms/${activeRoomCode}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildCloudPayload())
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        firebaseSyncState = 'OK';
+      } catch (err) {
+        console.warn('Firebase sync error:', err);
+        firebaseSyncState = 'ERROR';
+      }
+      updateCloudSyncStatusUI();
+    }
+
+    function toggleCloudSync() {
+      state.cloudSyncEnabled = !state.cloudSyncEnabled;
+      firebaseSyncState = state.cloudSyncEnabled ? 'IDLE' : 'OFF';
+      saveState();
+      if (state.cloudSyncEnabled) {
+        scheduleCloudSync(true);
+        showToast('✅ 已開啟 Firebase 雲端即時同步', 'success');
+      } else {
+        updateCloudSyncStatusUI();
+        showToast('⏸ 已暫停雲端同步（目前僅在本機儲存）', 'info');
+      }
+    }
+
+    function generateNewRoomCode() {
+      let nextCode = generateRandom4DigitCode();
+      while (nextCode === activeRoomCode) {
+        nextCode = generateRandom4DigitCode();
+      }
+      activeRoomCode = nextCode;
+      state.roomCode = nextCode;
+      localStorage.setItem(ROOM_CODE_STORAGE_KEY, nextCode);
+      updateHeaderRoomCodeBadge();
+      saveState();
+      scheduleCloudSync(true);
+      renderLiveBoardQrModal();
+      showToast(`🎲 已產生新開團碼【${nextCode}】並同步至雲端獨立空間！`, 'success');
+    }
+
+    function applyCustomRoomCode() {
+      const inputEl = document.getElementById('live-custom-room-input');
+      const code = normalizeRoomCode(inputEl ? inputEl.value : '');
+      if (!code) {
+        showToast('請輸入正確的 4 位數字開團碼（例如 8821）', 'warn');
+        return;
+      }
+      activeRoomCode = code;
+      state.roomCode = code;
+      localStorage.setItem(ROOM_CODE_STORAGE_KEY, code);
+      updateHeaderRoomCodeBadge();
+      if (inputEl) inputEl.value = '';
+      saveState();
+      scheduleCloudSync(true);
+      renderLiveBoardQrModal();
+      showToast(`已切換至開團碼【${code}】並立即同步資料！`, 'success');
+    }
+
+    function updateAdminPin(val) {
+      const pin = String(val || '').trim() || '8888';
+      state.adminPin = pin;
+      saveState();
+      scheduleCloudSync(true);
+      showToast(`已更新管理員解鎖密碼為「${pin}」`, 'success');
+    }
+
+    function openLiveBoardQrModal() {
+      if (!activeRoomCode) {
+        activeRoomCode = generateRandom4DigitCode();
+        state.roomCode = activeRoomCode;
+        updateHeaderRoomCodeBadge();
+        saveState();
+      }
+      scheduleCloudSync(true);
+      renderLiveBoardQrModal();
+      const modal = document.getElementById('live-board-qr-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeLiveBoardQrModal() {
+      const modal = document.getElementById('live-board-qr-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function renderLiveBoardQrModal() {
+      const codeEl = document.getElementById('live-room-code-display');
+      const urlEl = document.getElementById('live-viewer-url-text');
+      const pinEl = document.getElementById('live-admin-pin-input');
+      const qrBox = document.getElementById('live-board-qr-canvas');
+      const fileHint = document.getElementById('live-file-protocol-hint');
+      const viewerUrl = getViewerShareUrl(activeRoomCode);
+
+      if (codeEl) codeEl.textContent = activeRoomCode || '----';
+      if (urlEl) urlEl.textContent = viewerUrl;
+      if (pinEl) pinEl.value = state.adminPin || '8888';
+      if (fileHint) {
+        if (window.location.protocol === 'file:') {
+          fileHint.classList.remove('hidden');
+        } else {
+          fileHint.classList.add('hidden');
+        }
+      }
+
+      updateCloudSyncStatusUI();
+
+      if (qrBox) {
+        qrBox.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+          try {
+            new QRCode(qrBox, {
+              text: viewerUrl,
+              width: 210,
+              height: 210,
+              colorDark: '#0f172a',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          } catch (e) {
+            qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=210x210&data=${encodeURIComponent(viewerUrl)}" alt="即時看板 QR Code" class="w-[210px] h-[210px]" />`;
+          }
+        } else {
+          qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=210x210&data=${encodeURIComponent(viewerUrl)}" alt="即時看板 QR Code" class="w-[210px] h-[210px]" />`;
+        }
+      }
+    }
+
+    function copyViewerUrl() {
+      const url = getViewerShareUrl(activeRoomCode);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('📋 已複製場邊即時看板網址！可貼至 LINE 群組給球友開啟', 'success');
+        }).catch(() => {
+          showToast(`看板網址：${url}`, 'info');
+        });
+      } else {
+        showToast(`看板網址：${url}`, 'info');
+      }
+    }
+
+    function openViewerPreviewTab() {
+      const url = getViewerShareUrl(activeRoomCode);
+      window.open(url, '_blank');
+    }
+
+    function stopViewerSync() {
+      if (viewerEventSource) {
+        try { viewerEventSource.close(); } catch (e) {}
+        viewerEventSource = null;
+      }
+      if (viewerPollTimer) {
+        clearInterval(viewerPollTimer);
+        viewerPollTimer = null;
+      }
+    }
+
+    async function fetchViewerSnapshot(roomCode) {
+      if (!roomCode) return;
+      const statusEl = document.getElementById('viewer-sync-status');
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/rooms/${roomCode}.json?_t=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data === null) {
+          viewerRoomNotFound = true;
+          if (statusEl) {
+            statusEl.className = 'px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[11px] font-extrabold';
+            statusEl.textContent = `⚠️ 找不到房間 ${roomCode}`;
+          }
+        } else {
+          viewerRoomNotFound = false;
+          applyCloudSnapshotToState(data);
+          viewerLastSyncTime = Date.now();
+          if (statusEl) {
+            statusEl.className = 'px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-[11px] font-extrabold';
+            statusEl.textContent = `🟢 即時同步中 (房號 ${roomCode})`;
+          }
+        }
+        renderViewerMode();
+      } catch (err) {
+        console.warn('Viewer fetch failed:', err);
+        if (statusEl) {
+          statusEl.className = 'px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-400/50 text-rose-300 text-[11px] font-extrabold';
+          statusEl.textContent = '⚠️ 連線異常，重試中...';
+        }
+      }
+    }
+
+    function startViewerSync(roomCode) {
+      stopViewerSync();
+      activeRoomCode = roomCode;
+      viewerRoomNotFound = false;
+      localStorage.setItem(ROOM_CODE_STORAGE_KEY, roomCode);
+
+      const inputEl = document.getElementById('viewer-room-input');
+      if (inputEl) inputEl.value = roomCode;
+
+      const statusEl = document.getElementById('viewer-sync-status');
+      if (statusEl) {
+        statusEl.className = 'px-2 py-0.5 rounded-full bg-sky-500/20 border border-sky-400/50 text-sky-300 text-[11px] font-bold';
+        statusEl.textContent = `🔄 正在連線房號 ${roomCode}...`;
+      }
+
+      fetchViewerSnapshot(roomCode);
+
+      if (typeof EventSource !== 'undefined') {
+        try {
+          const es = new EventSource(`${FIREBASE_DB_URL}/rooms/${roomCode}.json`);
+          const handleStreamEvent = (evt) => {
+            try {
+              const payload = JSON.parse(evt.data);
+              if (!payload) return;
+              if (payload.path === '/') {
+                if (payload.data === null) {
+                  viewerRoomNotFound = true;
+                  renderViewerMode();
+                } else if (payload.data && typeof payload.data === 'object') {
+                  viewerRoomNotFound = false;
+                  applyCloudSnapshotToState(payload.data);
+                  viewerLastSyncTime = Date.now();
+                  if (statusEl) {
+                    statusEl.className = 'px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-[11px] font-extrabold';
+                    statusEl.textContent = `🟢 即時同步中 (房號 ${roomCode})`;
+                  }
+                  renderViewerMode();
+                }
+              } else {
+                fetchViewerSnapshot(roomCode);
+              }
+            } catch (parseErr) {
+              // ignore keep-alive or empty frame
+            }
+          };
+          es.addEventListener('put', handleStreamEvent);
+          es.addEventListener('patch', handleStreamEvent);
+          es.onerror = () => {
+            // 維持定期輪詢 fallback
+          };
+          viewerEventSource = es;
+        } catch (esErr) {
+          console.warn('EventSource unavailable, using polling:', esErr);
+        }
+      }
+
+      viewerPollTimer = setInterval(() => {
+        fetchViewerSnapshot(roomCode);
+      }, 5000);
+    }
+
+    function connectViewerRoomFromInput() {
+      const inputEl = document.getElementById('viewer-room-input');
+      const code = normalizeRoomCode(inputEl ? inputEl.value : '');
+      if (!code) {
+        showToast('請輸入 4 位數字開團代碼（例如 8821）', 'warn');
+        return;
+      }
+      const nextUrl = getViewerShareUrl(code);
+      try {
+        window.history.replaceState(null, '', nextUrl);
+      } catch (e) {}
+      startViewerSync(code);
+      showToast(`正在連線開團碼【${code}】即時看板...`, 'info');
+    }
+
+    function enterViewerModeShell(roomCode) {
+      isViewerMode = true;
+      const masterHeader = document.getElementById('master-header');
+      const masterMain = document.getElementById('master-main');
+      const viewerShell = document.getElementById('viewer-mode-shell');
+      if (masterHeader) masterHeader.classList.add('hidden');
+      if (masterMain) masterMain.classList.add('hidden');
+      if (viewerShell) {
+        viewerShell.classList.remove('hidden');
+        viewerShell.classList.add('flex');
+      }
+
+      const code = normalizeRoomCode(roomCode) || normalizeRoomCode(localStorage.getItem(ROOM_CODE_STORAGE_KEY)) || '';
+      if (code) {
+        startViewerSync(code);
+      } else {
+        activeRoomCode = '';
+        renderViewerMode();
+      }
+    }
+
+    function openAdminUnlockModal() {
+      const input = document.getElementById('admin-unlock-pin-input');
+      if (input) input.value = '';
+      const modal = document.getElementById('admin-unlock-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => { if (input) input.focus(); }, 60);
+      }
+    }
+
+    function closeAdminUnlockModal() {
+      const modal = document.getElementById('admin-unlock-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function submitAdminUnlock() {
+      const input = document.getElementById('admin-unlock-pin-input');
+      const entered = String(input ? input.value : '').trim();
+      const expected = String(state.adminPin || '8888').trim();
+      if (entered !== expected) {
+        showToast('❌ 管理員密碼錯誤！請聯繫團主確認密碼', 'warn');
+        return;
+      }
+
+      closeAdminUnlockModal();
+      stopViewerSync();
+      isViewerMode = false;
+
+      const masterHeader = document.getElementById('master-header');
+      const masterMain = document.getElementById('master-main');
+      const viewerShell = document.getElementById('viewer-mode-shell');
+      if (viewerShell) {
+        viewerShell.classList.add('hidden');
+        viewerShell.classList.remove('flex');
+      }
+      if (masterHeader) masterHeader.classList.remove('hidden');
+      if (masterMain) masterMain.classList.remove('hidden');
+
+      if (!activeRoomCode) {
+        loadState();
+        activeRoomCode = normalizeRoomCode(state.roomCode) || generateRandom4DigitCode();
+      }
+      state.roomCode = activeRoomCode;
+      localStorage.setItem(ROOM_CODE_STORAGE_KEY, activeRoomCode);
+      updateHeaderRoomCodeBadge();
+
+      try {
+        const cleanUrl = window.location.href.split('?')[0].split('#')[0] + (activeRoomCode ? `?room=${activeRoomCode}` : '');
+        window.history.replaceState(null, '', cleanUrl);
+      } catch (e) {}
+
+      saveState();
+      renderAll();
+      showToast(`🔓 解鎖成功！此設備已切換為「主控端」管理房號 ${activeRoomCode}`, 'success');
+    }
+
+    function renderViewerMode() {
+      const emptyBanner = document.getElementById('viewer-empty-room-banner');
+      const courtsGrid = document.getElementById('viewer-courts-grid');
+      const prepGrid = document.getElementById('viewer-prep-grid');
+      const playersGrid = document.getElementById('viewer-players-grid');
+      const lastUpdatedEl = document.getElementById('viewer-last-updated');
+
+      if (lastUpdatedEl) {
+        lastUpdatedEl.textContent = viewerLastSyncTime
+          ? `｜ 最後同步 ${new Date(viewerLastSyncTime).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
+          : '';
+      }
+
+      if (emptyBanner) {
+        if (!activeRoomCode) {
+          emptyBanner.classList.remove('hidden');
+          emptyBanner.innerHTML = `
+            <div class="text-amber-300 font-black text-base"><i class="fa-solid fa-door-open mr-1.5"></i>請輸入 4 碼開團代碼連線場次</div>
+            <p class="text-xs text-slate-300">請向團主詢問本次開團的 4 碼數字代碼，並於右上方輸入後按「連線」，或直接掃描團主的即時看板 QR Code。</p>
+          `;
+        } else if (viewerRoomNotFound) {
+          emptyBanner.classList.remove('hidden');
+          emptyBanner.innerHTML = `
+            <div class="text-amber-300 font-black text-base"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>尚無開團碼「${escapeHTML(activeRoomCode)}」的即時資料</div>
+            <p class="text-xs text-slate-300">請確認團主端已開啟「即時看板 QR」並成功連線雲端同步，或確認 4 碼代碼是否輸入正確。</p>
+          `;
+        } else {
+          emptyBanner.classList.add('hidden');
+          emptyBanner.innerHTML = '';
+        }
+      }
+
+      // 1. Read-Only 3 Courts (with Novice theme + live timers)
+      if (courtsGrid) {
+        const maxNoviceLv = Number(state.noviceMaxLevel) || 4;
+        courtsGrid.innerHTML = (state.courts || []).map((court, cIdx) => {
+          const playersOnCourt = (court.slots || []).map(id => getPlayerById(id));
+          const activeCount = playersOnCourt.filter(Boolean).length;
+          const isFull = activeCount === 4;
+          const isNoviceCourt = getGroupPoolClassification(playersOnCourt) === 'NOVICE';
+
+          const renderViewerSlot = (p) => {
+            if (!p) {
+              return `
+                <div class="h-14 rounded-lg border border-dashed ${isNoviceCourt ? 'border-lime-300/40 bg-teal-950/40' : 'border-emerald-300/30 bg-emerald-950/35'} flex items-center justify-center text-[11px] text-slate-400">
+                  空位待排
+                </div>
+              `;
+            }
+            const lvInfo = getLevelBadgeInfo(p.level);
+            return `
+              <div onclick="openHistoryModal('${p.id}')"
+                   class="h-14 rounded-lg bg-slate-950/90 border ${isNoviceCourt ? 'border-lime-300/60' : 'border-emerald-400/30'} p-1.5 flex flex-col justify-between cursor-pointer hover:bg-slate-900 transition">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="font-extrabold text-xs text-white truncate">${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</span>
+                  <span class="text-[10px] px-1 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-slate-400">
+                  <span>${isHostPlayer(p) ? '👑團主' : p.timeSlot}</span>
+                  <span class="text-emerald-300 font-bold">已打 ${p.games || 0} 場</span>
+                </div>
+              </div>
+            `;
+          };
+
+          return `
+            <div class="${isNoviceCourt ? 'novice-court-card' : 'bg-slate-900/95 border border-slate-800'} rounded-2xl p-3 flex flex-col justify-between shadow-lg">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="px-2 py-0.5 rounded-lg ${isNoviceCourt ? 'bg-lime-400/25 border border-lime-300/70 text-lime-200' : 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'} font-black text-xs">
+                    ${escapeHTML(court.name || `${cIdx + 1}號場`)}
+                  </span>
+                  ${isNoviceCourt
+                    ? `<span class="px-2 py-0.5 rounded-lg bg-gradient-to-r from-lime-400 via-emerald-400 to-teal-300 text-slate-950 font-black text-[11px]"><i class="fa-solid fa-seedling mr-0.5"></i>新手場</span>`
+                    : ''}
+                </div>
+                ${isFull
+                  ? `<span class="text-xs font-extrabold ${isNoviceCourt ? 'text-lime-200' : 'text-amber-300'} flex items-center gap-1.5">
+                       <span class="w-2 h-2 rounded-full ${isNoviceCourt ? 'bg-lime-300' : 'bg-amber-400'} animate-ping"></span>
+                       <span class="court-timer" data-start="${court.startTime || Date.now()}">${formatDuration(court.startTime)}</span>
+                     </span>`
+                  : `<span class="text-[11px] text-slate-400">休息 / 空場 (${activeCount}/4)</span>`
+                }
+              </div>
+
+              <div class="${isNoviceCourt ? 'badminton-court-novice' : 'badminton-court'} rounded-xl p-2.5 flex flex-col gap-2 relative">
+                ${isNoviceCourt ? `
+                  <div class="pointer-events-none select-none absolute inset-0 flex flex-col items-center justify-center opacity-15 z-0">
+                    <i class="fa-solid fa-seedling text-5xl text-lime-200"></i>
+                    <span class="text-[10px] font-black tracking-[0.2em] text-lime-100 mt-0.5">NOVICE 新手場</span>
+                  </div>
+                ` : ''}
+                <div class="grid grid-cols-2 gap-1.5 relative z-10">
+                  ${renderViewerSlot(playersOnCourt[0])}
+                  ${renderViewerSlot(playersOnCourt[1])}
+                </div>
+                <div class="court-net my-0.5 relative z-10">
+                  <span class="px-2 py-0.2 bg-emerald-950/90 border border-emerald-400/40 rounded-full text-[9px] font-black text-emerald-200 tracking-widest">
+                    ${isNoviceCourt ? `新手場 (≤${maxNoviceLv}級)` : 'NET 球網'}
+                  </span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 relative z-10">
+                  ${renderViewerSlot(playersOnCourt[2])}
+                  ${renderViewerSlot(playersOnCourt[3])}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. Read-Only Prep Groups 1 & 2
+      if (prepGrid) {
+        prepGrid.innerHTML = [0, 1].map(gIdx => {
+          const base = gIdx === 1 ? 4 : 0;
+          const groupPlayers = state.prepSlots.slice(base, base + 4).map(id => getPlayerById(id));
+          const activePlayers = groupPlayers.filter(Boolean);
+          const isNovicePrep = getGroupPoolClassification(activePlayers) === 'NOVICE';
+
+          return `
+            <div class="bg-slate-950/85 border ${gIdx === 0 ? 'border-indigo-500/40' : 'border-violet-500/40'} rounded-xl p-3 space-y-2.5">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded-md ${gIdx === 0 ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' : 'bg-violet-500/20 border-violet-500/40 text-violet-300'} border text-xs font-extrabold">
+                    ${gIdx === 0 ? '第 1 組（下一場優先上場・請熱身）' : '第 2 組（預備候命）'}
+                  </span>
+                  ${isNovicePrep ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-lime-400/20 text-lime-200 border border-lime-400/50 font-extrabold">🌱新手組</span>' : ''}
+                </div>
+                <span class="text-[11px] font-bold ${activePlayers.length === 4 ? 'text-emerald-300' : 'text-slate-400'}">
+                  ${activePlayers.length === 4 ? '✓ 已備妥 4 人' : `排點中 (${activePlayers.length}/4)`}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                ${groupPlayers.map((p, idx) => {
+                  if (!p) {
+                    return `
+                      <div class="h-14 rounded-lg border border-dashed border-slate-700 bg-slate-900/40 flex items-center justify-center text-[11px] text-slate-500">
+                        待排 (#${idx + 1})
+                      </div>
+                    `;
+                  }
+                  const lvInfo = getLevelBadgeInfo(p.level);
+                  return `
+                    <div onclick="openHistoryModal('${p.id}')"
+                         class="h-14 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400/60 p-2 flex flex-col justify-between cursor-pointer transition">
+                      <div class="flex items-center justify-between gap-1">
+                        <span class="font-extrabold text-xs text-white truncate">${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</span>
+                        <span class="text-[10px] px-1 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
+                      </div>
+                      <div class="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>${idx < 2 ? '上隊' : '下隊'}</span>
+                        <span class="text-emerald-300 font-bold">已打 ${p.games || 0} 場</span>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 3. Read-Only Personal Games Played Lookup
+      if (playersGrid) {
+        const searchVal = (document.getElementById('viewer-player-search')?.value || '').trim().toLowerCase();
+        const visiblePlayers = (state.players || []).filter(p => {
+          if (!p.checkedIn) return false;
+          if (searchVal && !(p.name || '').toLowerCase().includes(searchVal)) return false;
+          return true;
+        });
+
+        const statusOrder = { COURT: 0, PREP: 1, WAIT: 2 };
+        visiblePlayers.sort((a, b) => {
+          if (!!a.resting !== !!b.resting) return a.resting ? 1 : -1;
+          const lA = getPlayerLocation(a.id).status;
+          const lB = getPlayerLocation(b.id).status;
+          if ((statusOrder[lA] ?? 9) !== (statusOrder[lB] ?? 9)) return (statusOrder[lA] ?? 9) - (statusOrder[lB] ?? 9);
+          return (a.games || 0) - (b.games || 0);
+        });
+
+        if (visiblePlayers.length === 0) {
+          playersGrid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-slate-500">找不到符合的到場球友資料</div>`;
+        } else {
+          playersGrid.innerHTML = visiblePlayers.map(p => {
+            const loc = getPlayerLocation(p.id);
+            const lvInfo = getLevelBadgeInfo(p.level);
+            let badgeHTML = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] font-bold">場下待命中</span>';
+            if (p.resting) {
+              badgeHTML = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-bold">🏁 今日已結束</span>';
+            } else if (p.tempBreak) {
+              badgeHTML = '<span class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/40 text-[10px] font-bold">☕ 暫休中</span>';
+            } else if (loc.status === 'COURT') {
+              badgeHTML = `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-extrabold">${loc.label}</span>`;
+            } else if (loc.status === 'PREP') {
+              badgeHTML = `<span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-extrabold">${loc.label}（準備熱身）</span>`;
+            }
+
+            return `
+              <div onclick="openHistoryModal('${p.id}')"
+                   class="bg-slate-950/90 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/40 rounded-xl p-2.5 flex items-center justify-between gap-2 cursor-pointer transition">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-extrabold text-sm text-white truncate">${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${lvInfo.classes}">${lvInfo.label}</span>
+                    ${isHostPlayer(p) ? '<span class="text-[10px] text-amber-300 font-bold">👑團主</span>' : `<span class="text-[10px] text-slate-400">${p.timeSlot}</span>`}
+                  </div>
+                  <div class="mt-1">${badgeHTML}</div>
+                </div>
+                <div class="shrink-0 text-right">
+                  <div class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-black text-xs">
+                    已打 ${p.games || 0} 場
+                  </div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">點看同場紀錄</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
       }
     }
 
@@ -5803,12 +6786,26 @@
         }
       }
 
+      const delBtnEl = document.getElementById('hist-delete-btn');
+      const editBtnEl = document.getElementById('hist-edit-btn');
+      if (isViewerMode) {
+        if (toggleRestBtn) toggleRestBtn.classList.add('hidden');
+        if (editBtnEl) editBtnEl.classList.add('hidden');
+        if (delBtnEl) delBtnEl.classList.add('hidden');
+      } else {
+        if (toggleRestBtn) toggleRestBtn.classList.remove('hidden');
+        if (editBtnEl) editBtnEl.classList.remove('hidden');
+        if (delBtnEl) delBtnEl.classList.remove('hidden');
+      }
+
       document.getElementById('hist-edit-btn').onclick = () => {
+        if (isViewerMode) return;
         closeHistoryModal();
         openEditPlayerModal(playerId);
       };
 
       document.getElementById('hist-delete-btn').onclick = () => {
+        if (isViewerMode) return;
         deletePlayerDirectly(playerId);
       };
 
@@ -6094,8 +7091,22 @@
     });
 
     window.onload = function () {
-      loadState();
-      renderAll();
+      const urlParams = new URLSearchParams(window.location.search);
+      const modeParam = urlParams.get('mode');
+      const roomParam = normalizeRoomCode(urlParams.get('room'));
+
+      if (modeParam === 'viewer') {
+        enterViewerModeShell(roomParam);
+      } else {
+        isViewerMode = false;
+        loadState();
+        activeRoomCode = roomParam || normalizeRoomCode(state.roomCode) || normalizeRoomCode(localStorage.getItem(ROOM_CODE_STORAGE_KEY)) || generateRandom4DigitCode();
+        state.roomCode = activeRoomCode;
+        localStorage.setItem(ROOM_CODE_STORAGE_KEY, activeRoomCode);
+        updateHeaderRoomCodeBadge();
+        renderAll();
+        scheduleCloudSync(true);
+      }
 
       const dropzone = document.getElementById('icon-dropzone');
       if (dropzone) {
