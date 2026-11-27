@@ -376,10 +376,10 @@
           </div>
         </div>
 
-        <!-- SMART MATCHING SETTINGS BAR: (1) BINDING GROUPS & (2) NOVICE COURT MODE -->
+        <!-- SMART MATCHING SETTINGS BAR: (1) BINDING GROUPS & (2) NOVICE COURT MODE & (3) WD/XD SPECIAL MATCH -->
         <div class="mb-3 bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 flex flex-col gap-2">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <!-- Left: Binding Settings Control -->
+            <!-- Left: Binding Settings Control + Special Match (WD / XD) -->
             <div class="flex items-center gap-1.5 flex-wrap">
               <button onclick="openBindingModal()"
                 class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-extrabold text-xs flex items-center gap-1.5 transition active:scale-95">
@@ -388,6 +388,18 @@
               </button>
               <div id="binding-status-bar" class="flex items-center gap-1.5 flex-wrap">
                 <!-- Rendered by JS -->
+              </div>
+              <div class="flex items-center gap-1.5 pl-1.5 sm:border-l sm:border-slate-800">
+                <button id="special-btn-WD" onclick="openSpecialMatchHostModal('WD')" title="智慧排點：排出程度相近的女雙組合（可詢問是否加入女團主荷玉）"
+                  class="px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-extrabold text-xs flex items-center gap-1 transition active:scale-95">
+                  <span>♀</span>
+                  <span>女雙排點</span>
+                </button>
+                <button id="special-btn-XD" onclick="openSpecialMatchHostModal('XD')" title="智慧排點：排出兩隊實力平衡的混雙組合（可選擇是否加入團主荷玉／雷夢）"
+                  class="px-2.5 py-1.5 rounded-xl bg-fuchsia-500/15 hover:bg-fuchsia-500/30 border border-fuchsia-500/40 text-fuchsia-300 font-extrabold text-xs flex items-center gap-1 transition active:scale-95">
+                  <span>⚥</span>
+                  <span>混雙排點</span>
+                </button>
               </div>
             </div>
 
@@ -419,6 +431,12 @@
                 <span id="novice-pool-counts-hint" class="text-[10px] text-slate-400 hidden sm:inline"></span>
               </div>
             </div>
+          </div>
+
+          <!-- Pending Special Match (WD / XD) Reservation Banner -->
+          <div id="special-match-status-bar"
+            class="hidden pt-2 border-t border-slate-800/80 flex-wrap items-center justify-between gap-2 text-xs">
+            <!-- Rendered by JS -->
           </div>
 
           <!-- Active Binding Groups Quick Overview Strip -->
@@ -821,6 +839,20 @@
           </div>
         </div>
 
+        <!-- Discreet Gender Toggle (Default Male; checked only for Female) -->
+        <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl p-3">
+          <div>
+            <div class="text-xs font-bold text-rose-200">女生球友（預設為男生）</div>
+            <div class="text-[11px] text-slate-400">勾選後僅於名稱旁顯示極低調微點，供女雙 / 混雙智慧排點辨識</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="form-player-is-female" class="sr-only peer" />
+            <div
+              class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-400">
+            </div>
+          </label>
+        </div>
+
         <!-- Checked-in (Arrived) Status -->
         <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl p-3">
           <div>
@@ -1185,11 +1217,11 @@
         </div>
       </div>
 
-      <!-- Modal Footer: Explicit User Confirmation to Activate / Deactivate for Smart Matching -->
+      <!-- Modal Footer: Batch Activate / Pause All Binding Groups -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-3.5 mt-3 border-t border-slate-800">
         <button type="button" onclick="deactivateBindings()"
           class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 text-slate-300 hover:text-rose-300 text-xs font-bold transition">
-          <i class="fa-solid fa-pause mr-1"></i>暫停綁定（智慧排點暫不參考）
+          <i class="fa-solid fa-pause mr-1"></i>全部暫停（各組暫不參考）
         </button>
         <div class="flex items-center gap-2">
           <button type="button" onclick="closeBindingModal()"
@@ -1199,7 +1231,7 @@
           <button type="button" onclick="confirmAndActivateBindings()"
             class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/60 transition active:scale-95 flex items-center gap-1.5">
             <i class="fa-solid fa-circle-check"></i>
-            確認設定生效（讓智慧排點系統參考）
+            全部設為生效（套用全部綁定組）
           </button>
         </div>
       </div>
@@ -1405,6 +1437,50 @@
     </div>
   </div>
 
+  <!-- ================= MODAL 9: SPECIAL MATCH (WD / XD) HOST SELECTION MODAL ================= -->
+  <div id="special-match-host-modal"
+    class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+    onclick="closeSpecialMatchHostModal()">
+    <div class="bg-slate-900 border border-fuchsia-500/40 rounded-2xl max-w-md w-full p-5 shadow-2xl relative"
+      onclick="event.stopPropagation()">
+      <div class="flex items-start justify-between gap-2 pb-3 border-b border-slate-800 mb-3">
+        <div>
+          <h3 id="special-host-modal-title" class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+            排點設定 — 是否加入團主？
+          </h3>
+          <p id="special-host-modal-subtitle" class="text-xs text-slate-400 mt-1">
+            可選擇是否讓團主一起加入本場智慧排點（可複選，或直接不加入團主）
+          </p>
+        </div>
+        <button type="button" onclick="closeSpecialMatchHostModal()"
+          class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="special-host-modal-list" class="space-y-2.5 my-3">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-3.5 mt-3 border-t border-slate-800">
+        <button type="button" onclick="closeSpecialMatchHostModal()"
+          class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          取消
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="confirmSpecialMatchHostModal(false)"
+            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-extrabold transition active:scale-95">
+            不加入團主，直接排
+          </button>
+          <button type="button" onclick="confirmSpecialMatchHostModal(true)"
+            class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-fuchsia-500 hover:from-rose-400 hover:to-fuchsia-400 text-white font-black text-xs shadow-lg transition active:scale-95">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>確認排點
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= TOAST NOTIFICATION ================= -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -1521,8 +1597,8 @@
 
     function ensureHostPlayersExist() {
       const defaultHosts = [
-        { id: 'host_leimeng', name: '雷夢', level: 9, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
-        { id: 'host_heyu', name: '荷玉', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true }
+        { id: 'host_leimeng', name: '雷夢', level: 9, gender: 'M', timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_heyu', name: '荷玉', level: 6, gender: 'F', timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true }
       ];
       defaultHosts.forEach(defHost => {
         const existing = state.players.find(p => p.id === defHost.id || p.name === defHost.name);
@@ -1531,6 +1607,13 @@
           existing.paid = true;
           if (defHost.name === '雷夢' && existing.level === 8) existing.level = 9;
           if (defHost.name === '荷玉' && existing.level === 7) existing.level = 6;
+          if (defHost.name === '荷玉' && !existing.genderUserChanged) {
+            existing.gender = 'F';
+          } else if (defHost.name === '雷夢' && !existing.genderUserChanged) {
+            existing.gender = 'M';
+          } else if (existing.gender !== 'F' && existing.gender !== 'M') {
+            existing.gender = defHost.gender || 'M';
+          }
           if (typeof existing.checkedIn !== 'boolean') existing.checkedIn = true;
           if (!existing.playedWith) existing.playedWith = {};
         } else {
@@ -1545,27 +1628,28 @@
 
     function getInitialDemoPlayers() {
       const sample = [
-        { id: 'host_leimeng', name: '雷夢', level: 9, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
-        { id: 'host_heyu', name: '荷玉', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_leimeng', name: '雷夢', level: 9, gender: 'M', timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
+        { id: 'host_heyu', name: '荷玉', level: 6, gender: 'F', timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false, isHost: true },
         { id: 'p1', name: '阿凱', level: 8, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p2', name: '小傑', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p3', name: '瑋哥', level: 9, timeSlot: '18-20', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p4', name: '阿哲', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
-        { id: 'p5', name: '小美', level: 5, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
-        { id: 'p6', name: '庭庭', level: 4, timeSlot: '18-20', paid: false, checkedIn: true, games: 0, resting: false },
+        { id: 'p5', name: '小美', level: 5, gender: 'F', timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p6', name: '庭庭', level: 4, gender: 'F', timeSlot: '18-20', paid: false, checkedIn: true, games: 0, resting: false },
         { id: 'p7', name: '志豪', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p8', name: '冠宇', level: 5, timeSlot: '18-20', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p9', name: '大衛', level: 10, timeSlot: '19-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p10', name: '柏翰', level: 9, timeSlot: '18-21', paid: false, checkedIn: true, games: 0, resting: false },
         { id: 'p11', name: '子軒', level: 8, timeSlot: '19-21', paid: true, checkedIn: true, games: 0, resting: false },
         { id: 'p12', name: '家豪', level: 7, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
-        { id: 'p13', name: '雅筑', level: 3, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
-        { id: 'p14', name: '心怡', level: 4, timeSlot: '19-21', paid: false, checkedIn: false, games: 0, resting: false },
+        { id: 'p13', name: '雅筑', level: 3, gender: 'F', timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
+        { id: 'p14', name: '心怡', level: 4, gender: 'F', timeSlot: '19-21', paid: false, checkedIn: false, games: 0, resting: false },
         { id: 'p15', name: '建宏', level: 11, timeSlot: '19-21', paid: true, checkedIn: false, games: 0, resting: false },
         { id: 'p16', name: '品源', level: 6, timeSlot: '18-21', paid: true, checkedIn: true, games: 0, resting: false },
       ];
       return sample.map(p => ({
         ...p,
+        gender: p.gender === 'F' ? 'F' : 'M',
         isHost: !!p.isHost || HOST_NAMES.includes(p.name),
         playedWith: {},
         lastPlayedAt: 0
@@ -1592,6 +1676,8 @@
       is1820Ended: false,
       bindingGroups: [],
       bindingSystemActive: false,
+      bindingPerGroupMigrated: true,
+      pendingSpecialMatch: null,
       noviceModeEnabled: false,
       noviceMaxLevel: 4,
       noviceLevelUserChanged: false,
@@ -1654,6 +1740,13 @@
           if (typeof state.is1820Ended !== 'boolean') state.is1820Ended = false;
           if (!Array.isArray(state.bindingGroups)) state.bindingGroups = [];
           if (typeof state.bindingSystemActive !== 'boolean') state.bindingSystemActive = false;
+          if (!state.bindingPerGroupMigrated) {
+            if (!state.bindingSystemActive && Array.isArray(state.bindingGroups)) {
+              state.bindingGroups.forEach(bg => { if (bg) bg.enabled = false; });
+            }
+            state.bindingPerGroupMigrated = true;
+          }
+          if (typeof state.pendingSpecialMatch === 'undefined') state.pendingSpecialMatch = null;
           if (typeof state.noviceModeEnabled !== 'boolean') state.noviceModeEnabled = false;
           if (!state.noviceLevelUserChanged) {
             state.noviceMaxLevel = 4;
@@ -1672,9 +1765,14 @@
             while (state.prepSlots.length < 8) state.prepSlots.push(null);
             if (state.prepSlots.length > 8) state.prepSlots = state.prepSlots.slice(0, 8);
           }
-          // Ensure every player has unified playedWith object and checkedIn boolean, and hosts exist
+          // Ensure every player has unified playedWith object, gender, and checkedIn boolean, and hosts exist
           state.players.forEach(p => {
             if (!p.playedWith) p.playedWith = {};
+            if (p.name === '荷玉' && !p.genderUserChanged) {
+              p.gender = 'F';
+            } else if (p.gender !== 'F') {
+              p.gender = 'M';
+            }
             if (typeof p.checkedIn !== 'boolean') p.checkedIn = true;
             if (typeof p.tempBreak !== 'boolean') p.tempBreak = false;
             if (HOST_NAMES.includes(p.name)) p.isHost = true;
@@ -2033,6 +2131,15 @@
       return state.players.find(p => p.id === id) || null;
     }
 
+    function isFemalePlayer(player) {
+      return !!player && player.gender === 'F';
+    }
+
+    function renderSubtleFemaleMark(player) {
+      if (!isFemalePlayer(player)) return '';
+      return '<span class="inline-block w-1.5 h-1.5 rounded-full bg-rose-300/60 align-middle ml-1 shrink-0" title="女生標記"></span>';
+    }
+
     function getLevelBadgeInfo(level) {
       const lv = Number(level) || 1;
       if (lv <= 3) {
@@ -2239,9 +2346,8 @@
     /********************************************************************
      * 4B. BINDING SYSTEM (2-4人同場綁定：單次 / 全時段) & NOVICE COURT MODE (新手場分流)
      ********************************************************************/
-    // 取得目前已確認生效、且啟用中的綁定組合（需由使用者點擊「確認設定生效」開啟 state.bindingSystemActive 才會被智慧排點參考）
+    // 取得目前已個別設為生效中 (enabled === true) 的綁定組合
     function getActiveConfirmedBindingGroups() {
-      if (!state.bindingSystemActive) return [];
       return (state.bindingGroups || []).filter(bg => {
         if (!bg || !bg.enabled) return false;
         const validIds = (bg.playerIds || []).filter(id => !!getPlayerById(id));
@@ -2466,13 +2572,13 @@
         playerIds: [...bindingDraftPlayerIds],
         mode, // 'ONCE' or 'FULL'
         targetPool, // 'NOVICE' or 'REGULAR'
-        enabled: true,
+        enabled: false,
         completedOnce: false
       };
 
       if (!Array.isArray(state.bindingGroups)) state.bindingGroups = [];
       state.bindingGroups.push(newGroup);
-      // 新增或修改綁定後，需由使用者點選「確認設定生效」才會讓智慧排點系統正式參考
+      // 新增或修改綁定後，可於清單針對該組點「設為生效」或點「全部設為生效」
       bindingDraftPlayerIds = [];
       bindingDraftTargetPool = null;
       saveState();
@@ -2483,7 +2589,7 @@
         ? `・歸類於【${targetPool === 'NOVICE' ? '🌱新手組' : '🔥普通組'}】`
         : '';
       showToast(
-        `已加入綁定「${names}」（${mode === 'FULL' ? '全時段綁定' : '單次綁定'}${poolText}）！請點右下角「確認設定生效」套用`,
+        `已加入綁定「${names}」（${mode === 'FULL' ? '全時段綁定' : '單次綁定'}${poolText}）！請點該組的「▶ 設為生效」或右下角「全部設為生效」`,
         'info'
       );
     }
@@ -2507,9 +2613,17 @@
       if (bg.enabled) {
         bg.completedOnce = false;
       }
+      state.bindingSystemActive = (state.bindingGroups || []).some(g => g && g.enabled);
       saveState();
       renderBindingModalContent();
       renderAll();
+      const names = (bg.playerIds || []).map(id => getPlayerById(id)?.name || '').filter(Boolean).join('、');
+      showToast(
+        bg.enabled
+          ? `✅ 綁定組「${names}」已設為生效！智慧排點將參考此組`
+          : `⏸ 綁定組「${names}」已暫停參考（其他生效組別維持運作）`,
+        bg.enabled ? 'success' : 'info'
+      );
     }
 
     function toggleBindingGroupMode(groupId) {
@@ -2544,25 +2658,29 @@
     }
 
     function confirmAndActivateBindings() {
-      const activeCount = (state.bindingGroups || []).filter(g => g.enabled && (g.playerIds || []).length >= 2).length;
-      if (activeCount === 0) {
-        showToast('目前尚無啟用中的綁定組合！請先點選 2~4 人並點「＋加入綁定清單」', 'warn');
+      const validGroups = (state.bindingGroups || []).filter(g => !g.completedOnce && (g.playerIds || []).length >= 2);
+      if (validGroups.length === 0) {
+        showToast('目前尚無可啟用的綁定組合！請先點選 2~4 人並點「＋加入綁定清單」', 'warn');
         return;
       }
+      validGroups.forEach(g => { g.enabled = true; });
       state.bindingSystemActive = true;
       saveState();
       renderBindingModalContent();
       renderAll();
       closeBindingModal();
-      showToast(`✅ 已確認生效！智慧排點系統現在會參考這 ${activeCount} 組綁定設定`, 'success');
+      showToast(`✅ 已將全部 ${validGroups.length} 組綁定設為生效！智慧排點系統將依序參考`, 'success');
     }
 
     function deactivateBindings() {
+      (state.bindingGroups || []).forEach(g => {
+        if (g) g.enabled = false;
+      });
       state.bindingSystemActive = false;
       saveState();
       renderBindingModalContent();
       renderAll();
-      showToast('⏸ 已暫停排點綁定參考，智慧排點暫時以一般個人模式運作', 'info');
+      showToast('⏸ 已全部暫停所有排點綁定參考，智慧排點改以一般個人模式運作', 'info');
     }
 
     function renderBindingModalContent() {
@@ -2573,16 +2691,25 @@
       const listEl = document.getElementById('binding-groups-modal-list');
       if (!pickerGrid || !listEl) return;
 
-      const enabledGroups = (state.bindingGroups || []).filter(g => g.enabled);
+      const allGroups = (state.bindingGroups || []).filter(g => !g.completedOnce && (g.playerIds || []).length >= 2);
+      const enabledGroups = allGroups.filter(g => g.enabled);
       const maxNoviceLv = Number(state.noviceMaxLevel) || 4;
 
       if (bannerEl) {
-        if (state.bindingSystemActive && enabledGroups.length > 0) {
+        if (allGroups.length === 0) {
+          bannerEl.className = 'rounded-xl p-3 border bg-slate-950/60 border-slate-800 flex flex-wrap items-center justify-between gap-2';
+          bannerEl.innerHTML = `
+            <div class="flex items-center gap-2 text-xs font-bold text-slate-300">
+              <i class="fa-solid fa-circle-info text-sky-400 text-sm"></i>
+              <span>尚未建立綁定組合；加入清單後可分別控制每一組的「生效 / 暫停」。</span>
+            </div>
+          `;
+        } else if (enabledGroups.length > 0) {
           bannerEl.className = 'rounded-xl p-3 border bg-emerald-950/40 border-emerald-500/40 flex flex-wrap items-center justify-between gap-2';
           bannerEl.innerHTML = `
             <div class="flex items-center gap-2 text-xs font-extrabold text-emerald-300">
               <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-              <span>目前狀態：【已確認生效】智慧排點正在參考 ${enabledGroups.length} 組綁定設定</span>
+              <span>目前已生效 ${enabledGroups.length} / ${allGroups.length} 組（各組可獨立切換生效或暫停）</span>
             </div>
             <span class="text-[11px] text-emerald-200/80">若綁定成員有人在場上，會先讓別人上場，等全員在場下才一起上</span>
           `;
@@ -2590,8 +2717,8 @@
           bannerEl.className = 'rounded-xl p-3 border bg-amber-950/30 border-amber-500/40 flex flex-wrap items-center justify-between gap-2';
           bannerEl.innerHTML = `
             <div class="flex items-center gap-2 text-xs font-extrabold text-amber-300">
-              <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
-              <span>目前狀態：【尚未生效 / 已暫停】設定好綁定組合後，請按右下角「確認設定生效」才會讓智慧排點參考！</span>
+              <i class="fa-solid fa-pause-circle text-amber-400 text-sm"></i>
+              <span>目前生效 0 / ${allGroups.length} 組（全部已暫停），請點選各組的「設為生效」或「全部設為生效」</span>
             </div>
           `;
         }
@@ -2632,7 +2759,7 @@
                 : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-200'
             }">
               <div class="truncate">
-                <div class="text-xs font-extrabold truncate">${isPicked ? '✓ ' : ''}${escapeHTML(p.name)}</div>
+                <div class="text-xs font-extrabold truncate">${isPicked ? '✓ ' : ''}${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</div>
                 <div class="text-[10px] text-slate-400 flex items-center gap-1">${p.timeSlot}・上${p.games}場 ${poolTag}</div>
               </div>
               <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
@@ -2760,9 +2887,9 @@
                   <button type="button" onclick="toggleBindingGroupEnabled('${bg.id}')"
                           class="px-2.5 py-1 rounded-lg border text-[11px] font-bold transition ${bg.enabled
               ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30'
-              : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+              : 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25'
             }">
-                    ${bg.enabled ? '✓ 啟用中' : '已停用 (點此重新啟用)'}
+                    ${bg.enabled ? '✓ 生效中（點此暫停）' : '⏸ 已暫停（點此生效）'}
                   </button>
                   <button type="button" onclick="deleteBindingGroup('${bg.id}')" title="刪除此綁定"
                           class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-rose-600 text-slate-400 hover:text-white border border-slate-700 flex items-center justify-center text-xs transition">
@@ -2910,10 +3037,157 @@
       return found;
     }
 
+    function chooseK(arr, k) {
+      const res = [];
+      if (k === 0) return [[]];
+      if (!arr || arr.length < k || k < 0) return [];
+      function backtrack(start, current) {
+        if (current.length === k) {
+          res.push([...current]);
+          return;
+        }
+        for (let i = start; i <= arr.length - (k - current.length); i++) {
+          current.push(arr[i]);
+          backtrack(i + 1, current);
+          current.pop();
+        }
+      }
+      backtrack(0, []);
+      return res;
+    }
+
+    // 準備區已有 1~3 位手動排入之固定球員時，依照原有球員程度挑選並平衡補齊剩餘缺額
+    function pickBestCompletionForFixedPlayers(fixedPlayers, candidates, readyBindGroups = []) {
+      const fixedMap = new Map();
+      (fixedPlayers || []).forEach(p => { if (p) fixedMap.set(p.id, p); });
+      const fixed = Array.from(fixedMap.values());
+      const needCount = 4 - fixed.length;
+      if (needCount <= 0 || needCount >= 4) return null;
+
+      const fixedIds = new Set(fixed.map(p => p.id));
+      const cleanCandidates = (candidates || []).filter(c => c && !fixedIds.has(c.id));
+      if (cleanCandidates.length < needCount) return null;
+
+      const playerBindMap = new Map();
+      const bindStatsMap = new Map();
+      readyBindGroups.forEach(bg => {
+        const members = cleanCandidates.filter(c => bg.playerIds.includes(c.id));
+        const allIn = bg.playerIds.every(pid => fixedIds.has(pid) || cleanCandidates.some(c => c.id === pid));
+        if (allIn && members.length > 0) {
+          const avgEff = members.reduce((s, m) => s + getPlayerEffectiveGames(m), 0) / members.length;
+          const minLast = Math.min(...members.map(m => m.lastPlayedAt || 0));
+          bindStatsMap.set(bg.id, { avgEff, minLast });
+          members.forEach(m => playerBindMap.set(m.id, bg));
+        }
+      });
+
+      const getSortEff = (p) => {
+        const bg = playerBindMap.get(p.id);
+        return bg ? bindStatsMap.get(bg.id).avgEff : getPlayerEffectiveGames(p);
+      };
+      const getSortLast = (p) => {
+        const bg = playerBindMap.get(p.id);
+        return bg ? bindStatsMap.get(bg.id).minLast : (p.lastPlayedAt || 0);
+      };
+
+      const sortedCandidates = [...cleanCandidates].sort((a, b) => {
+        const effA = getSortEff(a);
+        const effB = getSortEff(b);
+        if (Math.abs(effA - effB) > 0.05) return effA - effB;
+        const bgA = playerBindMap.get(a.id)?.id || '';
+        const bgB = playerBindMap.get(b.id)?.id || '';
+        if (bgA !== bgB) return bgA.localeCompare(bgB);
+        return getSortLast(a) - getSortLast(b);
+      });
+
+      const buildAtomicPool = (maxLimit) => {
+        const pool = [];
+        const addedIds = new Set();
+        for (let i = 0; i < sortedCandidates.length; i++) {
+          const cand = sortedCandidates[i];
+          if (addedIds.has(cand.id)) continue;
+          const bg = playerBindMap.get(cand.id);
+          if (bg) {
+            const members = sortedCandidates.filter(c => bg.playerIds.includes(c.id));
+            if (pool.length + members.length <= maxLimit || pool.length < needCount) {
+              members.forEach(m => {
+                if (!addedIds.has(m.id)) {
+                  pool.push(m);
+                  addedIds.add(m.id);
+                }
+              });
+            }
+          } else if (pool.length < maxLimit) {
+            pool.push(cand);
+            addedIds.add(cand.id);
+          }
+        }
+        return pool;
+      };
+
+      const searchCompletion = (pool) => {
+        const combos = chooseK(pool, needCount);
+        let bestQuartet = null;
+        let bestBalanceInfo = null;
+        let bestScore = Infinity;
+
+        for (let cIdx = 0; cIdx < combos.length; cIdx++) {
+          const picked = combos[cIdx];
+          const four = [...fixed, ...picked];
+          const fourIds = four.map(p => p.id);
+
+          let violatesBinding = false;
+          for (let bIdx = 0; bIdx < readyBindGroups.length; bIdx++) {
+            const bg = readyBindGroups[bIdx];
+            let countInFour = 0;
+            for (let mIdx = 0; mIdx < bg.playerIds.length; mIdx++) {
+              if (fourIds.includes(bg.playerIds[mIdx])) countInFour++;
+            }
+            if (countInFour > 0 && countInFour < bg.playerIds.length) {
+              violatesBinding = true;
+              break;
+            }
+          }
+          if (violatesBinding) continue;
+
+          const effSum = picked.reduce((s, p) => s + getSortEff(p), 0);
+          const gamesPenalty = effSum * 45;
+
+          let togetherRepeats = 0;
+          for (let a = 0; a < 4; a++) {
+            for (let b = a + 1; b < 4; b++) {
+              if (!areTwoPlayersInSameActiveBinding(four[a].id, four[b].id)) {
+                togetherRepeats += getPlayedTogetherCount(four[a].id, four[b].id);
+              }
+            }
+          }
+          const repeatPenalty = togetherRepeats * 85;
+          const balanceInfo = evaluateQuartetSkillBalance(four);
+          const totalScore = gamesPenalty + repeatPenalty + balanceInfo.skillPenalty + (Math.random() * 2);
+
+          if (totalScore < bestScore) {
+            bestScore = totalScore;
+            bestQuartet = balanceInfo.orderedIds;
+            bestBalanceInfo = balanceInfo;
+          }
+        }
+        return bestQuartet ? { orderedIds: bestQuartet, balanceInfo: bestBalanceInfo } : null;
+      };
+
+      return searchCompletion(buildAtomicPool(12)) || searchCompletion(sortedCandidates);
+    }
+
     function autoFillPrepGroup(groupIndex, silent = false, poolType = 'ALL') {
       const base = groupIndex === 1 ? 4 : 0;
+      const existingGroupIds = state.prepSlots.slice(base, base + 4).filter(Boolean);
+      const hasPartialFixed = existingGroupIds.length >= 1 && existingGroupIds.length <= 3;
+      const fixedPlayers = hasPartialFixed
+        ? existingGroupIds.map(id => getPlayerById(id)).filter(Boolean)
+        : [];
+      const fixedIdSet = new Set(fixedPlayers.map(p => p.id));
+      const needCount = hasPartialFixed ? (4 - fixedPlayers.length) : 4;
 
-      // 1. 先篩選出符合基本條件與新手/普通分流的候選球友（排除暫時休息 tempBreak 的球友）
+      // 1. 先篩選出符合基本條件與新手/普通分流的候選球友（排除暫時休息 tempBreak 的球友；若本組已有固定手動球友，僅從等待區選取其餘人選）
       const baseAvailable = state.players.filter(p => {
         if (isHostPlayer(p)) return false;
         if (!p.checkedIn) return false;
@@ -2921,27 +3195,78 @@
         if (p.tempBreak) return false;
         if (!isPlayerEligibleInCurrentHour(p)) return false;
         if (!isPlayerInPoolType(p, poolType)) return false;
+        if (fixedIdSet.has(p.id)) return false;
         const loc = getPlayerLocation(p.id);
-        return loc.status === 'WAIT' || (loc.status === 'PREP' && loc.groupIndex === groupIndex);
+        return loc.status === 'WAIT' || (!hasPartialFixed && loc.status === 'PREP' && loc.groupIndex === groupIndex);
       });
 
       const baseIdSet = new Set(baseAvailable.map(p => p.id));
 
-      // 2. 處理已確認生效的排點綁定：
-      //    - 若某綁定組有任一成員「正在場上比賽 / 在另一準備組 / 不在本次分流池」，則該綁定組全員暫緩上場，先讓其他人上場！
-      //    - 若某綁定組「全員都在 baseAvailable 場下等待」，則標記為 readyBindGroups，確保一起排入同場！
+      // 2. 處理已個別生效的排點綁定：
+      //    - 若某綁定組所有成員都在 baseAvailable 或已在固定準備組內，才一起納入 readyBindGroups；否則暫緩
       const activeBinds = getActiveConfirmedBindingGroups();
       const heldBackPlayerIds = new Set();
-      const readyBindGroups = [];
+      let readyBindGroups = [];
 
       activeBinds.forEach(bg => {
-        const allReady = bg.playerIds.every(pid => baseIdSet.has(pid));
+        const allReady = bg.playerIds.every(pid => baseIdSet.has(pid) || fixedIdSet.has(pid));
         if (allReady) {
           readyBindGroups.push(bg);
         } else {
-          bg.playerIds.forEach(pid => heldBackPlayerIds.add(pid));
+          bg.playerIds.forEach(pid => {
+            if (!fixedIdSet.has(pid)) heldBackPlayerIds.add(pid);
+          });
         }
       });
+
+      // 2B. 若目前有預約中（等待場上人員下場）的「女雙 / 混雙」排點，為其調整順序並保留所需場下球友（扣除已指定的團主），優先讓其他球友上場
+      let specialReservedCount = 0;
+      if (state.pendingSpecialMatch && (state.pendingSpecialMatch.type === 'WD' || state.pendingSpecialMatch.type === 'XD')) {
+        const reqType = state.pendingSpecialMatch.type;
+        const spHosts = (state.pendingSpecialMatch.includedHostIds || []).map(id => getPlayerById(id)).filter(Boolean);
+        const hostFCount = spHosts.filter(h => isFemalePlayer(h)).length;
+        const hostMCount = spHosts.filter(h => !isFemalePlayer(h)).length;
+
+        const sortReserve = (arr) => [...arr].sort((a, b) => {
+          const effDiff = getPlayerEffectiveGames(a) - getPlayerEffectiveGames(b);
+          if (Math.abs(effDiff) > 0.05) return effDiff;
+          return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
+        });
+        const waitFemales = sortReserve(baseAvailable.filter(p => isFemalePlayer(p) && !heldBackPlayerIds.has(p.id)));
+        const waitMales = sortReserve(baseAvailable.filter(p => !isFemalePlayer(p) && !heldBackPlayerIds.has(p.id)));
+
+        if (reqType === 'WD') {
+          const needRegularF = Math.max(0, 4 - hostFCount);
+          waitFemales.slice(0, needRegularF).forEach(p => {
+            heldBackPlayerIds.add(p.id);
+            specialReservedCount++;
+          });
+        } else if (reqType === 'XD') {
+          const needRegularF = Math.max(0, 2 - hostFCount);
+          const needRegularM = Math.max(0, 2 - hostMCount);
+          waitFemales.slice(0, needRegularF).forEach(p => {
+            heldBackPlayerIds.add(p.id);
+            specialReservedCount++;
+          });
+          if (waitMales.length < needRegularM + needCount) {
+            waitMales.slice(0, needRegularM).forEach(p => {
+              heldBackPlayerIds.add(p.id);
+              specialReservedCount++;
+            });
+          }
+        }
+        // 若保留的人員屬於某個綁定組，整組一併暫緩以避免拆散綁定
+        readyBindGroups = readyBindGroups.filter(bg => {
+          const hasHeld = bg.playerIds.some(pid => heldBackPlayerIds.has(pid));
+          if (hasHeld) {
+            bg.playerIds.forEach(pid => {
+              if (!fixedIdSet.has(pid)) heldBackPlayerIds.add(pid);
+            });
+            return false;
+          }
+          return true;
+        });
+      }
 
       const available = baseAvailable.filter(p => !heldBackPlayerIds.has(p.id));
 
@@ -2951,17 +3276,31 @@
           ? `【🔥普通/熟手場 >${state.noviceMaxLevel}級】`
           : '';
 
-      if (available.length < 4) {
+      if (available.length < needCount) {
         if (!silent) {
-          const holdHint = heldBackPlayerIds.size > 0
-            ? '（部分綁定球友因夥伴尚在場上或不同分流池，暫緩等待全員到齊）'
-            : '';
-          showToast(`目前可排入「準備區第 ${groupIndex + 1} 組」${poolLabel}的球友不足 4 人！${holdHint}`, 'warn');
+          const parts = [];
+          if (heldBackPlayerIds.size > specialReservedCount) {
+            parts.push('部分綁定球友因夥伴尚在場上或不同分流池暫緩');
+          }
+          if (specialReservedCount > 0 && state.pendingSpecialMatch) {
+            const spName = state.pendingSpecialMatch.type === 'WD' ? '女雙' : '混雙';
+            parts.push(`已為預約【${spName}】保留 ${specialReservedCount} 位球友等待場上人員下場`);
+          }
+          const holdHint = parts.length > 0 ? `（${parts.join('；')}）` : '';
+          showToast(
+            hasPartialFixed
+              ? `準備區已有 ${fixedPlayers.length} 位球員，等待區剩餘可補齊人數不足 ${needCount} 人！${holdHint}`
+              : `目前可排入「準備區第 ${groupIndex + 1} 組」${poolLabel}的球友不足 4 人！${holdHint}`,
+            'warn'
+          );
         }
         return null;
       }
 
-      const result = pickBestQuartetFromCandidates(available, readyBindGroups);
+      const result = hasPartialFixed
+        ? pickBestCompletionForFixedPlayers(fixedPlayers, available, readyBindGroups)
+        : pickBestQuartetFromCandidates(available, readyBindGroups);
+
       if (!result) {
         if (!silent) {
           showToast(`無法湊出符合綁定人數限制的 4 人組合${poolLabel}，請檢查綁定設定或等待更多球友下場`, 'warn');
@@ -2977,7 +3316,12 @@
         saveState();
         renderAll();
         const b = result.balanceInfo;
-        showToast(`已自動配好「準備區第 ${groupIndex + 1} 組」${poolLabel}（${b.balanceType}：${b.teamASum}級 vs ${b.teamBSum}級）！`, 'success');
+        showToast(
+          hasPartialFixed
+            ? `已保留準備區原有 ${fixedPlayers.length} 人並依程度補齊其餘 ${needCount} 人（${b.balanceType}：${b.teamASum}級 vs ${b.teamBSum}級）！`
+            : `已自動配好「準備區第 ${groupIndex + 1} 組」${poolLabel}（${b.balanceType}：${b.teamASum}級 vs ${b.teamBSum}級）！`,
+          'success'
+        );
       }
       return result;
     }
@@ -3089,6 +3433,456 @@
     }
 
     /********************************************************************
+     * 4C. WOMEN'S DOUBLES (女雙) & MIXED DOUBLES (混雙) SMART MATCHING
+     ********************************************************************/
+    function evaluateMixedDoublesBalance(males2, females2) {
+      const m0 = males2[0], m1 = males2[1];
+      const f0 = females2[0], f1 = females2[1];
+
+      // 方案 A: (m0 + f0) vs (m1 + f1)
+      const aSumA = (m0.level || 1) + (f0.level || 1);
+      const bSumA = (m1.level || 1) + (f1.level || 1);
+      const diffA = Math.abs(aSumA - bSumA);
+
+      // 方案 B: (m0 + f1) vs (m1 + f0)
+      const aSumB = (m0.level || 1) + (f1.level || 1);
+      const bSumB = (m1.level || 1) + (f0.level || 1);
+      const diffB = Math.abs(aSumB - bSumB);
+
+      const useA = diffA <= diffB;
+      const teamASum = useA ? aSumA : aSumB;
+      const teamBSum = useA ? bSumA : bSumB;
+      const teamDiff = Math.min(diffA, diffB);
+      const orderedIds = useA
+        ? [m0.id, f0.id, m1.id, f1.id]
+        : [m0.id, f1.id, m1.id, f0.id];
+
+      const levels = [m0.level || 1, m1.level || 1, f0.level || 1, f1.level || 1];
+      const spread = Math.max(...levels) - Math.min(...levels);
+      const skillPenalty = teamDiff * 70 + spread * 35;
+
+      return {
+        skillPenalty,
+        teamASum,
+        teamBSum,
+        teamDiff,
+        balanceType: '混雙平衡配對',
+        orderedIds
+      };
+    }
+
+    function pickBestSpecialQuartet(type, candM, candF, fixedPlayers = []) {
+      const sortPool = (arr) => [...arr].sort((a, b) => {
+        const effDiff = getPlayerEffectiveGames(a) - getPlayerEffectiveGames(b);
+        if (Math.abs(effDiff) > 0.05) return effDiff;
+        return (a.lastPlayedAt || 0) - (b.lastPlayedAt || 0);
+      });
+
+      const fixedMap = new Map();
+      (fixedPlayers || []).forEach(p => { if (p) fixedMap.set(p.id, p); });
+      const dedupFixed = Array.from(fixedMap.values());
+      const fixedIds = new Set(dedupFixed.map(p => p.id));
+      const fixedM = dedupFixed.filter(p => !isFemalePlayer(p));
+      const fixedF = dedupFixed.filter(p => isFemalePlayer(p));
+      const cleanM = (candM || []).filter(p => p && !fixedIds.has(p.id));
+      const cleanF = (candF || []).filter(p => p && !fixedIds.has(p.id));
+
+      if (type === 'WD') {
+        if (fixedM.length > 0 || fixedF.length > 4) return null;
+        const needF = 4 - fixedF.length;
+        if (needF === 0) {
+          const b = evaluateQuartetSkillBalance(fixedF);
+          return { orderedIds: b.orderedIds, balanceInfo: b };
+        }
+        if (cleanF.length < needF) return null;
+        const sortedF = sortPool(cleanF);
+        const searchWD = (poolF) => {
+          const combos = chooseK(poolF, needF);
+          let bestQuartet = null;
+          let bestBalanceInfo = null;
+          let bestScore = Infinity;
+          for (let idx = 0; idx < combos.length; idx++) {
+            const picked = combos[idx];
+            const four = [...fixedF, ...picked];
+            const effSum = picked.reduce((s, p) => s + getPlayerEffectiveGames(p), 0);
+            const gamesPenalty = effSum * 45;
+            let togetherRepeats = 0;
+            for (let a = 0; a < 4; a++) {
+              for (let b = a + 1; b < 4; b++) {
+                togetherRepeats += getPlayedTogetherCount(four[a].id, four[b].id);
+              }
+            }
+            const repeatPenalty = togetherRepeats * 85;
+            const balanceInfo = evaluateQuartetSkillBalance(four);
+            const totalScore = gamesPenalty + repeatPenalty + balanceInfo.skillPenalty + (Math.random() * 2);
+            if (totalScore < bestScore) {
+              bestScore = totalScore;
+              bestQuartet = balanceInfo.orderedIds;
+              bestBalanceInfo = balanceInfo;
+            }
+          }
+          return bestQuartet ? { orderedIds: bestQuartet, balanceInfo: bestBalanceInfo } : null;
+        };
+        return searchWD(sortedF.slice(0, 12)) || searchWD(sortedF);
+      }
+
+      if (type === 'XD') {
+        if (fixedM.length > 2 || fixedF.length > 2) return null;
+        const needM = 2 - fixedM.length;
+        const needF = 2 - fixedF.length;
+        if (cleanM.length < needM || cleanF.length < needF) return null;
+        if (needM === 0 && needF === 0) {
+          const b = evaluateMixedDoublesBalance(fixedM, fixedF);
+          return { orderedIds: b.orderedIds, balanceInfo: b };
+        }
+        const sortedM = sortPool(cleanM);
+        const sortedF = sortPool(cleanF);
+        const searchXD = (poolM, poolF) => {
+          const combosM = chooseK(poolM, needM);
+          const combosF = chooseK(poolF, needF);
+          let bestQuartet = null;
+          let bestBalanceInfo = null;
+          let bestScore = Infinity;
+          for (let iM = 0; iM < combosM.length; iM++) {
+            const pickedM = combosM[iM];
+            const males2 = [...fixedM, ...pickedM];
+            for (let iF = 0; iF < combosF.length; iF++) {
+              const pickedF = combosF[iF];
+              const females2 = [...fixedF, ...pickedF];
+              const four = [...males2, ...females2];
+              const effSum = [...pickedM, ...pickedF].reduce((s, p) => s + getPlayerEffectiveGames(p), 0);
+              const gamesPenalty = effSum * 45;
+              let togetherRepeats = 0;
+              for (let a = 0; a < 4; a++) {
+                for (let b = a + 1; b < 4; b++) {
+                  togetherRepeats += getPlayedTogetherCount(four[a].id, four[b].id);
+                }
+              }
+              const repeatPenalty = togetherRepeats * 85;
+              const balanceInfo = evaluateMixedDoublesBalance(males2, females2);
+              const totalScore = gamesPenalty + repeatPenalty + balanceInfo.skillPenalty + (Math.random() * 2);
+              if (totalScore < bestScore) {
+                bestScore = totalScore;
+                bestQuartet = balanceInfo.orderedIds;
+                bestBalanceInfo = balanceInfo;
+              }
+            }
+          }
+          return bestQuartet ? { orderedIds: bestQuartet, balanceInfo: bestBalanceInfo } : null;
+        };
+        return searchXD(sortedM.slice(0, 10), sortedF.slice(0, 10)) || searchXD(sortedM, sortedF);
+      }
+
+      return null;
+    }
+
+    function getSpecialMatchPools(targetGroupIndex = -1, includedHostIds = []) {
+      const includedHostSet = new Set(includedHostIds || []);
+      const allActive = state.players.filter(p => {
+        if (isHostPlayer(p)) {
+          return includedHostSet.has(p.id) && !p.resting && !p.tempBreak;
+        }
+        return p.checkedIn && !p.resting && !p.tempBreak && isPlayerEligibleInCurrentHour(p);
+      });
+      const allActiveF = allActive.filter(p => isFemalePlayer(p));
+      const allActiveM = allActive.filter(p => !isFemalePlayer(p));
+
+      const waiting = allActive.filter(p => {
+        const loc = getPlayerLocation(p.id);
+        return loc.status === 'WAIT' || (targetGroupIndex !== -1 && loc.status === 'PREP' && loc.groupIndex === targetGroupIndex);
+      });
+      const waitF = waiting.filter(p => isFemalePlayer(p));
+      const waitM = waiting.filter(p => !isFemalePlayer(p));
+
+      return { allActive, allActiveF, allActiveM, waiting, waitF, waitM };
+    }
+
+    function findCompatibleTargetPrepGroupForSpecial(type, includedHostIds = [], preferEmptyOnly = false) {
+      const g0 = state.prepSlots.slice(0, 4);
+      const g1 = state.prepSlots.slice(4, 8);
+      if (g0.every(id => !id)) return 0;
+      if (g1.every(id => !id)) return 1;
+      if (preferEmptyOnly) return -1;
+
+      const hostPlayers = (includedHostIds || []).map(id => getPlayerById(id)).filter(Boolean);
+      const checkGroupCompat = (slotIds) => {
+        const filled = slotIds.filter(Boolean);
+        if (filled.length >= 4) return false;
+        const map = new Map();
+        filled.map(id => getPlayerById(id)).filter(Boolean).forEach(p => map.set(p.id, p));
+        hostPlayers.forEach(h => map.set(h.id, h));
+        const combined = Array.from(map.values());
+        if (combined.length > 4) return false;
+        const males = combined.filter(p => !isFemalePlayer(p)).length;
+        const females = combined.filter(p => isFemalePlayer(p)).length;
+        if (type === 'WD') return males === 0 && females <= 4;
+        if (type === 'XD') return males <= 2 && females <= 2;
+        return false;
+      };
+
+      if (checkGroupCompat(g0)) return 0;
+      if (checkGroupCompat(g1)) return 1;
+      return -1;
+    }
+
+    let pendingSpecialModalType = 'WD';
+
+    function openSpecialMatchHostModal(type) {
+      pendingSpecialModalType = type === 'XD' ? 'XD' : 'WD';
+      const isWD = pendingSpecialModalType === 'WD';
+      const titleEl = document.getElementById('special-host-modal-title');
+      const subtitleEl = document.getElementById('special-host-modal-subtitle');
+      const listEl = document.getElementById('special-host-modal-list');
+
+      if (titleEl) {
+        titleEl.innerHTML = isWD
+          ? '<span class="text-rose-400">♀</span> 女雙排點 — 是否加入團主？'
+          : '<span class="text-fuchsia-400">⚥</span> 混雙排點 — 是否加入團主？';
+      }
+      if (subtitleEl) {
+        subtitleEl.textContent = isWD
+          ? '女雙限定女性球友，可選擇是否加入女團主「荷玉」（男團主雷夢無法加入女雙）。'
+          : '混雙為「2男 + 2女」，可自由選擇是否加入「荷玉」或「雷夢」，也可以兩位團主都加入！';
+      }
+
+      if (listEl) {
+        const hosts = state.players.filter(p => isHostPlayer(p));
+        listEl.innerHTML = hosts.map(h => {
+          const isFemale = isFemalePlayer(h);
+          const lvInfo = getLevelBadgeInfo(h.level);
+          const loc = getPlayerLocation(h.id);
+          const locBadge = loc.status === 'COURT'
+            ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">${loc.label}</span>`
+            : loc.status === 'PREP'
+              ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">${loc.label}</span>`
+              : `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">待命中</span>`;
+          const blockedByGender = isWD && !isFemale;
+          const isDisabled = blockedByGender || !!h.resting || !!h.tempBreak;
+          const disabledReason = blockedByGender
+            ? '女雙不可加入男團主'
+            : h.resting
+              ? '已結束排點'
+              : h.tempBreak
+                ? '暫時休息中'
+                : '';
+
+          return `
+            <label class="flex items-center justify-between gap-3 p-3 rounded-xl border transition ${isDisabled
+              ? 'bg-slate-950/50 border-slate-800/70 opacity-55 cursor-not-allowed'
+              : 'bg-slate-950 hover:bg-slate-900 border-slate-800 hover:border-amber-400/50 cursor-pointer'
+            }">
+              <div class="flex items-center gap-3 min-w-0">
+                <input type="checkbox" value="${h.id}" ${isDisabled ? 'disabled' : ''}
+                       class="special-host-checkbox w-4 h-4 rounded border-slate-600 text-amber-500 focus:ring-amber-400 bg-slate-900 disabled:opacity-40" />
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-extrabold text-sm text-amber-200">👑 ${escapeHTML(h.name)}${renderSubtleFemaleMark(h)}</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${isFemale ? 'bg-rose-500/15 text-rose-200 border-rose-500/30' : 'bg-sky-500/15 text-sky-200 border-sky-500/30'}">${isFemale ? '女團主' : '男團主'}</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${lvInfo.classes}">${lvInfo.label}・${lvInfo.tier}</span>
+                  </div>
+                  ${disabledReason ? `<div class="text-[11px] text-rose-400 font-bold mt-0.5">${disabledReason}</div>` : ''}
+                </div>
+              </div>
+              <div class="shrink-0">${locBadge}</div>
+            </label>
+          `;
+        }).join('');
+      }
+
+      const modal = document.getElementById('special-match-host-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeSpecialMatchHostModal() {
+      const modal = document.getElementById('special-match-host-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function confirmSpecialMatchHostModal(useSelectedHosts) {
+      let selectedHostIds = [];
+      if (useSelectedHosts) {
+        const checkedBoxes = document.querySelectorAll('.special-host-checkbox:checked');
+        checkedBoxes.forEach(cb => {
+          const p = getPlayerById(cb.value);
+          if (p && isHostPlayer(p)) {
+            if (pendingSpecialModalType === 'WD' && !isFemalePlayer(p)) return;
+            selectedHostIds.push(p.id);
+          }
+        });
+      }
+      closeSpecialMatchHostModal();
+      requestSpecialMatch(pendingSpecialModalType, selectedHostIds);
+    }
+
+    function sanitizeIncludedHostIdsForSpecial(type, includedHostIds = []) {
+      const seen = new Set();
+      const result = [];
+      (includedHostIds || []).forEach(hid => {
+        if (!hid || seen.has(hid)) return;
+        const h = getPlayerById(hid);
+        if (!h || !isHostPlayer(h) || h.resting || h.tempBreak) return;
+        if (type === 'WD' && !isFemalePlayer(h)) return;
+        seen.add(hid);
+        result.push(hid);
+      });
+      return result;
+    }
+
+    function requestSpecialMatch(type, includedHostIds = []) {
+      const label = type === 'WD' ? '女雙' : '混雙';
+      const sanitizedHostIds = sanitizeIncludedHostIdsForSpecial(type, includedHostIds);
+      const selectedHostObjs = sanitizedHostIds.map(id => getPlayerById(id)).filter(Boolean);
+      const hostTag = selectedHostObjs.length > 0
+        ? `（含團主：${selectedHostObjs.map(h => h.name).join('、')}）`
+        : '';
+
+      const targetGroup = findCompatibleTargetPrepGroupForSpecial(type, sanitizedHostIds, false);
+      const pools = getSpecialMatchPools(targetGroup, sanitizedHostIds);
+
+      // 把該目標準備組中原本手動放的球友（若尚未納入 allActive）也計入可用池與鎖定名單
+      const existingInTargetObjs = targetGroup !== -1
+        ? state.prepSlots.slice(targetGroup === 1 ? 4 : 0, (targetGroup === 1 ? 4 : 0) + 4)
+            .map(id => getPlayerById(id))
+            .filter(Boolean)
+        : [];
+      const activeIdSet = new Set(pools.allActive.map(p => p.id));
+      const extraFixedF = existingInTargetObjs.filter(p => !activeIdSet.has(p.id) && isFemalePlayer(p)).length;
+      const extraFixedM = existingInTargetObjs.filter(p => !activeIdSet.has(p.id) && !isFemalePlayer(p)).length;
+      const totalActiveFCount = pools.allActiveF.length + extraFixedF;
+      const totalActiveMCount = pools.allActiveM.length + extraFixedM;
+
+      // 1. 先檢查總報到可用人數（加上指定團主）是否足夠
+      if (type === 'WD' && totalActiveFCount < 4) {
+        if (state.pendingSpecialMatch && state.pendingSpecialMatch.type === 'WD') {
+          state.pendingSpecialMatch = null;
+          saveState();
+          renderAll();
+        }
+        showToast(`⚠️ 目前可排點女生僅 ${totalActiveFCount} 人${hostTag}（女雙需至少 4 位女生），人數不足無法排點！`, 'warn');
+        return;
+      }
+      if (type === 'XD' && (totalActiveFCount < 2 || totalActiveMCount < 2)) {
+        if (state.pendingSpecialMatch && state.pendingSpecialMatch.type === 'XD') {
+          state.pendingSpecialMatch = null;
+          saveState();
+          renderAll();
+        }
+        showToast(`⚠️ 目前可排點人數不足以湊成混雙${hostTag}（目前男 ${totalActiveMCount} 人 / 女 ${totalActiveFCount} 人，混雙需至少各 2 人），無法排點！`, 'warn');
+        return;
+      }
+
+      // 2. 檢查指定團主是否都不在球場上（且不在另一準備組），並檢查場下人數是否足夠立即排出
+      const allSelectedHostsReady = sanitizedHostIds.every(hid => {
+        const loc = getPlayerLocation(hid);
+        return loc.status === 'WAIT' || (targetGroup !== -1 && loc.status === 'PREP' && loc.groupIndex === targetGroup);
+      });
+
+      if (targetGroup !== -1 && allSelectedHostsReady) {
+        const lockedMap = new Map();
+        existingInTargetObjs.forEach(p => lockedMap.set(p.id, p));
+        selectedHostObjs.forEach(h => lockedMap.set(h.id, h));
+        const lockedPlayers = Array.from(lockedMap.values());
+
+        const result = pickBestSpecialQuartet(type, pools.waitM, pools.waitF, lockedPlayers);
+        if (result) {
+          const base = targetGroup === 1 ? 4 : 0;
+          for (let i = 0; i < 4; i++) {
+            state.prepSlots[base + i] = result.orderedIds[i];
+          }
+          state.pendingSpecialMatch = null;
+          clearSelection();
+          saveState();
+          renderAll();
+          const b = result.balanceInfo;
+          showToast(`✅ 已智慧排出【${label}】${hostTag}至「準備區第 ${targetGroup + 1} 組」（${b.balanceType}：${b.teamASum}級 vs ${b.teamBSum}級）！`, 'success');
+          return;
+        }
+      }
+
+      // 3. 總人數足夠，但部分球友/團主正在場上或準備區不相容/已滿 -> 設定預約狀態，調整順序並等待下場
+      state.pendingSpecialMatch = {
+        type,
+        includedHostIds: sanitizedHostIds,
+        createdAt: Date.now()
+      };
+      saveState();
+      renderAll();
+      if (targetGroup === -1) {
+        showToast(`⏳ 準備區目前無相容空位，已預約【${label}】${hostTag}，等準備區空出且人員齊備將自動排出！`, 'info');
+      } else if (!allSelectedHostsReady) {
+        showToast(`⏳ 指定的團主目前正在場上或另一準備組，已預約【${label}】${hostTag}，等其下場後自動排出！`, 'info');
+      } else if (type === 'WD') {
+        showToast(`⏳ 場下可用女生暫不足 4 人，已設定【女雙預約】${hostTag}保留女生並調整順序，等場上女生下場後自動排出！`, 'info');
+      } else {
+        showToast(`⏳ 場下人數暫不足湊混雙（目前等待中 男 ${pools.waitM.length}/2・女 ${pools.waitF.length}/2），已設定【混雙預約】${hostTag}，等場上人員下場後自動排出！`, 'info');
+      }
+    }
+
+    function cancelPendingSpecialMatch() {
+      if (!state.pendingSpecialMatch) return;
+      const label = state.pendingSpecialMatch.type === 'WD' ? '女雙' : '混雙';
+      state.pendingSpecialMatch = null;
+      saveState();
+      renderAll();
+      showToast(`已取消【${label}】預約排點（原保留球友已恢復參與一般排點）`, 'info');
+    }
+
+    function checkAndFulfillPendingSpecialMatch() {
+      if (!state.pendingSpecialMatch) return false;
+      const type = state.pendingSpecialMatch.type;
+      const label = type === 'WD' ? '女雙' : '混雙';
+      const sanitizedHostIds = sanitizeIncludedHostIdsForSpecial(type, state.pendingSpecialMatch.includedHostIds || []);
+      const selectedHostObjs = sanitizedHostIds.map(id => getPlayerById(id)).filter(Boolean);
+      const hostTag = selectedHostObjs.length > 0
+        ? `（含團主：${selectedHostObjs.map(h => h.name).join('、')}）`
+        : '';
+
+      const targetGroup = findCompatibleTargetPrepGroupForSpecial(type, sanitizedHostIds, true);
+      const pools = getSpecialMatchPools(-1, sanitizedHostIds);
+
+      // 若中途有人離場導致總報到可用人數不再足夠，自動解除預約並發出警告
+      const totalEnough = type === 'WD'
+        ? pools.allActiveF.length >= 4
+        : (pools.allActiveF.length >= 2 && pools.allActiveM.length >= 2);
+      if (!totalEnough) {
+        state.pendingSpecialMatch = null;
+        saveState();
+        renderAll();
+        showToast(`⚠️ 因人數異動，目前可排點人數已不足湊成【${label}】${hostTag}，已自動取消預約`, 'warn');
+        return true;
+      }
+
+      if (targetGroup === -1) return false;
+
+      const allSelectedHostsReady = sanitizedHostIds.every(hid => {
+        const loc = getPlayerLocation(hid);
+        return loc.status === 'WAIT' || (loc.status === 'PREP' && loc.groupIndex === targetGroup);
+      });
+      if (!allSelectedHostsReady) return false;
+
+      const result = pickBestSpecialQuartet(type, pools.waitM, pools.waitF, selectedHostObjs);
+      if (!result) return false;
+
+      const base = targetGroup === 1 ? 4 : 0;
+      for (let i = 0; i < 4; i++) {
+        state.prepSlots[base + i] = result.orderedIds[i];
+      }
+      state.pendingSpecialMatch = null;
+      clearSelection();
+      saveState();
+      renderAll();
+      const b = result.balanceInfo;
+      showToast(`🎉 場上人員已下場！系統已自動排出【${label}】${hostTag}至「準備區第 ${targetGroup + 1} 組」（${b.teamASum}級 vs ${b.teamBSum}級）！`, 'success');
+      return true;
+    }
+
+    /********************************************************************
      * 5. COURT MANAGEMENT, SWAP & MATCH COMPLETION (自動計算上場與同場次數)
      ********************************************************************/
     function assignPrepToCourt(courtIndex, preferredGroupIndex) {
@@ -3138,12 +3932,15 @@
         clearSelection();
         saveState();
         renderAll();
-        showToast(
-          g1HasAny
-            ? `${court.name} 比賽開始！準備區「第 2 組」已自動遞補為「第 1 組」`
-            : `${court.name} 比賽開始！`,
-          'success'
-        );
+        const fulfilledSpecial = checkAndFulfillPendingSpecialMatch();
+        if (!fulfilledSpecial) {
+          showToast(
+            g1HasAny
+              ? `${court.name} 比賽開始！準備區「第 2 組」已自動遞補為「第 1 組」`
+              : `${court.name} 比賽開始！`,
+            'success'
+          );
+        }
       } else {
         court.slots = [...g1Ids];
         court.startTime = Date.now();
@@ -3151,7 +3948,10 @@
         clearSelection();
         saveState();
         renderAll();
-        showToast(`${court.name} 比賽開始（由準備區第 2 組派發）！`, 'success');
+        const fulfilledSpecial = checkAndFulfillPendingSpecialMatch();
+        if (!fulfilledSpecial) {
+          showToast(`${court.name} 比賽開始（由準備區第 2 組派發）！`, 'success');
+        }
       }
     }
 
@@ -3196,6 +3996,7 @@
       if (p) {
         showToast(`已將「${p.name}」從 ${court.name} 取消上場（退回等待區）`, 'info');
       }
+      checkAndFulfillPendingSpecialMatch();
     }
 
     function finishCourtMatch(courtIndex) {
@@ -3235,9 +4036,9 @@
         }
       }
 
-      // 檢查是否有已生效的「單次綁定 (ONCE)」組合在此場完成同場比賽，若有則自動完成並解除該單次綁定
+      // 檢查是否有已個別生效中的「單次綁定 (ONCE)」組合在此場完成同場比賽，若有則自動完成並解除該單次綁定
       let completedOnceLabels = [];
-      if (state.bindingSystemActive && Array.isArray(state.bindingGroups)) {
+      if (Array.isArray(state.bindingGroups)) {
         state.bindingGroups.forEach(bg => {
           if (bg && bg.enabled && bg.mode === 'ONCE' && Array.isArray(bg.playerIds) && bg.playerIds.length >= 2) {
             const allInMatch = bg.playerIds.every(pid => four.includes(pid));
@@ -3269,6 +4070,7 @@
       } else {
         showToast(`${court.name} 完賽結算！4位球員上場 +1 並已記錄同場球友`, 'success');
       }
+      checkAndFulfillPendingSpecialMatch();
     }
 
     function cancelCourtMatch(courtIndex) {
@@ -3316,6 +4118,7 @@
       saveState();
       renderAll();
       showToast(destinationMsg, 'info');
+      checkAndFulfillPendingSpecialMatch();
     }
 
     function recordPlayedTogether(id1, id2) {
@@ -3772,7 +4575,7 @@
             <i class="fa-solid fa-xmark"></i>
           </button>
           <div class="flex items-center justify-between gap-1 pr-2">
-            <span class="font-extrabold text-xs text-white truncate">${escapeHTML(player.name)}</span>
+            <span class="font-extrabold text-xs text-white truncate">${escapeHTML(player.name)}${renderSubtleFemaleMark(player)}</span>
             <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
           </div>
           <div class="flex items-center justify-between text-[10px]">
@@ -3976,43 +4779,93 @@
         noviceCountsEl.textContent = `(在場新手${novCnt}人 / 普通${regCnt}人)`;
       }
 
-      // 3. 更新排點綁定狀態列與快捷確認按鈕
-      const bindStatusBar = document.getElementById('binding-status-bar');
-      const bindStrip = document.getElementById('binding-groups-strip');
-      const enabledBinds = (state.bindingGroups || []).filter(g => g.enabled && (g.playerIds || []).length >= 2);
+      // 2C. 更新「女雙 / 混雙」按鈕樣式與預約等待狀態條
+      const wdBtn = document.getElementById('special-btn-WD');
+      const xdBtn = document.getElementById('special-btn-XD');
+      const specialBar = document.getElementById('special-match-status-bar');
+      const pendingSp = state.pendingSpecialMatch;
 
-      if (bindStatusBar) {
-        if (enabledBinds.length === 0) {
-          bindStatusBar.innerHTML = `<span class="text-[11px] text-slate-500">尚未設定綁定</span>`;
-        } else if (state.bindingSystemActive) {
-          bindStatusBar.innerHTML = `
-            <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-extrabold flex items-center gap-1">
-              <i class="fa-solid fa-circle-check"></i> 已生效參考中 (${enabledBinds.length}組)
-            </span>
-            <button onclick="deactivateBindings()" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-300 text-[10px] font-bold transition">
-              暫停參考
-            </button>
-          `;
+      if (wdBtn) {
+        const activeWD = pendingSp && pendingSp.type === 'WD';
+        wdBtn.className = activeWD
+          ? 'px-2.5 py-1.5 rounded-xl bg-rose-500 text-slate-950 border border-rose-300 font-black text-xs shadow flex items-center gap-1 transition active:scale-95 animate-pulse'
+          : 'px-2.5 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-extrabold text-xs flex items-center gap-1 transition active:scale-95';
+      }
+      if (xdBtn) {
+        const activeXD = pendingSp && pendingSp.type === 'XD';
+        xdBtn.className = activeXD
+          ? 'px-2.5 py-1.5 rounded-xl bg-fuchsia-500 text-slate-950 border border-fuchsia-300 font-black text-xs shadow flex items-center gap-1 transition active:scale-95 animate-pulse'
+          : 'px-2.5 py-1.5 rounded-xl bg-fuchsia-500/15 hover:bg-fuchsia-500/30 border border-fuchsia-500/40 text-fuchsia-300 font-extrabold text-xs flex items-center gap-1 transition active:scale-95';
+      }
+      if (specialBar) {
+        if (!pendingSp) {
+          specialBar.classList.add('hidden');
+          specialBar.classList.remove('flex');
+          specialBar.innerHTML = '';
         } else {
-          bindStatusBar.innerHTML = `
-            <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-extrabold flex items-center gap-1">
-              <i class="fa-solid fa-clock"></i> 待確認生效 (${enabledBinds.length}組)
-            </span>
-            <button onclick="confirmAndActivateBindings()" class="px-2.5 py-0.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-black shadow transition active:scale-95">
-              ✓ 點此確認生效
+          const spHostIds = Array.isArray(pendingSp.includedHostIds) ? pendingSp.includedHostIds : [];
+          const spHostNames = spHostIds.map(id => getPlayerById(id)?.name || '').filter(Boolean);
+          const spHostHint = spHostNames.length > 0 ? `【含團主：${spHostNames.join('、')}】` : '';
+          const spPools = getSpecialMatchPools(-1, spHostIds);
+          const isWD = pendingSp.type === 'WD';
+          const progressText = isWD
+            ? `${spHostHint}目前可用女生 ${spPools.waitF.length}/4 人（含團主總共 ${spPools.allActiveF.length} 女），已保留人員等待場上人員下場後自動排出`
+            : `${spHostHint}目前可用 男 ${spPools.waitM.length}/2・女 ${spPools.waitF.length}/2 人（含團主總共 ${spPools.allActiveM.length}男/${spPools.allActiveF.length}女），已保留人員等待下場後自動排出`;
+          specialBar.classList.remove('hidden');
+          specialBar.classList.add('flex');
+          specialBar.innerHTML = `
+            <div class="flex items-center gap-2 text-xs font-extrabold ${isWD ? 'text-rose-300' : 'text-fuchsia-300'}">
+              <span class="px-2 py-0.5 rounded-md ${isWD ? 'bg-rose-500/25 border border-rose-400/60' : 'bg-fuchsia-500/25 border border-fuchsia-400/60'}">
+                ⏳ 預約等待中：${isWD ? '♀ 女雙' : '⚥ 混雙'}
+              </span>
+              <span class="font-semibold text-slate-300">${progressText}</span>
+            </div>
+            <button type="button" onclick="cancelPendingSpecialMatch()"
+                    class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 text-slate-300 hover:text-rose-300 text-[11px] font-bold transition">
+              ✕ 取消預約
             </button>
           `;
         }
       }
 
+      // 3. 更新排點綁定狀態列與各組獨立切換生效/暫停列
+      const bindStatusBar = document.getElementById('binding-status-bar');
+      const bindStrip = document.getElementById('binding-groups-strip');
+      const visibleBinds = (state.bindingGroups || []).filter(g => !g.completedOnce && (g.playerIds || []).length >= 2);
+      const enabledBinds = visibleBinds.filter(g => g.enabled);
+
+      if (bindStatusBar) {
+        if (visibleBinds.length === 0) {
+          bindStatusBar.innerHTML = `<span class="text-[11px] text-slate-500">尚未設定綁定</span>`;
+        } else {
+          const allActive = enabledBinds.length === visibleBinds.length;
+          const anyActive = enabledBinds.length > 0;
+          bindStatusBar.innerHTML = `
+            <span class="px-2 py-0.5 rounded-lg ${anyActive ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-amber-500/20 border-amber-500/40 text-amber-300'} border text-[11px] font-extrabold flex items-center gap-1">
+              <i class="fa-solid ${anyActive ? 'fa-circle-check' : 'fa-pause-circle'}"></i> 生效 ${enabledBinds.length} / ${visibleBinds.length} 組
+            </span>
+            ${!allActive ? `
+              <button onclick="confirmAndActivateBindings()" class="px-2 py-0.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-black shadow transition active:scale-95">
+                ✓ 全部生效
+              </button>
+            ` : ''}
+            ${anyActive ? `
+              <button onclick="deactivateBindings()" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-300 text-[10px] font-bold transition">
+                全部暫停
+              </button>
+            ` : ''}
+          `;
+        }
+      }
+
       if (bindStrip) {
-        if (enabledBinds.length === 0) {
+        if (visibleBinds.length === 0) {
           bindStrip.classList.add('hidden');
           bindStrip.classList.remove('flex');
         } else {
           bindStrip.classList.remove('hidden');
           bindStrip.classList.add('flex');
-          bindStrip.innerHTML = enabledBinds.map(bg => {
+          bindStrip.innerHTML = visibleBinds.map(bg => {
             const members = bg.playerIds.map(id => getPlayerById(id)).filter(Boolean);
             const names = members.map(m => escapeHTML(m.name)).join('＋');
             const locStatus = getBindingGroupLocationStatus(members);
@@ -4021,16 +4874,26 @@
             const poolTag = state.noviceModeEnabled
               ? `・${effPool === 'NOVICE' ? '🌱新手組' : '🔥普通組'}`
               : '';
-            const modeCls = bg.mode === 'FULL'
-              ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-              : 'bg-sky-500/15 border-sky-500/40 text-sky-300';
+            const modeCls = !bg.enabled
+              ? 'bg-slate-900/80 border-slate-700 text-slate-400 opacity-75'
+              : bg.mode === 'FULL'
+                ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                : 'bg-sky-500/15 border-sky-500/40 text-sky-300';
             return `
-              <span onclick="openBindingModal()" title="點擊管理綁定設定"
-                    class="px-2 py-0.5 rounded-lg border ${modeCls} font-bold cursor-pointer flex items-center gap-1">
+              <div onclick="openBindingModal()" title="點擊管理綁定設定；點右側小鈕可直接個別切換生效或暫停"
+                   class="px-2 py-0.5 rounded-lg border ${modeCls} font-bold cursor-pointer flex items-center gap-1.5">
                 <i class="fa-solid fa-link text-[10px]"></i>
                 <span>[${modeText}${poolTag}] ${names}</span>
-                <span class="text-[10px] ${locStatus.colorClass}">(${locStatus.shortText})</span>
-              </span>
+                ${bg.enabled ? `<span class="text-[10px] ${locStatus.colorClass}">(${locStatus.shortText})</span>` : ''}
+                <button type="button" onclick="event.stopPropagation(); toggleBindingGroupEnabled('${bg.id}')"
+                        title="${bg.enabled ? '點擊暫停此組綁定' : '點擊生效此組綁定'}"
+                        class="px-1.5 py-0.2 rounded border text-[10px] font-extrabold transition active:scale-95 ${bg.enabled
+                ? 'bg-emerald-500/25 border-emerald-400/60 text-emerald-200 hover:bg-rose-500/30 hover:border-rose-400 hover:text-rose-200'
+                : 'bg-amber-500/25 border-amber-400/60 text-amber-200 hover:bg-emerald-500/30 hover:border-emerald-400 hover:text-emerald-200'
+              }">
+                  ${bg.enabled ? '✓生效' : '⏸暫停'}
+                </button>
+              </div>
             `;
           }).join('');
         }
@@ -4067,7 +4930,7 @@
             <i class="fa-solid fa-xmark"></i>
           </button>
           <div class="flex items-center justify-between gap-1">
-            <span class="font-extrabold text-sm text-white truncate">${escapeHTML(player.name)}</span>
+            <span class="font-extrabold text-sm text-white truncate">${escapeHTML(player.name)}${renderSubtleFemaleMark(player)}</span>
             <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold shrink-0 ${lvInfo.classes}">${lvInfo.label}</span>
           </div>
           <div class="flex items-center justify-between text-[11px] text-slate-400">
@@ -4133,7 +4996,7 @@
             <!-- Left: Player Name + Skill Level + Time Slot / Host Badge -->
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="font-extrabold text-sm ${isFinished ? 'text-slate-300' : isHost ? 'text-amber-200' : isTempBreak ? 'text-sky-200' : 'text-white'} truncate hover:text-amber-300 transition">${escapeHTML(p.name)}</span>
+                <span class="font-extrabold text-sm ${isFinished ? 'text-slate-300' : isHost ? 'text-amber-200' : isTempBreak ? 'text-sky-200' : 'text-white'} truncate hover:text-amber-300 transition">${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</span>
                 <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}" title="台灣推廣 ${lvInfo.label} (${lvInfo.tier})">
                   ${lvInfo.label}・${lvInfo.tier}
                 </span>
@@ -4465,7 +5328,7 @@
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <span class="font-extrabold text-sm text-white truncate">${escapeHTML(p.name)}</span>
+                  <span class="font-extrabold text-sm text-white truncate">${escapeHTML(p.name)}${renderSubtleFemaleMark(p)}</span>
                   <span class="text-[11px] px-1.5 py-0.2 rounded-md border font-bold ${lvInfo.classes}">${lvInfo.label}</span>
                   <span class="text-[10px] px-1.5 py-0.2 rounded border font-bold ${tsInfo.classes}">${tsInfo.text}</span>
                 </div>
@@ -4600,6 +5463,7 @@
       }
       saveState();
       renderAll();
+      checkAndFulfillPendingSpecialMatch();
     }
 
     function checkInAndPayPlayer(playerId) {
@@ -4663,6 +5527,7 @@
       }
       saveState();
       renderAll();
+      checkAndFulfillPendingSpecialMatch();
     }
 
     function togglePlayerRest(playerId, reason = 'EARLY') {
@@ -4686,6 +5551,7 @@
       }
       saveState();
       renderAll();
+      checkAndFulfillPendingSpecialMatch();
     }
 
     function markTimeSlotPlayersFinished(targetTimeSlot) {
@@ -4748,6 +5614,8 @@
       setFormLevel(5);
       const radios = document.getElementsByName('form-timeslot');
       radios.forEach(r => { r.checked = (r.value === '18-21'); });
+      const femaleEl = document.getElementById('form-player-is-female');
+      if (femaleEl) femaleEl.checked = false;
       const checkInEl = document.getElementById('form-player-checkedin');
       if (checkInEl) checkInEl.checked = !!defaultCheckedIn;
       document.getElementById('form-player-paid').checked = false;
@@ -4764,6 +5632,8 @@
       setFormLevel(p.level);
       const radios = document.getElementsByName('form-timeslot');
       radios.forEach(r => { r.checked = (r.value === p.timeSlot); });
+      const femaleEl = document.getElementById('form-player-is-female');
+      if (femaleEl) femaleEl.checked = isFemalePlayer(p);
       const checkInEl = document.getElementById('form-player-checkedin');
       if (checkInEl) checkInEl.checked = !!p.checkedIn;
       document.getElementById('form-player-paid').checked = !!p.paid;
@@ -4784,6 +5654,7 @@
       const radios = document.getElementsByName('form-timeslot');
       let timeSlot = '18-21';
       radios.forEach(r => { if (r.checked) timeSlot = r.value; });
+      const gender = document.getElementById('form-player-is-female')?.checked ? 'F' : 'M';
       const checkedIn = document.getElementById('form-player-checkedin')
         ? document.getElementById('form-player-checkedin').checked
         : true;
@@ -4796,6 +5667,8 @@
         if (existing) {
           existing.name = name;
           existing.level = level;
+          existing.gender = gender;
+          existing.genderUserChanged = true;
           existing.timeSlot = timeSlot;
           existing.checkedIn = checkedIn;
           existing.paid = paid;
@@ -4809,6 +5682,7 @@
           id: 'p_' + Date.now(),
           name,
           level,
+          gender,
           timeSlot,
           checkedIn,
           paid,
@@ -5108,6 +5982,7 @@
       state.is1820Ended = false;
       state.bindingGroups = [];
       state.bindingSystemActive = false;
+      state.pendingSpecialMatch = null;
       state.matchLogs = [];
       closeSettingsModal();
       saveState();
@@ -5128,6 +6003,7 @@
       state.is1820Ended = false;
       state.bindingGroups = [];
       state.bindingSystemActive = false;
+      state.pendingSpecialMatch = null;
       state.matchLogs = [];
       seedSampleMatchHistory();
       closeSettingsModal();
@@ -5149,6 +6025,7 @@
       state.is1820Ended = false;
       state.bindingGroups = [];
       state.bindingSystemActive = false;
+      state.pendingSpecialMatch = null;
       state.matchLogs = [];
       closeSettingsModal();
       saveState();
